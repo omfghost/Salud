@@ -1,733 +1,1315 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#1a1a1a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="HEALTH">
-    <title>HEALTH v2.5 - App de Salud</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding-bottom: 100px;
-        }
-        header {
-            background: linear-gradient(90deg, #1a1a2e, #0f3460);
-            padding: 20px;
-            border-bottom: 2px solid #a855f7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ec4899, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .btn-icon {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .section {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            animation: fadeIn 0.5s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #ec4899;
-        }
-        .input-group {
-            margin-bottom: 12px;
-        }
-        label {
-            display: block;
-            font-size: 12px;
-            color: #a0aec0;
-            margin-bottom: 5px;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #a855f7;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 14px;
-        }
-        input::placeholder { color: #718096; }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-            color: white;
-        }
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-        .btn-secondary {
-            background: #4c1d95;
-            color: #a78bfa;
-            font-size: 12px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .stat-box {
-            background: rgba(168, 85, 247, 0.2);
-            border-left: 4px solid #a855f7;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-label {
-            font-size: 11px;
-            color: #a0aec0;
-            text-transform: uppercase;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ec4899;
-            margin-top: 5px;
-        }
-        .history {
-            max-height: 300px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        .history-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            border-left: 3px solid #06b6d4;
-        }
-        .nav-bottom {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, transparent, #1a1a2e);
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            border-top: 1px solid #a855f7;
-        }
-        .nav-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        .nav-btn.active {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-            color: white;
-        }
-        .nav-btn.inactive {
-            background: rgba(255, 255, 255, 0.1);
-            color: #a0aec0;
-        }
-        .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 90vw;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 2px solid #a855f7;
-        }
-        .modal-close {
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            color: #a0aec0;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-        .glossary-item {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
-        }
-        .glossary-item:last-child {
-            border-bottom: none;
-        }
-        .glossary-title {
-            color: #ec4899;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .glossary-text {
-            font-size: 13px;
-            color: #cbd5e0;
-            line-height: 1.6;
-        }
-        .timer {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .timer-display {
-            font-size: 48px;
-            font-weight: bold;
-            color: #06b6d4;
-            font-family: 'Courier New', monospace;
-        }
-        .timer-phase {
-            font-size: 18px;
-            color: #a0aec0;
-            margin-top: 10px;
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HEALTH">
+<title>HEALTH</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html,body{font-family:'Inter','Manrope',-apple-system,BlinkMacSystemFont,sans-serif;background:#000;color:#e5e5e5;min-height:100vh;overflow-x:hidden;letter-spacing:-0.01em}
+body{padding-bottom:80px}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 16px}
+
+/* HEADER */
+.header{padding:16px 0 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(24px);z-index:50;border-bottom:1px solid rgba(255,255,255,0.04)}
+.logo{font-family:'Manrope';font-size:18px;font-weight:800;letter-spacing:-0.5px;color:#fff}
+.logo span{color:#86efac;font-weight:400}
+.header-actions{display:flex;gap:6px;align-items:center}
+.icon-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.04);border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.icon-btn:active{transform:scale(0.92);background:rgba(255,255,255,0.08)}
+.back-btn{background:rgba(134,239,172,0.1);color:#86efac;font-size:13px;font-weight:500;padding:0 12px;width:auto;border-radius:17px}
+
+/* CONTENT */
+.content{padding:14px 0;animation:fadeIn 0.25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* TYPOGRAPHY */
+.section-title{font-family:'Manrope';font-size:26px;font-weight:700;margin-bottom:2px;letter-spacing:-1.2px;color:#fff}
+.section-subtitle{font-size:13px;color:#666;margin-bottom:18px;letter-spacing:0;font-weight:400}
+.card-title{font-size:11px;font-weight:600;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.label-sm{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+
+/* CARDS */
+.card{background:#0a0a0a;border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px}
+.card-soft{padding:12px 0;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.card-soft:last-child{border-bottom:none}
+
+/* INPUTS */
+.input-group{margin-bottom:10px}
+.input-group label{display:block;font-size:11px;color:#666;margin-bottom:5px;font-weight:500;letter-spacing:0.2px}
+input,select,textarea{width:100%;padding:10px 12px;background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:9px;color:#fff;font-size:14px;font-family:inherit;transition:all 0.15s;letter-spacing:-0.01em}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#86efac;background:#161616}
+textarea{resize:vertical;min-height:54px}
+input[type="date"],input[type="time"]{font-family:inherit}
+
+/* BUTTONS */
+.btn{width:100%;padding:11px 14px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit;letter-spacing:0.1px}
+.btn-primary{background:#86efac;color:#000}
+.btn-primary:active{transform:scale(0.98);background:#6ee7b7}
+.btn-secondary{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.08)}
+.btn-secondary:active{background:rgba(255,255,255,0.1)}
+.btn-danger{background:#7f1d1d;color:#fca5a5}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:8px;width:auto}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+
+/* STATS */
+.stat{background:rgba(255,255,255,0.03);border-radius:10px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+.stat-label{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;font-weight:500}
+.stat-value{font-family:'Manrope';font-size:18px;font-weight:600;color:#86efac;letter-spacing:-0.5px}
+.stat-unit{font-size:10px;color:#444;margin-left:1px;font-weight:400}
+
+/* DATA ROWS (no card) */
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.data-row:last-child{border-bottom:none}
+.data-label{font-size:13px;color:#999;font-weight:400}
+.data-value{font-family:'Manrope';font-size:14px;color:#fff;font-weight:500}
+
+/* RANGES */
+.range-buttons{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.range-btn{padding:5px 11px;background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:14px;color:#666;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.15s;font-family:inherit}
+.range-btn.active{background:#86efac;color:#000;border-color:#86efac}
+
+/* HISTORY */
+.history{max-height:260px;overflow-y:auto;margin-top:10px}
+.history-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.history-item:last-child{border-bottom:none}
+.history-item-content{flex:1;min-width:0}
+.history-item-date{color:#555;font-size:10px;margin-bottom:2px;letter-spacing:0.3px;text-transform:uppercase;font-weight:500}
+.history-item-value{color:#fff;font-size:12px}
+.delete-btn{background:transparent;border:none;color:#444;font-size:16px;cursor:pointer;padding:2px 6px;transition:color 0.15s}
+.delete-btn:active{color:#dc2626}
+
+/* CHART */
+.chart-container{background:#0a0a0a;border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:12px;margin-bottom:10px;position:relative;height:200px}
+.chart-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:500;padding-left:2px}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;margin-left:4px;letter-spacing:0.5px;text-transform:uppercase}
+.badge-success{background:rgba(134,239,172,0.15);color:#86efac}
+.badge-warning{background:rgba(251,146,60,0.15);color:#fb923c}
+.badge-danger{background:rgba(239,68,68,0.15);color:#ef4444}
+.fast-badge{display:inline-block;background:linear-gradient(135deg,#86efac,#34d399);color:#000;padding:5px 12px;border-radius:14px;font-weight:600;font-size:11px;margin-top:8px;letter-spacing:0.3px}
+
+/* MEDITATION TIMER */
+.timer-display{font-family:'Manrope';font-size:64px;font-weight:200;text-align:center;color:#86efac;letter-spacing:-3px;margin:16px 0 8px;font-variant-numeric:tabular-nums}
+.timer-phase{text-align:center;font-size:14px;color:#666;margin-bottom:18px;font-weight:500;letter-spacing:0.2px;min-height:18px}
+.timer-phase.active{color:#86efac}
+
+/* NAV BOTTOM */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.95);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.05);padding:6px;z-index:100}
+.nav-inner{max-width:480px;margin:0 auto;display:flex;gap:2px}
+.nav-btn{flex:1;padding:9px 2px;background:transparent;border:none;color:#555;font-size:10px;font-weight:600;cursor:pointer;border-radius:8px;transition:all 0.15s;text-align:center;letter-spacing:0.2px;font-family:inherit}
+.nav-btn.active{background:#86efac;color:#000}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(12px)}
+.modal.active{display:flex}
+.modal-content{background:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;max-width:460px;width:100%;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal-title{font-family:'Manrope';font-size:18px;font-weight:700;letter-spacing:-0.5px}
+.modal-close{background:rgba(255,255,255,0.08);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px}
+
+/* GLOSSARY */
+.glossary-search{margin-bottom:12px}
+.glossary-item{padding:10px;margin-bottom:6px;cursor:pointer;border-radius:9px;border:1px solid rgba(255,255,255,0.04);transition:all 0.15s;background:rgba(255,255,255,0.02)}
+.glossary-item:active{border-color:#86efac}
+.glossary-name{font-weight:600;font-size:13px;color:#86efac;margin-bottom:2px}
+.glossary-preview{font-size:11px;color:#666}
+.glossary-detail{font-size:12px;color:#ccc;line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);display:none}
+.glossary-detail.show{display:block}
+.glossary-detail strong{color:#86efac;font-weight:600}
+.glossary-detail p{margin-bottom:6px}
+
+/* SUN CIRCLE */
+.sun-container{position:relative;width:100%;max-width:340px;margin:0 auto 12px;aspect-ratio:1}
+.sun-svg{width:100%;height:100%}
+.sun-center-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.sun-time-big{font-family:'Manrope';font-size:32px;font-weight:300;color:#fff;letter-spacing:-1.5px;font-variant-numeric:tabular-nums}
+.sun-time-small{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1.5px;margin-top:2px;font-weight:500}
+.sun-uv-big{font-family:'Manrope';font-size:18px;font-weight:600;margin-top:6px}
+.sun-live-dot{display:inline-block;width:5px;height:5px;background:#86efac;border-radius:50%;margin-right:4px;animation:pulse 1.5s infinite;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* TOGGLE */
+.toggle{position:relative;width:40px;height:22px;background:rgba(255,255,255,0.1);border-radius:11px;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.toggle.active{background:#86efac}
+.toggle-handle{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:all 0.15s}
+.toggle.active .toggle-handle{left:20px;background:#000}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.toggle-label{font-size:13px;color:#ccc}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:30px 14px;color:#444;font-size:12px}
+
+/* MEASUREMENT INFO */
+.measurement-info{font-size:10px;color:#555;margin-top:2px;font-style:italic;line-height:1.3}
+
+/* WOD */
+.wod-card{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.wod-card:last-child{border-bottom:none}
+.wod-name{font-weight:600;font-size:13px;margin-bottom:2px;color:#86efac}
+.wod-desc{font-size:11px;color:#888;line-height:1.4}
+
+/* DIVIDER */
+.divider{height:1px;background:rgba(255,255,255,0.06);margin:12px 0}
+
+/* PANEL HOME (Dashboard) */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.panel-card{background:#0a0a0a;border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.15s;position:relative}
+.panel-card:active{transform:scale(0.97);border-color:#86efac}
+.panel-card-icon{font-size:18px;margin-bottom:6px;display:block}
+.panel-card-title{font-size:11px;color:#666;font-weight:500;text-transform:uppercase;letter-spacing:0.8px}
+.panel-card-value{font-family:'Manrope';font-size:20px;font-weight:600;color:#fff;letter-spacing:-0.5px;margin-top:4px;line-height:1.1}
+.panel-card-unit{font-size:11px;color:#555;margin-left:2px;font-weight:400}
+.panel-card-sub{font-size:10px;color:#555;margin-top:2px}
+.panel-card-wide{grid-column:span 2}
+.panel-section-title{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin:14px 0 6px;padding-left:2px}
+.panel-section-title:first-child{margin-top:0}
+
+/* WIDGET MANAGER */
+.widget-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.widget-name{font-size:13px;color:#ccc}
+.widget-actions{display:flex;gap:6px}
+
+/* QUICK ACCESS */
+.quick-row{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.quick-pill{flex-shrink:0;padding:7px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.05);border-radius:20px;font-size:11px;color:#aaa;font-weight:500;cursor:pointer;transition:all 0.15s}
+.quick-pill:active{background:rgba(134,239,172,0.1);border-color:#86efac;color:#86efac}
+
+/* TYPE SELECTOR */
+.type-tabs{display:flex;gap:4px;background:rgba(255,255,255,0.03);padding:3px;border-radius:10px;margin-bottom:12px}
+.type-tab{flex:1;padding:8px;background:transparent;border:none;color:#666;font-size:12px;font-weight:500;cursor:pointer;border-radius:8px;transition:all 0.15s;font-family:inherit}
+.type-tab.active{background:#86efac;color:#000;font-weight:600}
+
+/* RANGE SLIDER */
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;outline:none;padding:0}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#86efac;border-radius:50%;cursor:pointer;border:2px solid #000;box-shadow:0 0 0 1px #86efac}
+
+/* SUN TIME LIST */
+.sun-times-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.sun-time-cell{text-align:center;padding:8px 4px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+.sun-time-cell-label{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.8px;font-weight:500}
+.sun-time-cell-value{font-family:'Manrope';font-size:13px;font-weight:600;color:#fff;margin-top:2px;font-variant-numeric:tabular-nums}
+.sun-time-cell-icon{font-size:11px;margin-right:3px}
+</style>
 </head>
 <body>
-    <header>
-        <div class="title">💚 HEALTH v2.5</div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-icon" onclick="openGlossary()">📚</button>
-            <button class="btn-icon" onclick="openSettings()">⚙️</button>
-        </div>
-    </header>
+<div class="app">
+<div class="header">
+<div class="logo">HEALTH<span>.</span></div>
+<div class="header-actions" id="headerActions">
+<button class="icon-btn" onclick="openModal('glossary')" title="Glosario">📖</button>
+</div>
+</div>
 
-    <div class="container">
-        <!-- RESPIRACIÓN -->
-        <div id="breathing-section" class="section">
-            <h2>🫁 Respiración Guiada</h2>
-            <div class="input-group">
-                <label>Tiempo total (segundos)</label>
-                <input type="number" id="totalTime" value="300" min="10" max="3600">
-            </div>
-            <div class="input-group">
-                <label>Inspiración (seg)</label>
-                <input type="number" id="inhaleTime" value="4" min="1" max="30">
-            </div>
-            <div class="input-group">
-                <label>Expiración (seg)</label>
-                <input type="number" id="exhaleTime" value="6" min="1" max="30">
-            </div>
-            <div class="timer">
-                <div class="timer-display" id="timerDisplay">5:00</div>
-                <div class="timer-phase" id="timerPhase">Listo para comenzar</div>
-            </div>
-            <div class="controls">
-                <button class="btn-primary" id="breathBtn" onclick="toggleBreathing()">▶️ Comenzar</button>
-                <button class="btn-secondary" id="musicBtn" onclick="toggleMusic()" style="background: #15803d; color: #4ade80;">🎵 Activado</button>
-            </div>
-        </div>
+<div class="content" id="content"></div>
 
-        <!-- AYUNOS -->
-        <div id="fasting-section" class="section hidden">
-            <h2>🕐 Registro de Ayunos</h2>
-            <div class="input-group">
-                <label>Fecha</label>
-                <input type="date" id="fastDate">
-            </div>
-            <div class="input-group">
-                <label>Última comida (HH:MM)</label>
-                <input type="time" id="lastMeal" value="20:00">
-            </div>
-            <div class="input-group">
-                <label>Fin del ayuno (HH:MM)</label>
-                <input type="time" id="fastEnd" value="12:00">
-            </div>
-            <div style="background: rgba(251, 146, 60, 0.2); padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <div style="color: #fed7aa; font-size: 12px;">Duración del ayuno:</div>
-                <div style="font-size: 32px; font-weight: bold; color: #fb923c;" id="fastDuration">16.0h</div>
-                <div id="fastBadge"></div>
-            </div>
-            <button class="btn-primary" onclick="saveFast()">📝 Registrar Ayuno</button>
-            <div class="grid" style="margin-top: 15px;">
-                <div class="stat-box">
-                    <div class="stat-label">Últ. Mes</div>
-                    <div class="stat-value" id="statLastMonth">0h</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Histórico</div>
-                    <div class="stat-value" id="statAllTime">0h</div>
-                </div>
-            </div>
-            <div class="history" id="fastHistory"></div>
-        </div>
+<div class="nav-bottom">
+<div class="nav-inner">
+<button class="nav-btn active" data-tab="panel" onclick="showTab('panel',this)">Panel</button>
+<button class="nav-btn" data-tab="estado" onclick="showTab('estado',this)">Estado</button>
+<button class="nav-btn" data-tab="sueno" onclick="showTab('sueno',this)">Sueño</button>
+<button class="nav-btn" data-tab="actividad" onclick="showTab('actividad',this)">Actividad</button>
+<button class="nav-btn" data-tab="meditacion" onclick="showTab('meditacion',this)">Meditación</button>
+<button class="nav-btn" data-tab="sol" onclick="showTab('sol',this)">Sol</button>
+<button class="nav-btn" data-tab="ajustes" onclick="showTab('ajustes',this)">Ajustes</button>
+</div>
+</div>
+</div>
 
-        <!-- MEDIDAS -->
-        <div id="measurements-section" class="section hidden">
-            <h2>📏 Medidas Corporales</h2>
-            <div class="input-group">
-                <label>Fecha</label>
-                <input type="date" id="measureDate">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="input-group">
-                    <label>Cintura (cm)</label>
-                    <input type="number" id="waist" placeholder="cm" step="0.1">
-                </div>
-                <div class="input-group">
-                    <label>Pecho (cm)</label>
-                    <input type="number" id="chest" placeholder="cm" step="0.1">
-                </div>
-                <div class="input-group">
-                    <label>Muslo (cm)</label>
-                    <input type="number" id="thigh" placeholder="cm" step="0.1">
-                </div>
-                <div class="input-group">
-                    <label>Bícep (cm)</label>
-                    <input type="number" id="bicep" placeholder="cm" step="0.1">
-                </div>
-            </div>
-            <button class="btn-primary" onclick="saveMeasure()">📐 Registrar</button>
-            <div class="history" id="measureHistory"></div>
-        </div>
+<div class="modal" id="modal-glossary">
+<div class="modal-content">
+<div class="modal-header">
+<div class="modal-title">📖 Glosario</div>
+<button class="modal-close" onclick="closeModal('glossary')">×</button>
+</div>
+<input type="text" class="glossary-search" id="glossarySearch" placeholder="Buscar término..." oninput="renderGlossary()">
+<div id="glossaryList"></div>
+</div>
+</div>
 
-        <!-- AJUSTES -->
-        <div id="settings-section" class="section hidden">
-            <h2>⚙️ Ajustes</h2>
-            <button class="btn-primary" onclick="exportData()">💾 Exportar Datos</button>
-            <button class="btn-primary" style="background: #059669;" onclick="importData()">📥 Importar Datos</button>
-            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="loadImport(event)">
-            <div style="margin-top: 20px; padding: 15px; background: rgba(168, 85, 247, 0.1); border-radius: 8px;">
-                <div style="font-size: 12px; color: #cbd5e0;">
-                    <strong>HEALTH v2.5</strong><br>
-                    🫁 Respiración con música automática<br>
-                    🕐 Registro de ayunos<br>
-                    📏 Medidas corporales<br>
-                    📚 Glosario completo<br>
-                    100% privado • Sin servidor
-                </div>
-            </div>
-        </div>
+<div class="modal" id="modal-widgets">
+<div class="modal-content">
+<div class="modal-header">
+<div class="modal-title">⚙️ Personalizar Panel</div>
+<button class="modal-close" onclick="closeModal('widgets')">×</button>
+</div>
+<div style="font-size:11px;color:#666;margin-bottom:12px">Activa los datos que quieres ver en el Panel principal.</div>
+<div id="widgetsList"></div>
+</div>
+</div>
+
+<script>
+// ============= DATA STORE =============
+const DEFAULT_WIDGETS = ['weight','sleep_hrv','sleep_hours','sleep_score','fasting_last','vo2max','sun_today','meditation_today','activity_last','waist'];
+
+const store = {
+  sleep: JSON.parse(localStorage.getItem('h_sleep') || '[]'),
+  activity: JSON.parse(localStorage.getItem('h_activity') || '[]'),
+  weight: JSON.parse(localStorage.getItem('h_weight') || '[]'),
+  allergy: JSON.parse(localStorage.getItem('h_allergy') || '[]'),
+  vo2max: localStorage.getItem('h_vo2max') || '',
+  fasting: JSON.parse(localStorage.getItem('h_fasting') || '[]'),
+  measurements: JSON.parse(localStorage.getItem('h_measurements') || '[]'),
+  meditation: JSON.parse(localStorage.getItem('h_meditation') || '[]'),
+  programs: JSON.parse(localStorage.getItem('h_programs') || '[]'),
+  sun: JSON.parse(localStorage.getItem('h_sun') || '[]'),
+  wods: JSON.parse(localStorage.getItem('h_wods') || 'null') || [
+    {name:'Fran',desc:'21-15-9 Thrusters (43kg) + Pull-ups'},
+    {name:'Cindy',desc:'AMRAP 20: 5 Pull-ups, 10 Push-ups, 15 Squats'},
+    {name:'Murph',desc:'1mi Run, 100 PU, 200 PushUp, 300 Sq, 1mi Run'},
+    {name:'Helen',desc:'3 RFT: 400m Run, 21 KB Swings, 12 Pull-ups'},
+    {name:'Diane',desc:'21-15-9 Deadlifts (102kg) + HSPU'},
+    {name:'Grace',desc:'30 Clean & Jerks (61kg)'},
+    {name:'Isabel',desc:'30 Snatches (61kg)'},
+    {name:'Annie',desc:'50-40-30-20-10 DU + Sit-ups'},
+    {name:'Filthy Fifty',desc:'50 reps de 10 ejercicios'},
+    {name:'Eva',desc:'5 RFT: 800m Run, 30 KB, 30 PU'}
+  ],
+  records: JSON.parse(localStorage.getItem('h_records') || '[]'),
+  settings: JSON.parse(localStorage.getItem('h_settings') || '{"music":true,"autoLocation":true,"lat":40.4168,"lng":-3.7038}'),
+  widgets: JSON.parse(localStorage.getItem('h_widgets') || JSON.stringify(DEFAULT_WIDGETS))
+};
+
+function save(key, val){
+  store[key] = val;
+  localStorage.setItem('h_'+key, JSON.stringify(val));
+}
+function saveSettings(){localStorage.setItem('h_settings', JSON.stringify(store.settings));}
+function saveWidgets(){localStorage.setItem('h_widgets', JSON.stringify(store.widgets));}
+
+// ============= GLOSSARY =============
+const GLOSSARY = {
+  'HRV':{n:'Variabilidad Frecuencia Cardíaca (HRV)',s:'Variación en milisegundos entre latidos consecutivos del corazón.',o:'Mediante dispositivos wearables (relojes inteligentes, bandas de pecho) durante el sueño.',c:'Calculado por el dispositivo midiendo intervalos RR del ECG.',i:'HRV alto = mejor recuperación y menor estrés. HRV bajo puede indicar sobreentrenamiento, fatiga o estrés.'},
+  'Puntuación Sueño':{n:'Puntuación de Calidad del Sueño',s:'Métrica de 0 a 100 que indica la calidad general del sueño nocturno.',o:'Wearable (Garmin, Whoop, Oura, Apple Watch) o subjetiva.',c:'Combina duración total, eficiencia, fases (REM, profundo, ligero) y despertares.',i:'>80 excelente, 70-80 bueno, 60-70 regular, <60 mal sueño.'},
+  'HR Nocturno':{n:'Frecuencia Cardíaca Nocturna',s:'Pulsaciones por minuto durante el sueño profundo.',o:'Wearable durante la noche.',c:'Promedio de FC durante las horas de sueño profundo.',i:'HR nocturno bajo indica buena recuperación.'},
+  'VO2 Max':{n:'Consumo Máximo de Oxígeno',s:'Capacidad máxima del cuerpo para utilizar oxígeno (ml/kg/min).',o:'Test de esfuerzo o estimación por wearable.',c:'Combina FC, ritmo y datos personales mediante algoritmos.',i:'>50 excelente, 40-50 bueno, <30 bajo.'},
+  'Duración Ayuno':{n:'Ayuno Intermitente',s:'Horas entre la última comida y la primera del día siguiente.',o:'Registro manual de horas.',c:'Hora fin - Hora última comida.',i:'12h: digestivo limpio. 14-16h: autofagia inicia. 16-20h: máxima autofagia.'},
+  'Autofagia':{n:'Autofagia',s:'Proceso celular de "limpieza": las células reciclan componentes dañados.',o:'Se activa con ayuno (>16h), ejercicio intenso o restricción calórica.',c:'No medible directamente sin biopsia.',i:'Premio Nobel 2016. Esencial para longevidad.'},
+  'Cintura':{n:'Circunferencia de Cintura',s:'Medida horizontal a la altura del ombligo.',o:'Cinta métrica flexible, exhalando suavemente.',c:'Medición directa en cm.',i:'Mejor predictor de riesgo cardiovascular. Hombres <94cm, mujeres <80cm.'},
+  'Pecho':{n:'Circunferencia de Pecho',s:'Medida horizontal a la altura del pezón.',o:'Cinta métrica, brazos relajados.',c:'Medición directa en cm.',i:'Indica desarrollo torácico y muscular.'},
+  'Muslo':{n:'Circunferencia de Muslo',s:'Medida a 10cm por encima de la rodilla.',o:'Cinta métrica con pierna relajada.',c:'Medición directa en cm.',i:'Asociado con longevidad (más músculo en piernas = menor mortalidad).'},
+  'Bícep':{n:'Circunferencia de Bícep',s:'Medida en el punto más grueso del brazo.',o:'Cinta métrica, brazo relajado.',c:'Medición directa en cm.',i:'Indicador de masa muscular en tren superior.'},
+  'Cadera':{n:'Circunferencia de Cadera',s:'Medida en la parte más ancha de glúteos y caderas.',o:'Cinta métrica horizontal.',c:'Medición directa en cm.',i:'Ratio cintura/cadera ideal: H<0.95, M<0.85.'},
+  'UV':{n:'Índice Ultravioleta',s:'Intensidad de radiación UV solar (escala 0-11+).',o:'Calculado por hora, latitud, altitud y nubosidad.',c:'Fórmulas astronómicas.',i:'0-2 bajo, 3-5 moderado, 6-7 alto, 8-10 muy alto, 11+ extremo.'},
+  'UVB':{n:'Radiación UVB',s:'Tipo de UV (280-315nm) que sintetiza vitamina D en la piel.',o:'Disponible cuando el sol está alto (>30°).',c:'Necesita ángulo solar elevado.',i:'Esencial para vitamina D. 10-20 min sin protección 2-3 veces por semana.'},
+  'UVA':{n:'Radiación UVA',s:'Tipo de UV (315-400nm) que penetra más profundamente en la piel.',o:'Presente durante todo el día con sol.',c:'Más constante que UVB durante el día.',i:'Causa envejecimiento y daño en ADN. Activa síntesis de melanina.'},
+  'Cenit Solar':{n:'Cenit Solar',s:'Momento en que el sol está en su punto más alto del día.',o:'Calculado por hora, latitud y época del año.',c:'Generalmente entre 12:00 y 14:00.',i:'Máxima radiación UV.'},
+  'Ventana Leptina':{n:'Ventana de Leptina',s:'Periodo con pico de leptina (hormona de saciedad).',o:'Ritmo circadiano, sigue al cenit solar.',c:'2-4 horas después del mediodía solar.',i:'Comer en esta ventana mejora saciedad. Última comida 4h antes del pico.'},
+  'Frecuencias Solfeggio':{n:'Frecuencias Solfeggio',s:'Frecuencias musicales tradicionales usadas en meditación.',o:'Generadas digitalmente con osciladores de audio.',c:'174Hz, 285Hz, 396Hz, 432Hz, 528Hz.',i:'Usadas para relajación profunda.'}
+};
+
+function renderGlossary(){
+  const list = document.getElementById('glossaryList');
+  const search = (document.getElementById('glossarySearch').value || '').toLowerCase();
+  const items = Object.entries(GLOSSARY).filter(([k,v])=>
+    !search || k.toLowerCase().includes(search) || v.n.toLowerCase().includes(search) || v.s.toLowerCase().includes(search)
+  );
+  list.innerHTML = items.map(([k,v])=>`
+    <div class="glossary-item" onclick="toggleGloss(this)">
+      <div class="glossary-name">${v.n}</div>
+      <div class="glossary-preview">${v.s.substring(0,70)}${v.s.length>70?'...':''}</div>
+      <div class="glossary-detail">
+        <p><strong>Significado:</strong> ${v.s}</p>
+        <p><strong>Obtención:</strong> ${v.o}</p>
+        <p><strong>Cálculo:</strong> ${v.c}</p>
+        <p><strong>Importancia:</strong> ${v.i}</p>
+      </div>
+    </div>
+  `).join('') || '<div class="empty-state">No se encontraron términos</div>';
+}
+
+function toggleGloss(el){el.querySelector('.glossary-detail').classList.toggle('show');}
+function openModal(id){document.getElementById('modal-'+id).classList.add('active');if(id==='glossary')renderGlossary();if(id==='widgets')renderWidgetsModal();}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
+
+// ============= AUDIO =============
+let audioCtx = null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,duration=300,vol=0.15){const ctx=getAudio();try{const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=freq;osc.type='sine';gain.gain.setValueAtTime(vol,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration/1000);osc.start();osc.stop(ctx.currentTime+duration/1000);}catch(e){}}
+function playBowl(){const ctx=getAudio();try{[220,330,440,550].forEach((f,i)=>{const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=f;osc.type=i===0?'sine':'triangle';gain.gain.setValueAtTime(0.12/(i+1),ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+3);osc.start();osc.stop(ctx.currentTime+3);});}catch(e){}}
+let bgMusicInterval=null;
+function startBgMusic(){stopBgMusic();const play=()=>{const ctx=getAudio();try{[174,285,396].forEach((f,i)=>{const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=f;osc.type='sine';gain.gain.setValueAtTime(0.05/(i+1),ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+8);osc.start();osc.stop(ctx.currentTime+8);});}catch(e){}};play();bgMusicInterval=setInterval(play,7000);}
+function stopBgMusic(){if(bgMusicInterval){clearInterval(bgMusicInterval);bgMusicInterval=null;}}
+
+// ============= UTILS =============
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtDate(d){return new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});}
+function filterByRange(data,range){if(range==='all')return data;const days={'1w':7,'2w':14,'1m':30,'2m':60,'6m':180,'1y':365}[range]||30;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);return data.filter(d=>new Date(d.date)>=cutoff);}
+function avg(arr,key){if(!arr.length)return 0;const vals=arr.map(d=>parseFloat(d[key]||0)).filter(v=>!isNaN(v));if(!vals.length)return 0;return(vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(1);}
+function fmtHour(h){const hours=Math.floor(h);const mins=Math.round((h-hours)*60);return `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}`;}
+
+let charts={};
+function makeChart(canvasId,labels,data,label,color='#86efac'){if(charts[canvasId])charts[canvasId].destroy();const ctx=document.getElementById(canvasId);if(!ctx)return;charts[canvasId]=new Chart(ctx,{type:'line',data:{labels,datasets:[{label,data,borderColor:color,backgroundColor:color+'15',tension:0.35,fill:true,pointRadius:2,pointHoverRadius:5,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#000',borderColor:color,borderWidth:1,padding:8,titleFont:{size:11},bodyFont:{size:12}}},scales:{x:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}}}}});}
+
+function delItem(type,id){if(!confirm('¿Eliminar este registro?'))return;store[type]=store[type].filter(x=>x.id!==id);save(type,store[type]);render();}
+function setRange(r){currentRange=r;render();}
+
+// ============= TABS =============
+let currentTab='panel';
+let currentRange='1m';
+let actType='crossfit';
+
+function showTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else{const b=document.querySelector(`[data-tab="${tab}"]`);if(b)b.classList.add('active');}
+  // Update header
+  const ha=document.getElementById('headerActions');
+  ha.innerHTML='';
+  if(tab!=='panel'){
+    const back=document.createElement('button');
+    back.className='icon-btn back-btn';
+    back.textContent='← Panel';
+    back.onclick=()=>showTab('panel');
+    ha.appendChild(back);
+  }
+  const gloss=document.createElement('button');
+  gloss.className='icon-btn';
+  gloss.textContent='📖';
+  gloss.onclick=()=>openModal('glossary');
+  ha.appendChild(gloss);
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  const c=document.getElementById('content');
+  const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
+  c.innerHTML='';
+  (renderers[currentTab]||renderPanel)(c);
+}
+
+// ============= SUN CALCS =============
+function calcSunTimes(lat,lng,date){
+  const d=date||new Date();
+  const dayOfYear=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);
+  const declination=-23.45*Math.cos(2*Math.PI*(dayOfYear+10)/365);
+  const latRad=lat*Math.PI/180;
+  const declRad=declination*Math.PI/180;
+  const cosHA=-Math.tan(latRad)*Math.tan(declRad);
+  let hourAngle=90;
+  if(cosHA>=-1&&cosHA<=1)hourAngle=Math.acos(cosHA)*180/Math.PI;
+  const sunrise=12-hourAngle/15-lng/15+d.getTimezoneOffset()/-60;
+  const sunset=12+hourAngle/15-lng/15+d.getTimezoneOffset()/-60;
+  const noon=(sunrise+sunset)/2;
+  const dayLen=sunset-sunrise;
+  const uvbStart=sunrise+dayLen*0.30;
+  const uvbEnd=sunset-dayLen*0.30;
+  const uvaStart=sunrise+dayLen*0.10;
+  const uvaEnd=sunset-dayLen*0.10;
+  return{sunrise,sunset,noon,uvbStart,uvbEnd,uvaStart,uvaEnd,declination};
+}
+
+function uvIndex(hour,sunTimes){
+  if(hour<sunTimes.sunrise||hour>sunTimes.sunset)return 0;
+  const noonDist=Math.abs(hour-sunTimes.noon);
+  const dayLength=(sunTimes.sunset-sunTimes.sunrise)/2;
+  return Math.max(0,Math.min(11,11*(1-Math.pow(noonDist/dayLength,2))));
+}
+
+// ============= PANEL (HOME / DASHBOARD) =============
+const WIDGET_DEFS={
+  weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:()=>{const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date)}:null;}},
+  weight_avg:{name:'Peso media mes',icon:'📊',section:'estado',get:()=>{const v=avg(filterByRange(store.weight,'1m'),'value');return v>0?{val:v,unit:'kg',sub:'últimos 30d'}:null;}},
+  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'sueno',get:()=>{const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date)}:null;}},
+  sleep_hours:{name:'Horas sueño',icon:'😴',section:'sueno',get:()=>{const s=store.sleep[store.sleep.length-1];return s?{val:s.hours,unit:'h',sub:fmtDate(s.date)}:null;}},
+  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'sueno',get:()=>{const s=store.sleep[store.sleep.length-1];return s?{val:s.score,unit:'/100',sub:fmtDate(s.date)}:null;}},
+  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'sueno',get:()=>{const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date)}:null;}},
+  sleep_avg_score:{name:'Score sueño media',icon:'📈',section:'sueno',get:()=>{const v=avg(filterByRange(store.sleep,'1m'),'score');return v>0?{val:v,unit:'/100',sub:'30 días'}:null;}},
+  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:()=>{const f=store.fasting[store.fasting.length-1];return f?{val:f.duration,unit:'h',sub:fmtDate(f.date)}:null;}},
+  fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:()=>{const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:v,unit:'h',sub:'30 días'}:null;}},
+  vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:()=>store.vo2max?{val:store.vo2max,unit:'ml/kg/min',sub:'actual'}:null},
+  sun_today:{name:'Sol ahora',icon:'☀️',section:'sol',get:()=>{const t=calcSunTimes(store.settings.lat,store.settings.lng);const h=new Date().getHours()+new Date().getMinutes()/60;const uv=uvIndex(h,t);return{val:uv.toFixed(1),unit:'UV',sub:h>=t.sunrise&&h<=t.sunset?'Día':'Noche'};}},
+  meditation_today:{name:'Meditación',icon:'🧘',section:'meditacion',get:()=>{const today_d=today();const todays=store.meditation.filter(m=>m.date===today_d);if(!todays.length)return{val:'0',unit:'min',sub:'hoy'};const total=todays.reduce((s,m)=>s+parseInt(m.duration),0);return{val:Math.floor(total/60),unit:'min',sub:'hoy'};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:()=>{const a=store.activity[store.activity.length-1];return a?{val:a.type,unit:'',sub:fmtDate(a.date)}:null;}},
+  activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:()=>{const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
+  waist:{name:'Cintura',icon:'📏',section:'estado',get:()=>{const m=[...store.measurements].reverse().find(x=>x.waist);return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  chest:{name:'Pecho',icon:'📐',section:'estado',get:()=>{const m=[...store.measurements].reverse().find(x=>x.chest);return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  thigh:{name:'Muslo',icon:'🦵',section:'estado',get:()=>{const m=[...store.measurements].reverse().find(x=>x.thigh);return m?{val:m.thigh,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  bicep:{name:'Bícep',icon:'💪',section:'estado',get:()=>{const m=[...store.measurements].reverse().find(x=>x.bicep);return m?{val:m.bicep,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  hip:{name:'Cadera',icon:'⭕',section:'estado',get:()=>{const m=[...store.measurements].reverse().find(x=>x.hip);return m?{val:m.hip,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  allergy_count:{name:'Días alergia mes',icon:'🤧',section:'estado',get:()=>{const c=filterByRange(store.allergy,'1m').length;return c>0?{val:c,unit:'días',sub:'30 días'}:null;}},
+  sun_exposure:{name:'Sol total mes',icon:'🌞',section:'sol',get:()=>{const filt=filterByRange(store.sun,'1m');if(!filt.length)return null;let totalMin=0;filt.forEach(s=>{const[h,m]=s.duration.split(':').map(Number);totalMin+=h*60+m;});return{val:Math.floor(totalMin/60),unit:'h',sub:'30 días'};}}
+};
+
+function renderPanel(c){
+  const now=new Date();
+  const hour=now.getHours()+now.getMinutes()/60;
+  const times=calcSunTimes(store.settings.lat,store.settings.lng);
+  const uv=uvIndex(hour,times);
+  const isDay=hour>=times.sunrise&&hour<=times.sunset;
+
+  // Greeting based on time
+  let greeting='Buenas noches';
+  if(hour>=6&&hour<12)greeting='Buenos días';
+  else if(hour>=12&&hour<20)greeting='Buenas tardes';
+
+  c.innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;margin-bottom:2px">${greeting}</div>
+      <div class="section-title">Panel</div>
     </div>
 
-    <!-- GLOSARIO MODAL -->
-    <div id="glossaryModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeGlossary()">×</button>
-            <h2 style="color: #ec4899; margin-bottom: 20px;">📚 Glosario de Términos</h2>
-            <div id="glossaryContent"></div>
+    <div class="panel-section-title">☀️ Solar — En vivo</div>
+    ${renderSunDashboard(times,hour,uv,isDay)}
+
+    <div class="panel-section-title">📊 Tus datos</div>
+    <div class="panel-grid" id="widgetsContainer">
+      ${store.widgets.map(w=>renderWidget(w)).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 2">Aún no hay datos. Empieza a registrar en las secciones.</div>'}
+    </div>
+
+    <button class="btn btn-secondary btn-sm" style="margin-top:10px;width:100%" onclick="openModal('widgets')">⚙️ Personalizar Panel</button>
+
+    <div class="panel-section-title">🧭 Navegación rápida</div>
+    <div class="panel-grid">
+      <div class="panel-card" onclick="showTab('estado')">
+        <span class="panel-card-icon">💚</span>
+        <div class="panel-card-title">Estado</div>
+        <div class="panel-card-sub">Peso, ayuno, medidas...</div>
+      </div>
+      <div class="panel-card" onclick="showTab('sueno')">
+        <span class="panel-card-icon">😴</span>
+        <div class="panel-card-title">Sueño</div>
+        <div class="panel-card-sub">HRV, horas, score...</div>
+      </div>
+      <div class="panel-card" onclick="showTab('actividad')">
+        <span class="panel-card-icon">🏋️</span>
+        <div class="panel-card-title">Actividad</div>
+        <div class="panel-card-sub">CrossFit, carrera...</div>
+      </div>
+      <div class="panel-card" onclick="showTab('meditacion')">
+        <span class="panel-card-icon">🧘</span>
+        <div class="panel-card-title">Meditación</div>
+        <div class="panel-card-sub">Respiración guiada</div>
+      </div>
+      <div class="panel-card" onclick="showTab('sol')">
+        <span class="panel-card-icon">☀️</span>
+        <div class="panel-card-title">Sol</div>
+        <div class="panel-card-sub">UV, vitamina D...</div>
+      </div>
+      <div class="panel-card" onclick="showTab('ajustes')">
+        <span class="panel-card-icon">⚙️</span>
+        <div class="panel-card-title">Ajustes</div>
+        <div class="panel-card-sub">Datos, ubicación...</div>
+      </div>
+    </div>
+  `;
+
+  // Auto-refresh sun panel every minute
+  if(window.panelRefreshTimer)clearInterval(window.panelRefreshTimer);
+  window.panelRefreshTimer=setInterval(()=>{if(currentTab==='panel')render();},60000);
+}
+
+function renderWidget(id){
+  const def=WIDGET_DEFS[id];
+  if(!def)return '';
+  const data=def.get();
+  if(!data)return '';
+  return `
+    <div class="panel-card" onclick="showTab('${def.section}')">
+      <span class="panel-card-icon">${def.icon}</span>
+      <div class="panel-card-title">${def.name}</div>
+      <div class="panel-card-value">${data.val}<span class="panel-card-unit">${data.unit}</span></div>
+      <div class="panel-card-sub">${data.sub}</div>
+    </div>
+  `;
+}
+
+function renderWidgetsModal(){
+  const list=document.getElementById('widgetsList');
+  list.innerHTML=Object.entries(WIDGET_DEFS).map(([id,def])=>{
+    const active=store.widgets.includes(id);
+    return `
+      <div class="widget-item">
+        <div>
+          <div class="widget-name">${def.icon} ${def.name}</div>
+          <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px">${def.section}</div>
         </div>
+        <div class="toggle ${active?'active':''}" onclick="toggleWidget('${id}',this)"><div class="toggle-handle"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleWidget(id,el){
+  if(store.widgets.includes(id)){
+    store.widgets=store.widgets.filter(w=>w!==id);
+    el.classList.remove('active');
+  }else{
+    store.widgets.push(id);
+    el.classList.add('active');
+  }
+  saveWidgets();
+}
+
+// ============= SUN DASHBOARD (Improved circular) =============
+function renderSunDashboard(times,currentHour,uv,isDay){
+  const size=320;
+  const center=size/2;
+  const radius=125;
+  const innerRadius=95;
+
+  // Day/Night arcs (full 24h)
+  // Sun position on circle (24h = 360deg, starting from bottom = midnight)
+  function hourToAngle(h){return (h/24)*360-90;} // -90 to start at top (noon)
+  function polarToXY(angle,r){const rad=angle*Math.PI/180;return{x:center+r*Math.cos(rad),y:center+r*Math.sin(rad)};}
+
+  // Generate arc path for day period
+  function arcPath(startH,endH,r){
+    const startA=hourToAngle(startH);
+    const endA=hourToAngle(endH);
+    const start=polarToXY(startA,r);
+    const end=polarToXY(endA,r);
+    const largeArc=(endH-startH)>12?1:0;
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+  }
+
+  // Sun current position
+  const sunAngle=hourToAngle(currentHour);
+  const sunPos=polarToXY(sunAngle,radius);
+
+  // Hour markers (every 3h)
+  let hourMarkers='';
+  for(let h=0;h<24;h+=3){
+    const angle=hourToAngle(h);
+    const outer=polarToXY(angle,radius+12);
+    const inner=polarToXY(angle,radius+2);
+    const text=polarToXY(angle,radius+22);
+    hourMarkers+=`<line x1="${inner.x}" y1="${inner.y}" x2="${outer.x}" y2="${outer.y}" stroke="#333" stroke-width="1"/>`;
+    hourMarkers+=`<text x="${text.x}" y="${text.y}" fill="#666" font-size="9" text-anchor="middle" dominant-baseline="middle" font-family="Manrope" font-weight="500">${h.toString().padStart(2,'0')}</text>`;
+  }
+
+  // Hour ticks (every 1h, smaller)
+  let hourTicks='';
+  for(let h=0;h<24;h++){
+    if(h%3===0)continue;
+    const angle=hourToAngle(h);
+    const outer=polarToXY(angle,radius+6);
+    const inner=polarToXY(angle,radius+2);
+    hourTicks+=`<line x1="${inner.x}" y1="${inner.y}" x2="${outer.x}" y2="${outer.y}" stroke="#222" stroke-width="0.5"/>`;
+  }
+
+  // UV color based on level
+  const uvColor=uv>=8?'#dc2626':uv>=6?'#f59e0b':uv>=3?'#fbbf24':uv>=1?'#86efac':'#475569';
+
+  // Build day/night background
+  // Night: from sunset to next day sunrise
+  // Day: from sunrise to sunset
+  let dayArc='';
+  if(times.sunrise<times.sunset){
+    dayArc=arcPath(times.sunrise,times.sunset,radius);
+  }
+
+  // UVB arc (inner)
+  let uvbArc='';
+  if(times.uvbStart<times.uvbEnd){
+    uvbArc=arcPath(times.uvbStart,times.uvbEnd,radius-12);
+  }
+
+  // UVA arc (between)
+  let uvaArc='';
+  if(times.uvaStart<times.uvaEnd){
+    uvaArc=arcPath(times.uvaStart,times.uvaEnd,radius-22);
+  }
+
+  return `
+    <div class="card" style="padding:12px 8px">
+      <div class="sun-container">
+        <svg class="sun-svg" viewBox="0 0 ${size} ${size}">
+          <defs>
+            <radialGradient id="bgGrad" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#0a0a0a"/>
+              <stop offset="100%" stop-color="#000"/>
+            </radialGradient>
+            <linearGradient id="dayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/>
+              <stop offset="50%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#dc2626"/>
+            </linearGradient>
+            <linearGradient id="uvbGrad">
+              <stop offset="0%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+            <linearGradient id="uvaGrad">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Background -->
+          <circle cx="${center}" cy="${center}" r="${radius+25}" fill="url(#bgGrad)"/>
+
+          <!-- Night ring background (full circle) -->
+          <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#0f172a" stroke-width="6" opacity="0.4"/>
+
+          <!-- Day arc -->
+          ${dayArc?`<path d="${dayArc}" fill="none" stroke="url(#dayGrad)" stroke-width="6" stroke-linecap="round" opacity="0.85"/>`:''}
+
+          <!-- UVA arc -->
+          ${uvaArc?`<path d="${uvaArc}" fill="none" stroke="url(#uvaGrad)" stroke-width="3" stroke-linecap="round" opacity="0.7"/>`:''}
+
+          <!-- UVB arc -->
+          ${uvbArc?`<path d="${uvbArc}" fill="none" stroke="url(#uvbGrad)" stroke-width="3" stroke-linecap="round" opacity="0.9"/>`:''}
+
+          <!-- Hour ticks -->
+          ${hourTicks}
+          ${hourMarkers}
+
+          <!-- Sun current position -->
+          <circle cx="${sunPos.x}" cy="${sunPos.y}" r="9" fill="${isDay?'#fbbf24':'#475569'}" stroke="#000" stroke-width="2"/>
+          ${isDay?`<circle cx="${sunPos.x}" cy="${sunPos.y}" r="14" fill="none" stroke="#fbbf24" stroke-width="1" opacity="0.4"/>`:''}
+
+          <!-- Sunrise marker -->
+          <g transform="translate(${polarToXY(hourToAngle(times.sunrise),radius).x},${polarToXY(hourToAngle(times.sunrise),radius).y})">
+            <circle r="3" fill="#fb923c"/>
+          </g>
+          <!-- Sunset marker -->
+          <g transform="translate(${polarToXY(hourToAngle(times.sunset),radius).x},${polarToXY(hourToAngle(times.sunset),radius).y})">
+            <circle r="3" fill="#dc2626"/>
+          </g>
+          <!-- Noon marker -->
+          <g transform="translate(${polarToXY(hourToAngle(times.noon),radius).x},${polarToXY(hourToAngle(times.noon),radius).y})">
+            <circle r="2.5" fill="#fbbf24"/>
+          </g>
+        </svg>
+        <div class="sun-center-text">
+          <div class="sun-time-big">${fmtHour(currentHour)}</div>
+          <div class="sun-time-small"><span class="sun-live-dot"></span>${isDay?'DÍA':'NOCHE'}</div>
+          <div class="sun-uv-big" style="color:${uvColor}">UV ${uv.toFixed(1)}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:14px;font-size:10px;color:#666;margin-top:4px;flex-wrap:wrap">
+        <span><span style="display:inline-block;width:8px;height:3px;background:#f59e0b;vertical-align:middle;margin-right:4px"></span>DÍA</span>
+        <span><span style="display:inline-block;width:8px;height:3px;background:#a855f7;vertical-align:middle;margin-right:4px"></span>UVB</span>
+        <span><span style="display:inline-block;width:8px;height:3px;background:#3b82f6;vertical-align:middle;margin-right:4px"></span>UVA</span>
+      </div>
+
+      <div class="sun-times-list">
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label"><span class="sun-time-cell-icon">🌅</span>Amanecer</div>
+          <div class="sun-time-cell-value">${fmtHour(times.sunrise)}</div>
+        </div>
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label"><span class="sun-time-cell-icon">☀️</span>Cenit</div>
+          <div class="sun-time-cell-value">${fmtHour(times.noon)}</div>
+        </div>
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label"><span class="sun-time-cell-icon">🌇</span>Atardecer</div>
+          <div class="sun-time-cell-value">${fmtHour(times.sunset)}</div>
+        </div>
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label">UVB inicio</div>
+          <div class="sun-time-cell-value" style="color:#a855f7">${fmtHour(times.uvbStart)}</div>
+        </div>
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label">UVB fin</div>
+          <div class="sun-time-cell-value" style="color:#a855f7">${fmtHour(times.uvbEnd)}</div>
+        </div>
+        <div class="sun-time-cell">
+          <div class="sun-time-cell-label">Día total</div>
+          <div class="sun-time-cell-value">${(times.sunset-times.sunrise).toFixed(1)}h</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============= ESTADO =============
+function renderEstado(c){
+  c.innerHTML=`
+    <div class="section-title">Estado</div>
+    <div class="section-subtitle">Salud general y composición corporal</div>
+
+    <div class="quick-row">
+      <div class="quick-pill" onclick="scrollTo2('s-weight')">Peso</div>
+      <div class="quick-pill" onclick="scrollTo2('s-fast')">Ayunos</div>
+      <div class="quick-pill" onclick="scrollTo2('s-meas')">Medidas</div>
+      <div class="quick-pill" onclick="scrollTo2('s-allergy')">Alergia</div>
+      <div class="quick-pill" onclick="scrollTo2('s-vo2')">VO2 Max</div>
     </div>
 
-    <!-- NAVIGATION -->
-    <div class="nav-bottom">
-        <button class="nav-btn active" onclick="showTab('breathing')">🫁</button>
-        <button class="nav-btn inactive" onclick="showTab('fasting')">🕐</button>
-        <button class="nav-btn inactive" onclick="showTab('measurements')">📏</button>
-        <button class="nav-btn inactive" onclick="showTab('settings')">⚙️</button>
+    <div class="card" id="s-weight">
+      <div class="card-title">⚖️ Peso</div>
+      <div class="grid-2">
+        <div class="input-group"><label>Fecha</label><input type="date" id="weightDate" value="${today()}"></div>
+        <div class="input-group"><label>Peso (kg)</label><input type="number" id="weightVal" step="0.1" placeholder="Ej: 75.5"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addWeight()">Registrar</button>
+      ${store.weight.length?`
+        <div class="grid-3" style="margin-top:10px">
+          <div class="stat"><div class="stat-label">Actual</div><div class="stat-value">${store.weight[store.weight.length-1].value}<span class="stat-unit">kg</span></div></div>
+          <div class="stat"><div class="stat-label">Media mes</div><div class="stat-value">${avg(filterByRange(store.weight,'1m'),'value')}<span class="stat-unit">kg</span></div></div>
+          <div class="stat"><div class="stat-label">Mín/Máx</div><div class="stat-value" style="font-size:14px">${Math.min(...store.weight.map(w=>parseFloat(w.value)))}/${Math.max(...store.weight.map(w=>parseFloat(w.value)))}</div></div>
+        </div>
+      `:''}
     </div>
 
-    <script>
-        // Data
-        let breathingActive = false;
-        let musicEnabled = true;
-        let timeLeft = 300;
-        let fastingData = [];
-        let measurementData = [];
-        let audioContext = null;
+    ${store.weight.length?`
+      <div class="range-buttons">
+        ${['1m','2m','6m','1y','all'].map(r=>`<button class="range-btn ${currentRange===r?'active':''}" onclick="setRange('${r}')">${r==='all'?'Todo':r}</button>`).join('')}
+      </div>
+      <div class="chart-label">Evolución del peso</div>
+      <div class="chart-container"><canvas id="weightChart"></canvas></div>
+    `:''}
 
-        const glossary = {
-            'HRV': {
-                nombre: 'Variabilidad Frecuencia Cardíaca',
-                significado: 'Variación entre latidos del corazón en ms.',
-                obtencion: 'Mediante dispositivos wearables.',
-                importancia: 'Alto = mejor recuperación. Bajo = estrés.'
-            },
-            'Duración Ayuno': {
-                nombre: 'Duración Ayuno Intermitente',
-                significado: 'Horas entre última comida y primera del día siguiente.',
-                obtencion: 'Se registra manualmente.',
-                importancia: 'Ayunos 12-16h son comunes. 16h+ beneficios mayores.'
-            },
-            'Medidas': {
-                nombre: 'Medidas Corporales',
-                significado: 'Circunferencia en cm de cintura, pecho, muslo, bícep, cadera.',
-                obtencion: 'Con cinta métrica flexible.',
-                importancia: 'Más preciso que peso para composición corporal.'
-            }
-        };
+    <div class="card" id="s-fast">
+      <div class="card-title">🕐 Ayunos Intermitentes</div>
+      <div class="grid-3">
+        <div class="input-group"><label>Fecha</label><input type="date" id="fastDate" value="${today()}"></div>
+        <div class="input-group"><label>Última comida</label><input type="time" id="fastStart" value="20:00" oninput="updateFastDur()"></div>
+        <div class="input-group"><label>Fin ayuno</label><input type="time" id="fastEnd" value="12:00" oninput="updateFastDur()"></div>
+      </div>
+      <div style="text-align:center;padding:10px;background:rgba(134,239,172,0.05);border-radius:10px;margin-bottom:10px">
+        <div style="font-family:'Manrope';font-size:32px;font-weight:300;color:#86efac;letter-spacing:-1px" id="fastDurDisplay">16.0h</div>
+        <div id="fastBadgeWrap"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addFast()">Registrar ayuno</button>
+      ${store.fasting.length?`
+        <div class="grid-3" style="margin-top:10px">
+          <div class="stat"><div class="stat-label">Media mes</div><div class="stat-value">${avg(filterByRange(store.fasting,'1m'),'duration')}<span class="stat-unit">h</span></div></div>
+          <div class="stat"><div class="stat-label">Histórico</div><div class="stat-value">${avg(store.fasting,'duration')}<span class="stat-unit">h</span></div></div>
+          <div class="stat"><div class="stat-label">Máximo</div><div class="stat-value">${Math.max(...store.fasting.map(f=>parseFloat(f.duration))).toFixed(1)}<span class="stat-unit">h</span></div></div>
+        </div>
+      `:''}
+    </div>
 
-        // Initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            document.getElementById('fastDate').valueAsDate = new Date();
-            document.getElementById('measureDate').valueAsDate = new Date();
-            updateFastDuration();
-            renderGlossary();
-        });
+    ${store.fasting.length?`
+      <div class="card">
+        <div class="card-title">Histórico ayunos</div>
+        <div class="range-buttons">
+          ${['1m','2m','6m','all'].map(r=>`<button class="range-btn ${currentRange===r?'active':''}" onclick="setRange('${r}')">${r==='all'?'Todo':r}</button>`).join('')}
+        </div>
+        <div class="history">
+          ${filterByRange(store.fasting,currentRange).slice().reverse().map(f=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(f.date)}</div>
+                <div class="history-item-value">${f.start} → ${f.end} · <strong style="color:#86efac">${f.duration}h</strong>${parseFloat(f.duration)>12?'<span class="badge badge-success">+12h</span>':''}</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('fasting',${f.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
 
-        // Tab Navigation
-        function showTab(tab) {
-            document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            
-            if (tab === 'breathing') document.getElementById('breathing-section').classList.remove('hidden');
-            if (tab === 'fasting') document.getElementById('fasting-section').classList.remove('hidden');
-            if (tab === 'measurements') document.getElementById('measurements-section').classList.remove('hidden');
-            if (tab === 'settings') document.getElementById('settings-section').classList.remove('hidden');
-            
-            event.target.classList.add('active');
-        }
+    <div class="card" id="s-meas">
+      <div class="card-title">📏 Medidas Corporales</div>
+      <div class="input-group"><label>Fecha</label><input type="date" id="mDate" value="${today()}"></div>
+      <div class="input-group">
+        <label>Cintura<div class="measurement-info">A la altura del ombligo, exhalando suave</div></label>
+        <input type="number" id="mWaist" step="0.1" placeholder="cm">
+      </div>
+      <div class="input-group">
+        <label>Pecho<div class="measurement-info">A la altura del pezón, brazos relajados</div></label>
+        <input type="number" id="mChest" step="0.1" placeholder="cm">
+      </div>
+      <div class="input-group">
+        <label>Muslo<div class="measurement-info">10cm por encima de la rodilla</div></label>
+        <input type="number" id="mThigh" step="0.1" placeholder="cm">
+      </div>
+      <div class="input-group">
+        <label>Bícep<div class="measurement-info">Punto más grueso, brazo relajado</div></label>
+        <input type="number" id="mBicep" step="0.1" placeholder="cm">
+      </div>
+      <div class="input-group">
+        <label>Cadera<div class="measurement-info">Parte más ancha de glúteos</div></label>
+        <input type="number" id="mHip" step="0.1" placeholder="cm">
+      </div>
+      <button class="btn btn-primary" onclick="addMeasure()">Registrar medidas</button>
+    </div>
 
-        // Breathing
-        function toggleBreathing() {
-            breathingActive = !breathingActive;
-            if (breathingActive) {
-                timeLeft = parseInt(document.getElementById('totalTime').value);
-                playMusic();
-                startTimer();
-                document.getElementById('breathBtn').textContent = '⏸️ Pausar';
-            } else {
-                document.getElementById('breathBtn').textContent = '▶️ Comenzar';
-            }
-        }
+    ${store.measurements.length?`
+      <div class="card">
+        <div class="card-title">Histórico medidas</div>
+        <div class="history">
+          ${store.measurements.slice().reverse().map(m=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(m.date)}</div>
+                <div style="font-size:11px;color:#bbb">
+                  ${m.waist?`C ${m.waist} `:''}${m.chest?`P ${m.chest} `:''}${m.thigh?`M ${m.thigh} `:''}${m.bicep?`B ${m.bicep} `:''}${m.hip?`Ca ${m.hip}`:''}
+                </div>
+              </div>
+              <button class="delete-btn" onclick="delItem('measurements',${m.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
 
-        function startTimer() {
-            if (!breathingActive) return;
-            const interval = setInterval(() => {
-                if (!breathingActive) {
-                    clearInterval(interval);
-                    return;
-                }
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    breathingActive = false;
-                    clearInterval(interval);
-                    document.getElementById('breathBtn').textContent = '▶️ Comenzar';
-                    playSound(800, 500);
-                }
-            }, 1000);
-        }
+    <div class="card" id="s-allergy">
+      <div class="card-title">🤧 Síntomas de Alergia</div>
+      <div class="grid-2">
+        <div class="input-group"><label>Fecha</label><input type="date" id="allergyDate" value="${today()}"></div>
+        <div class="input-group"><label>Intensidad 1-10</label><input type="number" id="allergyLevel" min="1" max="10" placeholder="1-10"></div>
+      </div>
+      <div class="input-group"><label>Notas</label><textarea id="allergyNotes" placeholder="Síntomas, causas..."></textarea></div>
+      <button class="btn btn-primary" onclick="addAllergy()">Registrar</button>
+      ${store.allergy.length?`<div style="margin-top:10px;font-size:12px;color:#666">Días con síntomas: <strong style="color:#86efac">${store.allergy.length}</strong></div>`:''}
+    </div>
 
-        function updateTimerDisplay() {
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            document.getElementById('timerDisplay').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-            
-            const inhale = parseInt(document.getElementById('inhaleTime').value);
-            const exhale = parseInt(document.getElementById('exhaleTime').value);
-            const cycle = (timeLeft % (inhale + exhale));
-            
-            if (cycle <= inhale) {
-                document.getElementById('timerPhase').textContent = `Inhala (${inhale - cycle}s)`;
-                if (musicEnabled) playSound(432, 100);
-            } else {
-                document.getElementById('timerPhase').textContent = `Exhala (${inhale + exhale - cycle}s)`;
-                if (musicEnabled) playSound(380, 100);
-            }
-        }
+    ${store.allergy.length?`
+      <div class="card">
+        <div class="card-title">Histórico alergia</div>
+        <div class="history">
+          ${store.allergy.slice().reverse().map(a=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(a.date)} · Intensidad ${a.level}/10</div>
+                ${a.notes?`<div style="font-size:11px;color:#777;margin-top:2px">${a.notes}</div>`:''}
+              </div>
+              <button class="delete-btn" onclick="delItem('allergy',${a.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
 
-        function toggleMusic() {
-            musicEnabled = !musicEnabled;
-            const btn = document.getElementById('musicBtn');
-            btn.textContent = musicEnabled ? '🎵 Activado' : '🔇 Desactivado';
-            btn.style.background = musicEnabled ? '#15803d' : '#6b7280';
-        }
+    <div class="card" id="s-vo2">
+      <div class="card-title">🫁 VO2 Max</div>
+      <div class="input-group"><label>Valor actual (ml/kg/min)</label><input type="number" id="vo2Val" step="0.1" placeholder="Ej: 45.2" value="${store.vo2max}"></div>
+      <button class="btn btn-primary" onclick="saveVO2()">Guardar</button>
+      ${store.vo2max?`<div style="margin-top:10px;text-align:center;font-family:'Manrope';font-size:24px;font-weight:300;color:#86efac">${store.vo2max} <span style="font-size:11px;color:#555">ml/kg/min</span></div>`:''}
+    </div>
+  `;
 
-        // Audio
-        function playMusic() {
-            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const ctx = audioContext;
-            try {
-                const now = ctx.currentTime;
-                const duration = 2;
-                [174, 285, 396].forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.frequency.value = freq;
-                    osc.type = 'sine';
-                    gain.gain.setValueAtTime(0.1 / (idx + 1), now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
-                    osc.start(now);
-                    osc.stop(now + duration);
-                });
-            } catch (e) {}
-        }
+  setTimeout(()=>{
+    updateFastDur();
+    if(store.weight.length){
+      const filt=filterByRange(store.weight,currentRange);
+      makeChart('weightChart',filt.map(w=>fmtDate(w.date)),filt.map(w=>parseFloat(w.value)),'Peso (kg)');
+    }
+  },50);
+}
 
-        function playSound(frequency, duration) {
-            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const ctx = audioContext;
-            try {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.frequency.value = frequency;
-                osc.type = 'sine';
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + duration / 1000);
-            } catch (e) {}
-        }
+function scrollTo2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 
-        // Fasting
-        function updateFastDuration() {
-            const [lastH, lastM] = document.getElementById('lastMeal').value.split(':').map(Number);
-            const [endH, endM] = document.getElementById('fastEnd').value.split(':').map(Number);
-            let last = lastH * 60 + lastM;
-            let end = endH * 60 + endM;
-            if (end <= last) end += 24 * 60;
-            const duration = ((end - last) / 60).toFixed(1);
-            document.getElementById('fastDuration').textContent = duration + 'h';
-            
-            const badge = document.getElementById('fastBadge');
-            if (parseFloat(duration) > 12) {
-                badge.innerHTML = '<div class="badge">🎯 +12h</div>';
-            } else {
-                badge.innerHTML = '';
-            }
-        }
+function addWeight(){const date=document.getElementById('weightDate').value;const value=document.getElementById('weightVal').value;if(!date||!value)return alert('Completa los campos');store.weight.push({id:Date.now(),date,value});save('weight',store.weight);render();}
 
-        function saveFast() {
-            const duration = document.getElementById('fastDuration').textContent.replace('h', '');
-            fastingData.push({
-                date: document.getElementById('fastDate').value,
-                lastMeal: document.getElementById('lastMeal').value,
-                fastEnd: document.getElementById('fastEnd').value,
-                duration: duration,
-                id: Date.now()
-            });
-            saveData();
-            renderFastHistory();
-            updateFastStats();
-            alert('✅ Ayuno registrado');
-        }
+function updateFastDur(){const start=document.getElementById('fastStart')?.value;const end=document.getElementById('fastEnd')?.value;if(!start||!end)return;const[sh,sm]=start.split(':').map(Number);const[eh,em]=end.split(':').map(Number);let s=sh*60+sm,e=eh*60+em;if(e<=s)e+=24*60;const dur=((e-s)/60).toFixed(1);const d=document.getElementById('fastDurDisplay');if(d){d.textContent=dur+'h';document.getElementById('fastBadgeWrap').innerHTML=parseFloat(dur)>12?`<div class="fast-badge">🎯 Ayuno prolongado +12h</div>`:'';}}
 
-        function renderFastHistory() {
-            const history = document.getElementById('fastHistory');
-            history.innerHTML = '';
-            [...fastingData].reverse().forEach(entry => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `${entry.date} → ${entry.duration}h ${parseFloat(entry.duration) > 12 ? '🎯' : ''}`;
-                history.appendChild(div);
-            });
-        }
+function addFast(){const date=document.getElementById('fastDate').value;const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const[sh,sm]=start.split(':').map(Number);const[eh,em]=end.split(':').map(Number);let s=sh*60+sm,e=eh*60+em;if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date,start,end,duration});save('fasting',store.fasting);render();}
 
-        function updateFastStats() {
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-            const lastMonth = fastingData.filter(d => new Date(d.date) >= oneMonthAgo);
-            const lastMonthAvg = lastMonth.length > 0 ? (lastMonth.reduce((sum, d) => sum + parseFloat(d.duration), 0) / lastMonth.length).toFixed(1) : '0';
-            const allAvg = fastingData.length > 0 ? (fastingData.reduce((sum, d) => sum + parseFloat(d.duration), 0) / fastingData.length).toFixed(1) : '0';
-            
-            document.getElementById('statLastMonth').textContent = lastMonthAvg + 'h';
-            document.getElementById('statAllTime').textContent = allAvg + 'h';
-        }
+function addMeasure(){const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value};if(!m.waist&&!m.chest&&!m.thigh&&!m.bicep&&!m.hip)return alert('Introduce al menos una medida');store.measurements.push(m);save('measurements',store.measurements);render();}
 
-        // Measurements
-        function saveMeasure() {
-            const waist = document.getElementById('waist').value;
-            const chest = document.getElementById('chest').value;
-            const thigh = document.getElementById('thigh').value;
-            const bicep = document.getElementById('bicep').value;
-            
-            if (!waist && !chest && !thigh && !bicep) {
-                alert('⚠️ Ingresa al menos una medida');
-                return;
-            }
-            
-            measurementData.push({
-                date: document.getElementById('measureDate').value,
-                waist: waist || '-',
-                chest: chest || '-',
-                thigh: thigh || '-',
-                bicep: bicep || '-',
-                id: Date.now()
-            });
-            
-            saveData();
-            renderMeasureHistory();
-            document.getElementById('waist').value = '';
-            document.getElementById('chest').value = '';
-            document.getElementById('thigh').value = '';
-            document.getElementById('bicep').value = '';
-            alert('✅ Medidas registradas');
-        }
+function addAllergy(){const date=document.getElementById('allergyDate').value;const level=document.getElementById('allergyLevel').value;const notes=document.getElementById('allergyNotes').value;if(!date||!level)return alert('Completa fecha e intensidad');store.allergy.push({id:Date.now(),date,level,notes});save('allergy',store.allergy);render();}
 
-        function renderMeasureHistory() {
-            const history = document.getElementById('measureHistory');
-            history.innerHTML = '';
-            [...measurementData].reverse().forEach(entry => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `${entry.date}<br>C:${entry.waist} P:${entry.chest} M:${entry.thigh} B:${entry.bicep}`;
-                history.appendChild(div);
-            });
-        }
+function saveVO2(){const val=document.getElementById('vo2Val').value;if(!val)return alert('Introduce un valor');store.vo2max=val;localStorage.setItem('h_vo2max',val);render();}
 
-        // Glossary
-        function renderGlossary() {
-            const content = document.getElementById('glossaryContent');
-            content.innerHTML = '';
-            for (const [key, term] of Object.entries(glossary)) {
-                const div = document.createElement('div');
-                div.className = 'glossary-item';
-                div.innerHTML = `
-                    <div class="glossary-title">${term.nombre}</div>
-                    <div class="glossary-text"><strong>Significado:</strong> ${term.significado}</div>
-                    <div class="glossary-text"><strong>Obtención:</strong> ${term.obtencion}</div>
-                    <div class="glossary-text"><strong>Importancia:</strong> ${term.importancia}</div>
-                `;
-                content.appendChild(div);
-            }
-        }
+// ============= SUEÑO =============
+function renderSueno(c){
+  c.innerHTML=`
+    <div class="section-title">Sueño</div>
+    <div class="section-subtitle">Recuperación nocturna y descanso</div>
 
-        function openGlossary() {
-            document.getElementById('glossaryModal').classList.add('active');
-        }
+    <div class="card">
+      <div class="card-title">Nuevo registro</div>
+      <div class="input-group"><label>Fecha</label><input type="date" id="sleepDate" value="${today()}"></div>
+      <div class="grid-2">
+        <div class="input-group"><label>HRV (ms)</label><input type="number" id="sleepHRV" placeholder="Ej: 55"></div>
+        <div class="input-group"><label>Horas</label><input type="number" step="0.1" id="sleepHours" placeholder="Ej: 7.5"></div>
+        <div class="input-group"><label>Puntuación 0-100</label><input type="number" id="sleepScore" min="0" max="100" placeholder="Ej: 85"></div>
+        <div class="input-group"><label>HR nocturno</label><input type="number" id="sleepHR" placeholder="Ej: 52"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addSleep()">Registrar</button>
+    </div>
 
-        function closeGlossary() {
-            document.getElementById('glossaryModal').classList.remove('active');
-        }
+    ${store.sleep.length?`
+      <div class="range-buttons">
+        ${['1m','2m','6m','1y','all'].map(r=>`<button class="range-btn ${currentRange===r?'active':''}" onclick="setRange('${r}')">${r==='all'?'Todo':r}</button>`).join('')}
+      </div>
 
-        function openSettings() {
-            showTab('settings');
-        }
+      <div class="grid-2">
+        <div class="stat"><div class="stat-label">HRV media mes</div><div class="stat-value">${avg(filterByRange(store.sleep,'1m'),'hrv')}<span class="stat-unit">ms</span></div></div>
+        <div class="stat"><div class="stat-label">HRV histórico</div><div class="stat-value">${avg(store.sleep,'hrv')}<span class="stat-unit">ms</span></div></div>
+        <div class="stat"><div class="stat-label">Horas media mes</div><div class="stat-value">${avg(filterByRange(store.sleep,'1m'),'hours')}<span class="stat-unit">h</span></div></div>
+        <div class="stat"><div class="stat-label">Horas histórico</div><div class="stat-value">${avg(store.sleep,'hours')}<span class="stat-unit">h</span></div></div>
+        <div class="stat"><div class="stat-label">Score media mes</div><div class="stat-value">${avg(filterByRange(store.sleep,'1m'),'score')}</div></div>
+        <div class="stat"><div class="stat-label">Score histórico</div><div class="stat-value">${avg(store.sleep,'score')}</div></div>
+        <div class="stat"><div class="stat-label">HR media mes</div><div class="stat-value">${avg(filterByRange(store.sleep,'1m'),'hr')}<span class="stat-unit">bpm</span></div></div>
+        <div class="stat"><div class="stat-label">HR histórico</div><div class="stat-value">${avg(store.sleep,'hr')}<span class="stat-unit">bpm</span></div></div>
+      </div>
 
-        // Data Management
-        function saveData() {
-            const data = { fasting: fastingData, measurements: measurementData };
-            localStorage.setItem('healthData', JSON.stringify(data));
-        }
+      <div class="chart-label" style="margin-top:14px">HRV (ms)</div>
+      <div class="chart-container"><canvas id="sleepHRVChart"></canvas></div>
+      <div class="chart-label">Horas de sueño</div>
+      <div class="chart-container"><canvas id="sleepHoursChart"></canvas></div>
+      <div class="chart-label">Puntuación de sueño</div>
+      <div class="chart-container"><canvas id="sleepScoreChart"></canvas></div>
+      <div class="chart-label">HR nocturno</div>
+      <div class="chart-container"><canvas id="sleepHRChart"></canvas></div>
 
-        function loadData() {
-            const saved = localStorage.getItem('healthData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                fastingData = data.fasting || [];
-                measurementData = data.measurements || [];
-                renderFastHistory();
-                renderMeasureHistory();
-                updateFastStats();
-            }
-        }
+      <div class="card">
+        <div class="card-title">Registros recientes</div>
+        <div class="history">
+          ${store.sleep.slice().reverse().slice(0,20).map(s=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(s.date)}</div>
+                <div style="font-size:11px;color:#bbb">HRV ${s.hrv} · ${s.hours}h · ${s.score} · ${s.hr}bpm</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('sleep',${s.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:'<div class="empty-state">Aún no hay datos de sueño.</div>'}
+  `;
+  setTimeout(()=>{
+    if(store.sleep.length){
+      const filt=filterByRange(store.sleep,currentRange);
+      const labels=filt.map(s=>fmtDate(s.date));
+      makeChart('sleepHRVChart',labels,filt.map(s=>parseFloat(s.hrv)),'HRV','#86efac');
+      makeChart('sleepHoursChart',labels,filt.map(s=>parseFloat(s.hours)),'Horas','#60a5fa');
+      makeChart('sleepScoreChart',labels,filt.map(s=>parseFloat(s.score)),'Score','#c084fc');
+      makeChart('sleepHRChart',labels,filt.map(s=>parseFloat(s.hr)),'HR','#f87171');
+    }
+  },50);
+}
 
-        function exportData() {
-            const data = { fasting: fastingData, measurements: measurementData };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `health-data-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+function addSleep(){const s={id:Date.now(),date:document.getElementById('sleepDate').value,hrv:document.getElementById('sleepHRV').value,hours:document.getElementById('sleepHours').value,score:document.getElementById('sleepScore').value,hr:document.getElementById('sleepHR').value};if(!s.date)return alert('Selecciona fecha');store.sleep.push(s);save('sleep',store.sleep);render();}
 
-        function importData() {
-            document.getElementById('importFile').click();
-        }
+// ============= ACTIVIDAD =============
+function renderActividad(c){
+  c.innerHTML=`
+    <div class="section-title">Actividad Física</div>
+    <div class="section-subtitle">Entrenamientos y rendimiento</div>
 
-        function loadImport(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imported = JSON.parse(e.target.result);
-                    fastingData = imported.fasting || [];
-                    measurementData = imported.measurements || [];
-                    saveData();
-                    renderFastHistory();
-                    renderMeasureHistory();
-                    updateFastStats();
-                    alert('✅ Datos importados');
-                };
-                reader.readAsText(file);
-            }
-        }
+    <div class="card">
+      <div class="type-tabs">
+        <button class="type-tab ${actType==='crossfit'?'active':''}" onclick="setActType('crossfit')">CrossFit</button>
+        <button class="type-tab ${actType==='carrera'?'active':''}" onclick="setActType('carrera')">Carrera</button>
+        <button class="type-tab ${actType==='piscina'?'active':''}" onclick="setActType('piscina')">Piscina</button>
+      </div>
 
-        // Event listeners
-        document.getElementById('lastMeal').addEventListener('change', updateFastDuration);
-        document.getElementById('fastEnd').addEventListener('change', updateFastDuration);
-        document.getElementById('totalTime').addEventListener('change', () => {
-            timeLeft = parseInt(document.getElementById('totalTime').value);
-            updateTimerDisplay();
-        });
-    </script>
+      <div class="input-group"><label>Fecha</label><input type="date" id="actDate" value="${today()}"></div>
+
+      ${actType==='crossfit'?`
+        <div class="input-group"><label>Tipo de entreno</label><select id="actSubtype"><option value="WOD">WOD</option><option value="Strength">Strength</option><option value="EMOM">EMOM</option><option value="AMRAP">AMRAP</option><option value="For Time">For Time</option><option value="Skill">Skill</option><option value="Olympic">Olímpico</option><option value="Gymnastics">Gymnastics</option><option value="Hero WOD">Hero WOD</option><option value="Benchmark">Benchmark</option></select></div>
+        <div class="grid-2">
+          <div class="input-group"><label>Duración (min)</label><input type="number" id="actDuration" placeholder="45"></div>
+          <div class="input-group"><label>Tiempo/Reps</label><input type="text" id="actResult" placeholder="8:42 o 150 reps"></div>
+          <div class="input-group"><label>FC media</label><input type="number" id="actHRavg" placeholder="155"></div>
+          <div class="input-group"><label>FC máxima</label><input type="number" id="actHRmax" placeholder="185"></div>
+        </div>
+      `:actType==='carrera'?`
+        <div class="grid-2">
+          <div class="input-group"><label>Distancia (km)</label><input type="number" step="0.01" id="actDistance" placeholder="10"></div>
+          <div class="input-group"><label>Duración (min)</label><input type="number" id="actDuration" placeholder="50"></div>
+          <div class="input-group"><label>Ritmo min/km</label><input type="text" id="actResult" placeholder="5:00"></div>
+          <div class="input-group"><label>FC media</label><input type="number" id="actHRavg" placeholder="145"></div>
+        </div>
+      `:`
+        <div class="grid-2">
+          <div class="input-group"><label>Distancia (m)</label><input type="number" id="actDistance" placeholder="2000"></div>
+          <div class="input-group"><label>Duración (min)</label><input type="number" id="actDuration" placeholder="40"></div>
+          <div class="input-group"><label>Estilo</label><select id="actResult"><option>Crol</option><option>Espalda</option><option>Braza</option><option>Mariposa</option><option>Combinado</option></select></div>
+          <div class="input-group"><label>Series</label><input type="text" id="actHRavg" placeholder="10x100m"></div>
+        </div>
+      `}
+
+      <div class="input-group"><label>Notas</label><textarea id="actNotes" placeholder="Cómo te sentiste..."></textarea></div>
+      <button class="btn btn-primary" onclick="addActivity()">Registrar</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏆 WODs Benchmark</div>
+      ${store.wods.map(w=>`<div class="wod-card"><div class="wod-name">${w.name}</div><div class="wod-desc">${w.desc}</div></div>`).join('')}
+      <div class="divider"></div>
+      <div class="input-group"><label>Añadir WOD</label><input type="text" id="wodName" placeholder="Nombre"></div>
+      <div class="input-group"><textarea id="wodDesc" placeholder="Descripción"></textarea></div>
+      <button class="btn btn-secondary btn-sm" onclick="addWod()" style="width:100%">+ Añadir WOD</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🥇 Mejores Marcas</div>
+      <div class="input-group"><label>Ejercicio</label><input type="text" id="recName" placeholder="Back Squat, Fran, 5K..."></div>
+      <div class="grid-2">
+        <div class="input-group"><label>Valor</label><input type="text" id="recValue" placeholder="140kg o 4:32"></div>
+        <div class="input-group"><label>Fecha</label><input type="date" id="recDate" value="${today()}"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addRecord()">Guardar</button>
+      ${store.records.length?`
+        <div class="history" style="margin-top:10px">
+          ${store.records.slice().reverse().map(r=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div style="font-size:12px"><strong>${r.name}:</strong> <span style="color:#86efac">${r.value}</span></div>
+                <div class="history-item-date">${fmtDate(r.date)}</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('records',${r.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `:''}
+    </div>
+
+    ${store.activity.length?`
+      <div class="card">
+        <div class="card-title">Histórico</div>
+        <div class="history">
+          ${store.activity.slice().reverse().slice(0,30).map(a=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(a.date)} · ${a.type}${a.subtype?' · '+a.subtype:''}</div>
+                <div style="font-size:11px;color:#bbb">${a.duration?a.duration+'min':''}${a.result?' · '+a.result:''}${a.distance?' · '+a.distance:''}</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('activity',${a.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
+  `;
+}
+
+function setActType(t){actType=t;render();}
+function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:document.getElementById('actSubtype')?.value||'',duration:document.getElementById('actDuration')?.value||'',result:document.getElementById('actResult')?.value||'',distance:document.getElementById('actDistance')?.value||'',hrAvg:document.getElementById('actHRavg')?.value||'',hrMax:document.getElementById('actHRmax')?.value||'',notes:document.getElementById('actNotes')?.value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);render();}
+function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name,desc});save('wods',store.wods);render();}
+function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name,value,date});save('records',store.records);render();}
+
+// ============= MEDITACIÓN =============
+let medTimer=null;
+let medTimeLeft=0;
+let medConfig={total:300,inhale:4,exhale:6};
+let medCycleTime=0;
+
+function renderMeditacion(c){
+  c.innerHTML=`
+    <div class="section-title">Meditación</div>
+    <div class="section-subtitle">Respiración guiada</div>
+
+    <div class="card">
+      <div class="timer-display" id="medTimer">${fmtTime(medConfig.total)}</div>
+      <div class="timer-phase" id="medPhase">Listo para comenzar</div>
+
+      <div class="grid-3">
+        <div class="input-group"><label>Total (s)</label><input type="number" id="medTotal" value="${medConfig.total}" onchange="updateMedConfig()"></div>
+        <div class="input-group"><label>Inhalar (s)</label><input type="number" id="medInhale" value="${medConfig.inhale}" onchange="updateMedConfig()"></div>
+        <div class="input-group"><label>Exhalar (s)</label><input type="number" id="medExhale" value="${medConfig.exhale}" onchange="updateMedConfig()"></div>
+      </div>
+
+      <div class="toggle-row" style="padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:9px;margin-bottom:10px">
+        <span class="toggle-label">🎵 Música relajante</span>
+        <div class="toggle ${store.settings.music?'active':''}" onclick="toggleMusic(this)"><div class="toggle-handle"></div></div>
+      </div>
+
+      <button class="btn btn-primary" id="medBtn" onclick="toggleMed()">Comenzar</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💾 Programas guardados</div>
+      <div class="input-group"><label>Nombre</label><input type="text" id="progName" placeholder="Mañana relajante"></div>
+      <button class="btn btn-secondary btn-sm" style="width:100%" onclick="saveProgram()">Guardar configuración</button>
+      ${store.programs.length?`
+        <div style="margin-top:10px">
+          ${store.programs.map(p=>`
+            <div class="history-item">
+              <div class="history-item-content" onclick="loadProgram(${p.id})" style="cursor:pointer">
+                <div style="font-size:13px;font-weight:500">${p.name}</div>
+                <div class="history-item-date">${p.total}s · ${p.inhale}/${p.exhale}</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('programs',${p.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `:''}
+    </div>
+
+    ${store.meditation.length?`
+      <div class="card">
+        <div class="card-title">Sesiones recientes</div>
+        <div class="history">
+          ${store.meditation.slice().reverse().slice(0,15).map(m=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(m.date)}</div>
+                <div style="font-size:11px">${m.duration}s · Inhalar ${m.inhale}s / Exhalar ${m.exhale}s</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('meditation',${m.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `:''}
+  `;
+}
+
+function fmtTime(s){const m=Math.floor(s/60);const sec=s%60;return `${m}:${sec.toString().padStart(2,'0')}`;}
+function updateMedConfig(){medConfig.total=parseInt(document.getElementById('medTotal').value)||300;medConfig.inhale=parseInt(document.getElementById('medInhale').value)||4;medConfig.exhale=parseInt(document.getElementById('medExhale').value)||6;document.getElementById('medTimer').textContent=fmtTime(medConfig.total);}
+
+function toggleMed(){
+  if(medTimer){clearInterval(medTimer);medTimer=null;stopBgMusic();document.getElementById('medBtn').textContent='Comenzar';document.getElementById('medPhase').textContent='Pausado';}
+  else{medTimeLeft=medConfig.total;medCycleTime=0;if(store.settings.music)startBgMusic();document.getElementById('medBtn').textContent='Pausar';playBowl();
+    medTimer=setInterval(()=>{medTimeLeft--;medCycleTime++;const cycle=medConfig.inhale+medConfig.exhale;const inCycle=medCycleTime%cycle;const phaseEl=document.getElementById('medPhase');
+      if(inCycle===1){phaseEl.textContent=`Inhala (${medConfig.inhale}s)`;phaseEl.classList.add('active');playTone(440,200,0.1);}
+      else if(inCycle===medConfig.inhale+1){phaseEl.textContent=`Exhala (${medConfig.exhale}s)`;playTone(330,200,0.1);}
+      document.getElementById('medTimer').textContent=fmtTime(medTimeLeft);
+      if(medTimeLeft<=0){clearInterval(medTimer);medTimer=null;stopBgMusic();playBowl();document.getElementById('medBtn').textContent='Comenzar';document.getElementById('medPhase').textContent='✨ Sesión completa';store.meditation.push({id:Date.now(),date:today(),duration:medConfig.total,inhale:medConfig.inhale,exhale:medConfig.exhale});save('meditation',store.meditation);}
+    },1000);}
+}
+
+function toggleMusic(el){store.settings.music=!store.settings.music;el.classList.toggle('active');saveSettings();if(store.settings.music&&medTimer)startBgMusic();else stopBgMusic();}
+function saveProgram(){const name=document.getElementById('progName').value;if(!name)return alert('Pon nombre');store.programs.push({id:Date.now(),name,...medConfig});save('programs',store.programs);render();}
+function loadProgram(id){const p=store.programs.find(x=>x.id===id);if(!p)return;medConfig={total:p.total,inhale:p.inhale,exhale:p.exhale};render();}
+
+// ============= SOL =============
+let sunTimerInterval=null;
+let sunTimeStart=null;
+let sunSliderHour=new Date().getHours()+new Date().getMinutes()/60;
+let sunLive=true;
+
+function renderSol(c){
+  const lat=store.settings.lat;
+  const lng=store.settings.lng;
+  const times=calcSunTimes(lat,lng);
+  const currentHour=sunLive?(new Date().getHours()+new Date().getMinutes()/60):sunSliderHour;
+  const uv=uvIndex(currentHour,times);
+  const isDay=currentHour>=times.sunrise&&currentHour<=times.sunset;
+
+  c.innerHTML=`
+    <div class="section-title">Sol</div>
+    <div class="section-subtitle">Exposición solar y vitamina D</div>
+
+    ${renderSunDashboard(times,currentHour,uv,isDay)}
+
+    <div class="card">
+      <div class="card-title">🎚️ Explorar hora</div>
+      <div style="text-align:center;font-family:'Manrope';font-size:22px;font-weight:300;color:#86efac;margin-bottom:8px">${fmtHour(currentHour)}</div>
+      <input type="range" min="0" max="24" step="0.25" value="${currentHour}" id="sunSlider" oninput="updateSunSlider(this.value)">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:4px">
+        <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:10px" onclick="toggleSunLive()">${sunLive?'🎚️ Modo manual':'⚡ Volver a EN VIVO'}</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Ubicación</div>
+      <div class="toggle-row" style="padding:0 0 8px">
+        <span class="toggle-label">Geolocalización automática</span>
+        <div class="toggle ${store.settings.autoLocation?'active':''}" onclick="toggleAutoLoc(this)"><div class="toggle-handle"></div></div>
+      </div>
+      ${!store.settings.autoLocation?`
+        <div class="grid-2">
+          <div class="input-group"><label>Latitud</label><input type="number" step="0.0001" id="manLat" value="${store.settings.lat}" onchange="updateManLoc()"></div>
+          <div class="input-group"><label>Longitud</label><input type="number" step="0.0001" id="manLng" value="${store.settings.lng}" onchange="updateManLoc()"></div>
+        </div>
+      `:''}
+      <div style="font-size:11px;color:#555;text-align:center;margin-top:6px">📍 ${lat.toFixed(4)}°, ${lng.toFixed(4)}°</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🧬 Ventanas de Leptina</div>
+      <p style="font-size:11px;color:#666;margin-bottom:10px">La leptina (saciedad) sigue al sol. Comer dentro de la ventana óptima mejora regulación hormonal.</p>
+      <div class="data-row"><span class="data-label">📈 Pico leptina (comida)</span><span class="data-value" style="color:#86efac">${fmtHour(times.noon)}</span></div>
+      <div class="data-row"><span class="data-label">🛑 Última comida ideal</span><span class="data-value" style="color:#fb923c">${fmtHour(times.noon+4)}</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏱️ Cronómetro de Sol</div>
+      <div class="timer-display" id="sunTimerDisplay" style="font-size:36px">00:00:00</div>
+      <button class="btn btn-primary" onclick="toggleSunTimer()">${sunTimerInterval?'Detener y guardar':'Iniciar exposición'}</button>
+      ${store.sun.length?`
+        <div class="divider"></div>
+        <div class="card-title">Registros</div>
+        <div class="history">
+          ${store.sun.slice().reverse().slice(0,10).map(s=>`
+            <div class="history-item">
+              <div class="history-item-content">
+                <div class="history-item-date">${fmtDate(s.date)}</div>
+                <div style="font-size:12px">${s.duration} · UV ${s.uv}</div>
+              </div>
+              <button class="delete-btn" onclick="delItem('sun',${s.id})">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `:''}
+    </div>
+  `;
+
+  if(sunLive){setTimeout(()=>{if(currentTab==='sol')render();},60000);}
+}
+
+function toggleAutoLoc(el){store.settings.autoLocation=!store.settings.autoLocation;el.classList.toggle('active');saveSettings();if(store.settings.autoLocation&&navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{store.settings.lat=pos.coords.latitude;store.settings.lng=pos.coords.longitude;saveSettings();render();});}else render();}
+function updateManLoc(){store.settings.lat=parseFloat(document.getElementById('manLat').value);store.settings.lng=parseFloat(document.getElementById('manLng').value);saveSettings();render();}
+function updateSunSlider(val){sunSliderHour=parseFloat(val);sunLive=false;render();}
+function toggleSunLive(){sunLive=!sunLive;if(sunLive)sunSliderHour=new Date().getHours()+new Date().getMinutes()/60;render();}
+function toggleSunTimer(){
+  if(sunTimerInterval){const duration=Math.floor((Date.now()-sunTimeStart)/1000);const h=Math.floor(duration/3600);const m=Math.floor((duration%3600)/60);const s=duration%60;const times=calcSunTimes(store.settings.lat,store.settings.lng);const uv=uvIndex(new Date().getHours()+new Date().getMinutes()/60,times);store.sun.push({id:Date.now(),date:today(),duration:`${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`,uv:uv.toFixed(1)});save('sun',store.sun);clearInterval(sunTimerInterval);sunTimerInterval=null;render();}
+  else{sunTimeStart=Date.now();sunTimerInterval=setInterval(()=>{const dur=Math.floor((Date.now()-sunTimeStart)/1000);const h=Math.floor(dur/3600);const m=Math.floor((dur%3600)/60);const s=dur%60;const el=document.getElementById('sunTimerDisplay');if(el)el.textContent=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;},1000);render();}
+}
+
+// ============= AJUSTES =============
+function renderAjustes(c){
+  c.innerHTML=`
+    <div class="section-title">Ajustes</div>
+    <div class="section-subtitle">Configuración y datos</div>
+
+    <div class="card">
+      <div class="card-title">💾 Datos</div>
+      <button class="btn btn-primary" onclick="exportData()" style="margin-bottom:8px">📤 Exportar datos</button>
+      <label class="btn btn-secondary" style="display:block;text-align:center;cursor:pointer;margin-bottom:8px">📥 Importar datos<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+      <button class="btn btn-danger" onclick="deleteAll()">🗑️ Eliminar todos los datos</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Ubicación</div>
+      <div class="toggle-row" style="padding:0 0 8px">
+        <span class="toggle-label">Geolocalización automática</span>
+        <div class="toggle ${store.settings.autoLocation?'active':''}" onclick="toggleAutoLoc(this)"><div class="toggle-handle"></div></div>
+      </div>
+      ${!store.settings.autoLocation?`
+        <div class="grid-2">
+          <div class="input-group"><label>Latitud</label><input type="number" step="0.0001" value="${store.settings.lat}" id="setLat" onchange="store.settings.lat=parseFloat(this.value);saveSettings()"></div>
+          <div class="input-group"><label>Longitud</label><input type="number" step="0.0001" value="${store.settings.lng}" id="setLng" onchange="store.settings.lng=parseFloat(this.value);saveSettings()"></div>
+        </div>
+      `:''}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Resumen</div>
+      <div class="data-row"><span class="data-label">Sueño</span><span class="data-value">${store.sleep.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Actividad</span><span class="data-value">${store.activity.length} entrenos</span></div>
+      <div class="data-row"><span class="data-label">Peso</span><span class="data-value">${store.weight.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Ayunos</span><span class="data-value">${store.fasting.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Medidas</span><span class="data-value">${store.measurements.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Alergia</span><span class="data-value">${store.allergy.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Meditación</span><span class="data-value">${store.meditation.length} sesiones</span></div>
+      <div class="data-row"><span class="data-label">Sol</span><span class="data-value">${store.sun.length} registros</span></div>
+      <div class="data-row"><span class="data-label">Marcas</span><span class="data-value">${store.records.length} records</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ℹ️ Sobre HEALTH</div>
+      <div style="font-size:12px;color:#888;line-height:1.6">Aplicación integral de salud personal. Todos los datos se guardan localmente en tu dispositivo. 100% privado, sin servidores, funciona offline.<br><br><strong style="color:#86efac">Versión 4.0</strong></div>
+    </div>
+  `;
+}
+
+function exportData(){const data={sleep:store.sleep,activity:store.activity,weight:store.weight,allergy:store.allergy,vo2max:store.vo2max,fasting:store.fasting,measurements:store.measurements,meditation:store.meditation,programs:store.programs,sun:store.sun,wods:store.wods,records:store.records,settings:store.settings,widgets:store.widgets};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`health-backup-${today()}.json`;a.click();URL.revokeObjectURL(url);}
+
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const d=JSON.parse(ev.target.result);Object.keys(d).forEach(k=>{if(d[k]!==undefined){store[k]=d[k];if(k==='vo2max')localStorage.setItem('h_vo2max',d[k]);else if(k==='settings')saveSettings();else if(k==='widgets')saveWidgets();else localStorage.setItem('h_'+k,JSON.stringify(d[k]));}});alert('✅ Datos importados');render();}catch(err){alert('❌ Archivo inválido');}};reader.readAsText(file);}
+
+function deleteAll(){if(!confirm('⚠️ ¿Eliminar TODOS los datos? Esta acción no se puede deshacer.'))return;if(!confirm('¿Estás completamente seguro?'))return;Object.keys(store).forEach(k=>{if(k!=='settings'&&k!=='widgets'){store[k]=Array.isArray(store[k])?[]:'';localStorage.removeItem('h_'+k);}});alert('✅ Todos los datos eliminados');render();}
+
+// ============= INIT =============
+if(navigator.geolocation&&store.settings.autoLocation){navigator.geolocation.getCurrentPosition(pos=>{store.settings.lat=pos.coords.latitude;store.settings.lng=pos.coords.longitude;saveSettings();if(currentTab==='panel'||currentTab==='sol')render();});}
+render();
+</script>
 </body>
 </html>
