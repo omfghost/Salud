@@ -1,0 +1,49 @@
+🪟 HEALTH v2.5 - INICIO RÁPIDO PARA WINDOWS
+
+═══════════════════════════════════════════════════════════════════
+
+¡SUPERCAPACIDAD! Solo necesitas 1 paso:
+
+🔵 OPCIÓN A (La más fácil):
+   → Haz DOBLE CLIC en: ABRIR_HEALTH.bat
+   → ¡Se abre HEALTH en tu navegador automáticamente!
+
+🔵 OPCIÓN B:
+   → Haz doble clic en: HEALTH-app.html
+   → Se abre en tu navegador
+   → ¡Listo!
+
+═══════════════════════════════════════════════════════════════════
+
+¡LISTO! 🎉
+
+HEALTH se abrirá en tu navegador.
+
+═══════════════════════════════════════════════════════════════════
+
+✨ CARACTERÍSTICAS:
+
+🫁 Respiración guiada con música automática
+🕐 Registro de ayunos con cálculo automático
+📏 Medidas corporales (cintura, pecho, muslo, bícep, cadera)
+📚 Glosario interactivo con explicaciones
+💾 Datos privados - se guardan en tu Windows
+🔒 100% seguro - sin servidor
+
+═══════════════════════════════════════════════════════════════════
+
+BONUS - Crear acceso directo en escritorio:
+
+1. Clic derecho en HEALTH-app.html
+2. "Crear acceso directo"
+3. Arrastra el acceso al escritorio
+4. ¡Ya tienes HEALTH en el escritorio!
+
+═══════════════════════════════════════════════════════════════════
+
+Los datos se guardan automáticamente.
+Para hacer backup: ⚙️ Ajustes > Exportar
+
+¡Que disfrutes HEALTH! 💚
+
+═══════════════════════════════════════════════════════════════════

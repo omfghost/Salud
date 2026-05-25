@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HEALTH">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect width='180' height='180' fill='url(%23grad)' rx='40'/><text x='90' y='120' font-size='70' font-weight='bold' fill='white' text-anchor='middle' font-family='system-ui'>H</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect width='192' height='192' fill='url(%23grad)' rx='40'/><text x='96' y='130' font-size='80' font-weight='bold' fill='white' text-anchor='middle' font-family='system-ui'>H</text></svg>">
+    <title>HEALTH - App de Salud Integral v2.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+        * { font-family: 'Sora', sans-serif; }
+        body { margin: 0; padding: 0; background: linear-gradient(to bottom right, #030712, #1a1a2e, #16213e); color: #fff; }
+        .gradient-text { background: linear-gradient(to right, #ec4899, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 15px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 30px; border: 2px solid #a855f7; }
+        .glossary-item { margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-left: 4px solid #a855f7; border-radius: 8px; }
+        .fast-badge { display: inline-block; background: linear-gradient(135deg, #f97316, #ea580c); padding: 8px 16px; border-radius: 20px; font-weight: bold; color: white; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { Plus, Settings, Download, Upload, Trash2, BookOpen, X, Music, Volume2 } = window.lucide;
+
+        const GLOSSARY = {
+            'HRV': { nombre: 'Variabilidad de la Frecuencia Cardíaca', significado: 'La variación en el tiempo entre latidos del corazón.', obtencion: 'Se obtiene mediante dispositivos wearables.', calculo: 'Se calcula automáticamente por los dispositivos.', importancia: 'HRV alto indica mejor recuperación. HRV bajo puede indicar estrés.' },
+            'Duración Ayuno': { nombre: 'Duración del Ayuno Intermitente', significado: 'Número de horas entre tu última comida y tu primera comida del siguiente día.', obtencion: 'Se registra la hora de última comida y hora de fin manualmente.', calculo: 'Se calcula automáticamente: Hora fin - Hora última comida.', importancia: 'Ayunos 12-16h son comunes. Mayores beneficios con 16h+.' },
+            'Medidas Corporales': { nombre: 'Medidas de Circunferencia del Cuerpo', significado: 'Circunferencia en centímetros de distintas partes del cuerpo.', obtencion: 'Se miden con cinta métrica flexible.', calculo: 'Se registran directamente.', importancia: 'Más preciso que peso para ver cambios de composición corporal.' },
+            'Respiración Guiada': { nombre: 'Técnica de Respiración Controlada', significado: 'Respirar según un patrón específico para relajación.', obtencion: 'Se practica conscientemente.', calculo: 'Patrón = Segundos de inhalación + Segundos de exhalación.', importancia: 'Activa el sistema nervioso parasimpático (relajación).' },
+            'Frecuencias Solfeggio': { nombre: 'Frecuencias Sagradas de Sonido', significado: 'Frecuencias específicas (Hz) con propiedades curativas.', obtencion: 'Se generan mediante síntesis de audio.', calculo: 'Frecuencias: 174Hz, 285Hz, 396Hz.', importancia: 'Usadas en meditación y relajación.' }
+        };
+
+        const HealthApp = () => {
+            const [activeTab, setActiveTab] = React.useState('respiration');
+            const [fastData, setFastData] = React.useState([]);
+            const [measurementData, setMeasurementData] = React.useState([]);
+            const [showSettings, setShowSettings] = React.useState(false);
+            const [respirationPrograms, setRespirationPrograms] = React.useState([]);
+            const [musicEnabled, setMusicEnabled] = React.useState(true);
+            const [showGlossary, setShowGlossary] = React.useState(false);
+            const audioContextRef = React.useRef(null);
+
+            React.useEffect(() => {
+                const saved = localStorage.getItem('healthAppData');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    setFastData(data.fast || []);
+                    setMeasurementData(data.measurements || []);
+                    setRespirationPrograms(data.programs || []);
+                }
+            }, []);
+
+            React.useEffect(() => {
+                const dataToSave = { fast: fastData, measurements: measurementData, programs: respirationPrograms };
+                localStorage.setItem('healthAppData', JSON.stringify(dataToSave));
+            }, [fastData, measurementData, respirationPrograms]);
+
+            const playRelaxingMusic = () => {
+                if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                const ctx = audioContextRef.current;
+                try {
+                    const now = ctx.currentTime;
+                    const duration = 2;
+                    [174, 285, 396].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.12 / (idx + 1), now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                        osc.start(now);
+                        osc.stop(now + duration);
+                    });
+                } catch(e) {}
+            };
+
+            const playSound = (frequency = 432, duration = 300) => {
+                if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                const ctx = audioContextRef.current;
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = frequency;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration / 1000);
+                } catch(e) {}
+            };
+
+            const RespirationSection = () => {
+                const [totalTime, setTotalTime] = React.useState(300);
+                const [inhale, setInhale] = React.useState(4);
+                const [exhale, setExhale] = React.useState(6);
+                const [isRunning, setIsRunning] = React.useState(false);
+                const [timeLeft, setTimeLeft] = React.useState(300);
+                const [programName, setProgramName] = React.useState('');
+                const [breathingPhase, setBreathingPhase] = React.useState('');
+
+                React.useEffect(() => {
+                    if (!isRunning) return;
+                    if (musicEnabled) playRelaxingMusic();
+                    let cycleTime = inhale + exhale;
+                    let currentPhaseTime = 0;
+                    const interval = setInterval(() => {
+                        setTimeLeft((prev) => {
+                            if (prev <= 1) {
+                                setIsRunning(false);
+                                playSound(800, 500);
+                                return totalTime;
+                            }
+                            currentPhaseTime++;
+                            if (currentPhaseTime <= inhale) {
+                                setBreathingPhase(`Inhala (${inhale - currentPhaseTime + 1}s)`);
+                                if (musicEnabled) playSound(432, 100);
+                            } else if (currentPhaseTime <= cycleTime) {
+                                setBreathingPhase(`Exhala (${cycleTime - currentPhaseTime + 1}s)`);
+                                if (musicEnabled) playSound(380, 100);
+                            } else {
+                                currentPhaseTime = 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+                    return () => clearInterval(interval);
+                }, [isRunning, totalTime, inhale, exhale, musicEnabled]);
+
+                const saveProgram = () => {
+                    if (programName) {
+                        setRespirationPrograms([...respirationPrograms, { id: Date.now(), name: programName, totalTime, inhale, exhale }]);
+                        setProgramName('');
+                    }
+                };
+
+                return (
+                    <div className="space-y-6 fade-in">
+                        <div className="bg-gradient-to-r from-cyan-900 to-blue-900 p-6 rounded-lg">
+                            <h2 className="text-2xl font-bold text-white mb-4">🫁 Respiración Guiada</h2>
+                            <div className="bg-blue-800 p-6 rounded-lg mb-6 text-center">
+                                <div className="text-6xl font-bold text-cyan-300 mb-2">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</div>
+                                <p className="text-cyan-200 text-xl">{breathingPhase || 'Listo para comenzar...'}</p>
+                                {musicEnabled && isRunning && <p className="text-green-400 text-sm mt-2">🎵 Música activa</p>}
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                                <div><label className="text-cyan-200 text-sm text-xs">Tiempo (seg)</label><input type="number" value={totalTime} onChange={(e) => { setTotalTime(parseInt(e.target.value)); setTimeLeft(parseInt(e.target.value)); }} className="w-full p-2 rounded bg-blue-800 text-white text-sm" /></div>
+                                <div><label className="text-cyan-200 text-sm text-xs">Inhala (seg)</label><input type="number" value={inhale} onChange={(e) => setInhale(parseInt(e.target.value))} className="w-full p-2 rounded bg-blue-800 text-white text-sm" /></div>
+                                <div><label className="text-cyan-200 text-sm text-xs">Exhala (seg)</label><input type="number" value={exhale} onChange={(e) => setExhale(parseInt(e.target.value))} className="w-full p-2 rounded bg-blue-800 text-white text-sm" /></div>
+                            </div>
+                            <div className="flex gap-3 mb-4">
+                                <button onClick={() => setIsRunning(!isRunning)} className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-3 rounded-lg font-bold">{isRunning ? '⏸️ Pausar' : '▶️ Comenzar'}</button>
+                                <button onClick={() => setMusicEnabled(!musicEnabled)} className={`p-3 rounded-lg font-bold flex items-center gap-2 ${musicEnabled ? 'bg-green-600' : 'bg-gray-600'}`}>{musicEnabled ? <Music size={20} /> : <Volume2 size={20} />}</button>
+                            </div>
+                            <div className="mt-6"><label className="text-cyan-200 text-sm">Guardar programa:</label><div className="flex gap-2 mt-2"><input type="text" value={programName} onChange={(e) => setProgramName(e.target.value)} placeholder="Ej: Respiración" className="flex-1 p-2 rounded bg-blue-800 text-white text-sm" /><button onClick={saveProgram} className="bg-cyan-500 text-white px-3 py-2 rounded font-bold text-sm">Guardar</button></div></div>
+                            {respirationPrograms.length > 0 && (<div className="mt-4"><h3 className="text-cyan-300 font-bold mb-2 text-sm">Mis Programas</h3><div className="space-y-2">{respirationPrograms.map((prog) => (<button key={prog.id} onClick={() => { setTotalTime(prog.totalTime); setTimeLeft(prog.totalTime); setInhale(prog.inhale); setExhale(prog.exhale); }} className="w-full bg-blue-700 text-white p-2 rounded text-xs font-bold">{prog.name}</button>))}</div></div>)}
+                        </div>
+                    </div>
+                );
+            };
+
+            const FastSection = () => {
+                const [form, setForm] = React.useState({ date: new Date().toISOString().split('T')[0], lastMeal: '20:00', fastEnd: '12:00' });
+
+                const calculateFastDuration = () => {
+                    const [lastH, lastM] = form.lastMeal.split(':').map(Number);
+                    const [endH, endM] = form.fastEnd.split(':').map(Number);
+                    let last = lastH * 60 + lastM;
+                    let end = endH * 60 + endM;
+                    if (end <= last) end += 24 * 60;
+                    return ((end - last) / 60).toFixed(1);
+                };
+
+                const addFastData = () => {
+                    const duration = calculateFastDuration();
+                    setFastData([...fastData, { ...form, duration, id: Date.now() }]);
+                    setForm({ date: new Date().toISOString().split('T')[0], lastMeal: '20:00', fastEnd: '12:00' });
+                };
+
+                const getLastMonthStats = () => {
+                    const oneMonthAgo = new Date();
+                    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+                    const filtered = fastData.filter(d => new Date(d.date) >= oneMonthAgo);
+                    if (filtered.length === 0) return { avg: 0, max: 0 };
+                    const durations = filtered.map(d => parseFloat(d.duration));
+                    return { avg: (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(1), max: Math.max(...durations).toFixed(1) };
+                };
+
+                const stats = getLastMonthStats();
+                const allAvg = fastData.length > 0 ? (fastData.reduce((sum, d) => sum + parseFloat(d.duration), 0) / fastData.length).toFixed(1) : 0;
+
+                return (
+                    <div className="space-y-6 fade-in">
+                        <div className="bg-gradient-to-r from-yellow-900 to-orange-900 p-6 rounded-lg">
+                            <h2 className="text-2xl font-bold text-white mb-4">🕐 Ayunos</h2>
+                            <div className="grid grid-cols-3 gap-3 mb-4"><div><label className="text-yellow-200 text-xs">Fecha</label><input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full p-2 rounded bg-orange-800 text-white text-sm" /></div><div><label className="text-yellow-200 text-xs">Última comida</label><input type="time" value={form.lastMeal} onChange={(e) => setForm({ ...form, lastMeal: e.target.value })} className="w-full p-2 rounded bg-orange-800 text-white text-sm" /></div><div><label className="text-yellow-200 text-xs">Fin ayuno</label><input type="time" value={form.fastEnd} onChange={(e) => setForm({ ...form, fastEnd: e.target.value })} className="w-full p-2 rounded bg-orange-800 text-white text-sm" /></div></div>
+                            <div className="mt-4 p-4 bg-orange-800 rounded"><p className="text-yellow-200"><strong>Duración:</strong> <span className="text-2xl font-bold text-yellow-100">{calculateFastDuration()}h</span></p>{parseFloat(calculateFastDuration()) > 12 && <div className="fast-badge">🎯 +12h</div>}</div>
+                            <button onClick={addFastData} className="mt-4 w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-3 rounded-lg font-bold text-sm"><Plus size={20} className="inline mr-2" /> Registrar</button>
+                        </div>
+                        {fastData.length > 0 && (<div><div className="grid grid-cols-3 gap-3 mb-4"><div className="bg-gray-800 p-3 rounded border border-yellow-500"><h3 className="text-yellow-300 text-xs uppercase">Últ. Mes</h3><p className="text-white text-xl font-bold">{stats.avg}h</p></div><div className="bg-gray-800 p-3 rounded border border-yellow-500"><h3 className="text-yellow-300 text-xs uppercase">Máximo</h3><p className="text-white text-xl font-bold">{stats.max}h</p></div><div className="bg-gray-800 p-3 rounded border border-yellow-500"><h3 className="text-yellow-300 text-xs uppercase">Histórico</h3><p className="text-white text-xl font-bold">{allAvg}h</p></div></div><div className="bg-gray-800 p-4 rounded"><h3 className="text-white font-bold mb-2 text-sm">Histórico</h3><div className="space-y-1 max-h-48 overflow-y-auto text-xs">{[...fastData].reverse().map((entry) => (<div key={entry.id} className="bg-gray-700 p-2 rounded text-gray-200"><strong>{entry.date}</strong> - {entry.duration}h {parseFloat(entry.duration) > 12 && <span className="text-orange-400">🎯</span>}</div>))}</div></div></div>)}
+                    </div>
+                );
+            };
+
+            const MeasurementsSection = () => {
+                const [form, setForm] = React.useState({ date: new Date().toISOString().split('T')[0], waist: '', chest: '', thigh: '', bicep: '', hip: '' });
+
+                const addMeasurement = () => {
+                    if (form.waist || form.chest || form.thigh || form.bicep || form.hip) {
+                        setMeasurementData([...measurementData, { ...form, id: Date.now() }]);
+                        setForm({ date: new Date().toISOString().split('T')[0], waist: '', chest: '', thigh: '', bicep: '', hip: '' });
+                    }
+                };
+
+                return (
+                    <div className="space-y-6 fade-in">
+                        <div className="bg-gradient-to-r from-pink-900 to-red-900 p-6 rounded-lg">
+                            <h2 className="text-2xl font-bold text-white mb-4">📏 Medidas</h2>
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div><label className="text-pink-200 text-xs">Fecha</label><input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                                <div><label className="text-pink-200 text-xs">Cintura (cm)</label><input type="number" step="0.1" placeholder="cm" value={form.waist} onChange={(e) => setForm({ ...form, waist: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                                <div><label className="text-pink-200 text-xs">Pecho (cm)</label><input type="number" step="0.1" placeholder="cm" value={form.chest} onChange={(e) => setForm({ ...form, chest: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                                <div><label className="text-pink-200 text-xs">Muslo (cm)</label><input type="number" step="0.1" placeholder="cm" value={form.thigh} onChange={(e) => setForm({ ...form, thigh: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                                <div><label className="text-pink-200 text-xs">Bícep (cm)</label><input type="number" step="0.1" placeholder="cm" value={form.bicep} onChange={(e) => setForm({ ...form, bicep: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                                <div><label className="text-pink-200 text-xs">Cadera (cm)</label><input type="number" step="0.1" placeholder="cm" value={form.hip} onChange={(e) => setForm({ ...form, hip: e.target.value })} className="w-full p-2 rounded bg-red-800 text-white text-sm" /></div>
+                            </div>
+                            <button onClick={addMeasurement} className="mt-4 w-full bg-gradient-to-r from-pink-500 to-red-500 text-white p-3 rounded-lg font-bold text-sm"><Plus size={20} className="inline mr-2" /> Registrar</button>
+                        </div>
+                        {measurementData.length > 0 && (<div className="bg-gray-800 p-4 rounded"><h3 className="text-white font-bold mb-2 text-sm">Histórico</h3><div className="space-y-2 max-h-48 overflow-y-auto text-xs">{[...measurementData].reverse().map((entry) => (<div key={entry.id} className="bg-gray-700 p-2 rounded text-gray-200"><strong className="text-pink-300">{entry.date}</strong><div className="grid grid-cols-2 gap-1 mt-1">{entry.waist && <span>C: {entry.waist}</span>}{entry.chest && <span>P: {entry.chest}</span>}{entry.thigh && <span>M: {entry.thigh}</span>}{entry.bicep && <span>B: {entry.bicep}</span>}{entry.hip && <span>Ca: {entry.hip}</span>}</div></div>))}</div></div>)}
+                    </div>
+                );
+            };
+
+            const GlossaryModal = () => {
+                return (
+                    <div className="modal-overlay" onClick={() => setShowGlossary(false)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold gradient-text">📚 Glosario</h2>
+                                <button onClick={() => setShowGlossary(false)} className="text-gray-400"><X size={24} /></button>
+                            </div>
+                            <div className="space-y-3">{Object.entries(GLOSSARY).map(([key, term]) => (<div key={key} className="glossary-item"><h3 className="text-lg font-bold text-purple-400">{term.nombre}</h3><div className="mt-2 space-y-1 text-xs text-gray-300"><div><strong className="text-white">Significado:</strong> {term.significado}</div><div><strong className="text-white">Obtención:</strong> {term.obtencion}</div>{term.calculo && <div><strong className="text-white">Cálculo:</strong> {term.calculo}</div>}<div><strong className="text-white">Importancia:</strong> {term.importancia}</div></div></div>))}</div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const SettingsSection = () => {
+                const exportData = () => {
+                    const data = { fast: fastData, measurements: measurementData, programs: respirationPrograms };
+                    const json = JSON.stringify(data, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `health-data-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                };
+
+                const importData = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const imported = JSON.parse(event.target.result);
+                            setFastData(imported.fast || []);
+                            setMeasurementData(imported.measurements || []);
+                            setRespirationPrograms(imported.programs || []);
+                            setShowSettings(false);
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+
+                return (
+                    <div className="space-y-4 fade-in">
+                        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                            <h2 className="text-2xl font-bold text-white mb-4">⚙️ Ajustes</h2>
+                            <div className="space-y-2">
+                                <button onClick={exportData} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold text-sm"><Download size={18} className="inline mr-2" /> Exportar</button>
+                                <label className="w-full bg-green-600 text-white p-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"><Upload size={18} /> Importar<input type="file" accept=".json" onChange={importData} className="hidden" /></label>
+                            </div>
+                            <div className="mt-4 p-3 bg-purple-900 rounded border border-purple-500 text-xs"><p className="text-purple-300"><strong>✨ v2.5</strong><br/>🎵 Música automática<br/>📊 Ayunos + Medidas</p></div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black pb-24">
+                    <div className="sticky top-0 z-50 bg-gray-900 border-b border-gray-700 p-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-xl font-bold gradient-text">HEALTH v2.5</h1>
+                            <div className="flex gap-2">
+                                <button onClick={() => setShowGlossary(true)} className="p-2 hover:bg-gray-700 rounded"><BookOpen className="text-purple-400" size={20} /></button>
+                                <button onClick={() => setShowSettings(!showSettings)} className="p-2 hover:bg-gray-700 rounded"><Settings className="text-gray-300" size={20} /></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {showGlossary && <GlossaryModal />}
+
+                    <div className="p-4">
+                        {showSettings ? <SettingsSection /> : (
+                            <>
+                                {activeTab === 'respiration' && <RespirationSection />}
+                                {activeTab === 'fast' && <FastSection />}
+                                {activeTab === 'measurements' && <MeasurementsSection />}
+                            </>
+                        )}
+                    </div>
+
+                    {!showSettings && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700">
+                            <div className="flex justify-around p-3 gap-1">
+                                {[
+                                    { id: 'respiration', label: '🫁' },
+                                    { id: 'fast', label: '🕐' },
+                                    { id: 'measurements', label: '📏' },
+                                ].map((tab) => (
+                                    <button key={tab.id} onClick={() => { setActiveTab(tab.id); setShowSettings(false); }} className={`flex-1 py-2 px-3 rounded-lg font-bold text-sm ${activeTab === tab.id ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300'}`}>{tab.label}</button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<HealthApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
