@@ -40,15 +40,15 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 14px;width:100%;overflow-x:hidden;position:relative;box-sizing:border-box}
 
 /* HEADER */
-.header{padding:14px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(12,16,12,0.85);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);z-index:50;margin-top:6px;gap:6px;-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,0.4) 8%,#000 22%,#000 78%,rgba(0,0,0,0.4) 92%,transparent 100%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.4) 15%,#000 35%,#000 65%,rgba(0,0,0,0.4) 85%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,0.4) 8%,#000 22%,#000 78%,rgba(0,0,0,0.4) 92%,transparent 100%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.4) 15%,#000 35%,#000 65%,rgba(0,0,0,0.4) 85%,transparent 100%);-webkit-mask-composite:source-in;mask-composite:intersect;border:none;overflow:visible}
+.header{padding:14px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:linear-gradient(180deg,rgba(13,18,14,0.96) 0%,rgba(11,15,11,0.9) 100%);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);z-index:50;margin-top:6px;gap:8px;border-radius:0 0 20px 20px;border-bottom:1px solid rgba(167,243,208,0.08);box-shadow:0 6px 24px -10px rgba(0,0,0,0.7);overflow:visible}
 .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 18% 50%,rgba(167,243,208,0.07) 0%,transparent 65%);pointer-events:none;z-index:0}
-.logo{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,#d1fae5 0%,#fef3c7 50%,#d1fae5 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:0;font-style:italic;text-shadow:0 0 24px rgba(167,243,208,0.65),0 0 8px rgba(167,243,208,0.4);position:relative;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6))}
+.logo{font-family:var(--display);font-size:26px;font-weight:600;letter-spacing:-0.5px;background:linear-gradient(135deg,#a7f3d0 0%,#fde047 50%,#a7f3d0 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:0;font-style:italic;text-shadow:0 0 16px rgba(167,243,208,0.4);position:relative;z-index:2}
 .logo-wrap{position:relative;display:inline-flex;align-items:center;z-index:1;flex-shrink:1;min-width:0}
-.logo-dot{position:absolute;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(167,243,208,0.45) 0%,rgba(167,243,208,0.2) 35%,rgba(167,243,208,0) 70%);left:-12px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:0;animation:logoPulse 3.5s ease-in-out infinite;filter:blur(4px)}
-@keyframes logoPulse{0%,100%{opacity:0.85;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.12)}}
-.header-actions{display:flex;gap:5px;align-items:center;position:relative;z-index:2;flex-shrink:0}
-.icon-btn{height:32px;border-radius:50%;background:rgba(167,243,208,0.06);border:1px solid rgba(167,243,208,0.18);color:#a7f3d0;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;width:32px;padding:0;font-family:var(--sans);font-weight:600;backdrop-filter:blur(8px);box-shadow:0 0 12px rgba(167,243,208,0.08)}
-.icon-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.18)}
+.logo-dot{position:absolute;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,rgba(167,243,208,0.4) 0%,rgba(167,243,208,0.18) 38%,rgba(167,243,208,0) 72%);left:-16px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:0;animation:logoPulse 3.5s ease-in-out infinite;filter:blur(3px)}
+@keyframes logoPulse{0%,100%{opacity:0.8;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.1)}}
+.header-actions{display:flex;gap:6px;align-items:center;position:relative;z-index:3;flex-shrink:0}
+.icon-btn{height:34px;width:34px;border-radius:50%;background:rgba(167,243,208,0.08);border:1px solid rgba(167,243,208,0.2);color:#a7f3d0;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;padding:0;font-family:var(--sans);font-weight:600;backdrop-filter:blur(8px);box-shadow:0 0 12px rgba(167,243,208,0.1)}
+.icon-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.2)}
 .back-btn{background:transparent !important;border:none !important;color:var(--accent);font-size:13px;font-weight:600;padding:0 10px;width:auto;letter-spacing:0.3px;font-family:var(--sans);text-shadow:0 0 10px rgba(167,243,208,0.6);height:32px;cursor:pointer;display:flex;align-items:center}
 .back-btn:active{transform:scale(0.95)}
 .settings-btn{background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));border-color:rgba(255,255,255,0.12)}
@@ -593,13 +593,74 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .day-row-text{font-size:11.5px;color:#ccc;line-height:1.3;font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .day-row-text.empty{color:var(--text-dim);font-style:italic;font-family:var(--serif);font-size:11px}
 .day-thumb-right{flex-shrink:0;margin-left:auto}
+.day-row-img-center{justify-content:center}
+.day-thumb-centered{width:46px;height:36px;border-radius:7px;overflow:hidden;border:1px solid var(--border);cursor:pointer;margin:0 auto}
+.day-thumb-centered img{width:100%;height:100%;object-fit:cover;display:block}
 .day-clear-text-btn{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.18);color:#f87171;font-size:9px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;font-family:var(--sans);line-height:1}
 .day-clear-text-btn:active{background:rgba(239,68,68,0.18);transform:scale(0.9)}
 /* Fasting goal inline badge - small & compact */
-.fast-goal-inline{display:inline-flex;align-items:center;font-size:9.5px;font-weight:600;padding:3px 7px;border-radius:6px;font-family:var(--sans);letter-spacing:0.3px;white-space:nowrap;line-height:1.1}
+.fast-goal-inline{display:inline-flex;align-items:center;font-size:9px;font-weight:600;padding:2px 6px;border-radius:5px;font-family:var(--sans);letter-spacing:0.2px;white-space:nowrap;line-height:1.1}
 .fast-goal-met{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.22)}
 .fast-goal-extended{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.25)}
 .fast-goal-pending{background:rgba(255,255,255,0.03);color:var(--text-dim);border:1px solid var(--border)}
+
+/* Fasting compact input row with inline duration box */
+.fast-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
+.fast-input-row .input-group{margin-bottom:0;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
+.fast-input-row .input-group.date-compact{flex:0 0 92px}
+.fast-input-row .input-group label{margin-bottom:4px;line-height:1.1;min-height:13px;font-size:8.5px}
+.fast-input-row input{height:36px;box-sizing:border-box;padding:0 4px;text-align:center;font-size:11px}
+.fast-dur-group{flex:0 0 64px}
+.fast-dur-box{height:36px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--display);font-size:13px;font-weight:400;color:var(--accent);font-style:italic;letter-spacing:-0.3px;white-space:nowrap}
+.fast-input-row .add-btn{height:36px;width:32px;align-self:flex-end}
+
+/* Panel sun UVA/UVB mini chips bottom-right of graph */
+.panel-uv-mini{position:absolute;bottom:6px;right:2px;display:flex;flex-direction:column;gap:3px;pointer-events:none;z-index:3}
+.panel-uv-chip{background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:2px 6px;font-family:var(--serif);font-style:italic;font-size:12px;font-weight:500;display:flex;align-items:center;gap:4px;line-height:1}
+.panel-uv-chip span{font-family:var(--sans);font-style:normal;font-size:7px;font-weight:700;letter-spacing:0.5px;opacity:0.8}
+
+/* Registros toolbar: search + chart inline */
+.registros-toolbar{display:flex;gap:6px;align-items:center;margin:8px 0 6px}
+.registros-toolbar .registros-search{flex:1;min-width:0}
+.registros-toolbar .chart-icon-btn{flex-shrink:0;padding:6px 10px;font-size:13px}
+
+/* History item action buttons (edit + delete) */
+.history-item-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.edit-btn{background:rgba(167,243,208,0.06);border:1px solid rgba(167,243,208,0.18);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:all 0.15s;font-family:var(--sans)}
+.edit-btn:active{background:rgba(167,243,208,0.2);transform:scale(0.92)}
+
+/* View (video) button in records */
+.view-btn{background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:600;cursor:pointer;padding:0;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;transition:all 0.15s;font-family:var(--sans)}
+.view-btn:active{background:rgba(96,165,250,0.2);transform:scale(0.92)}
+
+/* Sleep row 2: puntuacion + hr + add button */
+.sleep-row2{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box}
+.sleep-row2 .input-group{flex:1;min-width:0;margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end}
+.sleep-row2 .input-group label{margin-bottom:5px;line-height:1.1}
+.sleep-row2 .input-group input{height:38px;box-sizing:border-box;text-align:center}
+.sleep-row2 .add-btn{height:38px;align-self:flex-end}
+
+/* Image/video viewer topbar with inline buttons */
+.image-viewer-topbar{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;padding:14px;z-index:10}
+.image-viewer-back{background:linear-gradient(135deg,rgba(52,211,153,0.2),rgba(52,211,153,0.08));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(167,243,208,0.35);color:#a7f3d0;font-size:11px;font-weight:700;padding:8px 13px;border-radius:10px;cursor:pointer;font-family:var(--sans);letter-spacing:0.5px;display:flex;align-items:center;gap:4px;text-shadow:0 0 8px rgba(167,243,208,0.4)}
+.image-viewer-back:active{transform:scale(0.95);background:rgba(167,243,208,0.25)}
+.image-viewer-close-x{margin-left:auto;background:rgba(239,68,68,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:14px;font-weight:600;width:38px;height:38px;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.image-viewer-close-x:active{transform:scale(0.92);background:rgba(239,68,68,0.22)}
+
+/* Record video attach area */
+.rec-video-area{flex:0 0 44px;height:38px;align-self:flex-end;border:2px dashed rgba(96,165,250,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.18s;background:rgba(96,165,250,0.04)}
+.rec-video-area:active{transform:scale(0.95)}
+.rec-video-area.has-video{border-style:solid;border-color:rgba(96,165,250,0.5);background:rgba(96,165,250,0.12);color:#60a5fa}
+
+/* Environment block: location row one line */
+.env-loc-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.env-coords{font-size:10px;color:var(--text-dim);font-family:var(--sans);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.env-loc-btn{flex-shrink:0;width:30px;height:28px;background:rgba(167,243,208,0.08);border:1px solid rgba(167,243,208,0.2);border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0}
+.env-loc-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.2)}
+.env-uv-row{display:flex;gap:5px;margin-top:8px}
+.env-uv-chip{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;min-width:0}
+.env-uv-chip span{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;font-family:var(--sans)}
+.env-uv-chip b{font-family:var(--serif);font-style:italic;font-size:14px;font-weight:500;line-height:1}
 
 </style>
 </head>
@@ -635,6 +696,15 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 <div class="modal-handle"></div>
 <div class="modal-header"><div class="modal-title" id="termTitle">Término</div><button class="modal-close" onclick="closeModal('term')">×</button></div>
 <div id="termContent" style="font-size:13px;color:#ccc;line-height:1.6;font-family:var(--sans)"></div>
+</div>
+</div>
+
+<div class="modal" id="modal-editRecord">
+<div class="modal-content" style="max-width:420px">
+<div class="modal-handle"></div>
+<div class="modal-header"><div class="modal-title" id="editModalTitle">Editar registro</div><button class="modal-close" onclick="closeModal('editRecord')">×</button></div>
+<div id="editModalBody"></div>
+<button class="btn btn-primary" style="margin-top:10px" onclick="saveEditRecord()">GUARDAR CAMBIOS</button>
 </div>
 </div>
 
@@ -674,15 +744,22 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 </div>
 
 <div class="image-viewer" id="imageViewer">
-<button class="image-viewer-close" onclick="closeImageViewer()">×</button>
-<div class="image-viewer-actions" id="imageViewerActions">
-<button class="image-viewer-back" onclick="imageViewerGoTo('panel')">← Panel</button>
+<div class="image-viewer-topbar">
 <button class="image-viewer-back" onclick="imageViewerGoTo('actividad')">← Actividad</button>
+<button class="image-viewer-back" onclick="imageViewerGoTo('panel')">← Panel</button>
+<button class="image-viewer-close-x" onclick="closeImageViewer()">✕</button>
 </div>
 <img id="imageViewerImg" src="">
 </div>
+
+<div class="image-viewer" id="videoViewer">
+<div class="image-viewer-topbar">
+<button class="image-viewer-close-x" onclick="closeVideoViewer()" style="margin-left:auto">✕</button>
+</div>
+<video id="videoViewerEl" controls playsinline style="max-width:100%;max-height:80vh;border-radius:12px"></video>
+</div>
 <script>
-const DEFAULT_WIDGETS=['weight','sleep_hrv','sleep_hours','sleep_score','fasting_last','vo2max','meditation_today','activity_last','waist'];
+const DEFAULT_WIDGETS=['weight','sleep_hrv','sleep_hours','sleep_score','fasting_last','vo2max','meditation_last','activity_last','waist'];
 const DEFAULT_SPORTS=[{id:'crossfit',name:'CrossFit'},{id:'carrera',name:'Carrera'},{id:'piscina',name:'Piscina'}];
 const WEATHER_PRESETS={
   soleado:{name:'Soleado',icon:'☀️',uvMult:1.0,uvbMult:1.0},
@@ -765,8 +842,8 @@ if(store.collapsed.measurements===undefined)store.collapsed.measurements=true;
 if(store.collapsed.allergy===undefined)store.collapsed.allergy=true;
 if(store.collapsed.vo2===undefined)store.collapsed.vo2=true;
 if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
-// Sun blocks collapsed by default (graph always visible)
-['sunweather','skintype','clothing','sunloc','hormones','suntimer'].forEach(function(k){
+// Sun + settings blocks collapsed by default (graph always visible)
+['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setloc','setsports','setsummary','setabout','vitdAccum','vitdEstim'].forEach(function(k){
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
@@ -779,6 +856,12 @@ function saveActiveDays(){try{localStorage.setItem('h_activeDays',JSON.stringify
 function saveEstadoOrder(){try{localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));}catch(e){}}
 
 // Migrate old estadoOrder: convert weight+measurements -> body, add sleep
+(function migrateWidgets(){
+  if(store.widgets&&store.widgets.indexOf('meditation_today')!==-1){
+    store.widgets=store.widgets.map(function(w){return w==='meditation_today'?'meditation_last':w;});
+    saveWidgets();
+  }
+})();
 (function migrateEstadoOrder(){
   let arr=store.estadoOrder.slice();
   // Remove obsolete entries
@@ -1040,6 +1123,13 @@ function fmtDate(d){return new Date(d).toLocaleDateString('es-ES',{day:'2-digit'
 function filterByRange(data,range){if(range==='all')return data;const days={'1w':7,'2w':14,'1m':30,'2m':60,'6m':180,'1y':365}[range]||30;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);return data.filter(function(d){return new Date(d.date)>=cutoff;});}
 function avg(arr,key){if(!arr.length)return 0;const vals=arr.map(function(d){return parseFloat(d[key]||0);}).filter(function(v){return !isNaN(v);});if(!vals.length)return 0;return(vals.reduce(function(s,v){return s+v;},0)/vals.length).toFixed(1);}
 function fmtHour(h){h=((h%24)+24)%24;const hours=Math.floor(h);const mins=Math.round((h-Math.floor(h))*60);return (hours<10?'0':'')+hours+':'+(mins<10?'0':'')+mins;}
+// Format a decimal-hours duration as "7h:55m"
+function fmtDuration(decH){
+  const v=parseFloat(decH);if(isNaN(v))return '—';
+  const hours=Math.floor(v);
+  const mins=Math.round((v-hours)*60);
+  return hours+'h:'+(mins<10?'0':'')+mins+'m';
+}
 function escapeHTML(s){if(!s)return '';return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 let charts={};
@@ -1053,6 +1143,68 @@ function makeChart(canvasId,labels,data,label,color){
 }
 
 function delItem(type,id){if(!confirm('¿Eliminar este registro?'))return;store[type]=store[type].filter(function(x){return x.id!==id;});save(type,store[type]);render();}
+
+// Generic record editor - builds fields from the record's editable keys
+const EDIT_FIELDS={
+  weight:[{k:'date',l:'Fecha',t:'date'},{k:'value',l:'Peso (kg)',t:'number'}],
+  measurements:[{k:'date',l:'Fecha',t:'date'},{k:'waist',l:'Cintura',t:'number'},{k:'chest',l:'Pecho',t:'number'},{k:'thigh',l:'Muslo',t:'number'},{k:'bicep',l:'Bícep',t:'number'},{k:'hip',l:'Cadera',t:'number'},{k:'neck',l:'Cuello',t:'number'}],
+  fasting:[{k:'date',l:'Fecha',t:'date'},{k:'start',l:'Última comida',t:'time'},{k:'end',l:'Fin ayuno',t:'time'}],
+  sleep:[{k:'date',l:'Fecha',t:'date'},{k:'hrv',l:'HRV',t:'number'},{k:'hours',l:'Horas',t:'number'},{k:'score',l:'Puntuación',t:'number'},{k:'hr',l:'HR nocturno',t:'number'}],
+  allergy:[{k:'date',l:'Fecha',t:'date'},{k:'level',l:'Intensidad',t:'number'},{k:'notes',l:'Notas',t:'text'}],
+  vo2history:[{k:'date',l:'Fecha',t:'date'},{k:'value',l:'VO2 Max',t:'number'}],
+  activity:[{k:'date',l:'Fecha',t:'date'},{k:'subtype',l:'Tipo',t:'text'},{k:'duration',l:'Duración (min)',t:'number'},{k:'result',l:'Resultado',t:'text'},{k:'distance',l:'Distancia',t:'text'},{k:'hrAvg',l:'FC media',t:'number'}],
+  records:[{k:'date',l:'Fecha',t:'date'},{k:'name',l:'Ejercicio',t:'text'},{k:'value',l:'Valor',t:'text'}],
+  sun:[{k:'date',l:'Fecha',t:'date'},{k:'duration',l:'Duración',t:'text'},{k:'uv',l:'UV',t:'number'},{k:'vitd',l:'Vit D (IU)',t:'number'}],
+  meditation:[{k:'date',l:'Fecha',t:'date'},{k:'duration',l:'Duración (s)',t:'number'},{k:'inhale',l:'Inhalar (s)',t:'number'},{k:'exhale',l:'Exhalar (s)',t:'number'}]
+};
+let editingRecord={type:null,id:null};
+function editItem(type,id){
+  const item=(store[type]||[]).find(function(x){return x.id===id;});
+  if(!item){return;}
+  editingRecord={type:type,id:id};
+  const fields=EDIT_FIELDS[type]||Object.keys(item).filter(function(k){return k!=='id'&&k!=='photo'&&k!=='video';}).map(function(k){return {k:k,l:k,t:typeof item[k]==='number'?'number':'text'};});
+  let body='';
+  fields.forEach(function(f){
+    const val=item[f.k]!=null?item[f.k]:'';
+    body+='<div class="input-group" style="margin-bottom:8px"><label>'+f.l.toUpperCase()+'</label><input type="'+f.t+'" id="edit_'+f.k+'" value="'+String(val).replace(/"/g,'&quot;')+'"'+(f.t==='number'?' step="0.1"':'')+'></div>';
+  });
+  // video field for records
+  if(type==='records'){
+    body+='<div class="input-group" style="margin-bottom:8px"><label>VÍDEO (opcional)</label><div class="meas-photo-area" onclick="document.getElementById(\'editVideoInput\').click()" style="margin:0"><div id="editVideoPreview">'+(item.video?'🎬 Vídeo adjunto':'')+'</div><div id="editVideoPlaceholder" style="font-size:11px;color:var(--text-muted)">'+(item.video?'':'🎬 Adjuntar vídeo')+'</div><input type="file" id="editVideoInput" accept="video/*" style="display:none" onchange="handleEditVideo(event)"></div></div>';
+    editVideoData=item.video||null;
+  }
+  document.getElementById('editModalTitle').textContent='Editar registro';
+  document.getElementById('editModalBody').innerHTML=body;
+  openModal('editRecord');
+}
+let editVideoData=null;
+function handleEditVideo(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){editVideoData=ev.target.result;const p=document.getElementById('editVideoPreview');if(p)p.textContent='🎬 Vídeo adjunto';const ph=document.getElementById('editVideoPlaceholder');if(ph)ph.style.display='none';};
+  reader.readAsDataURL(file);
+}
+function saveEditRecord(){
+  const type=editingRecord.type,id=editingRecord.id;
+  if(!type)return;
+  const item=(store[type]||[]).find(function(x){return x.id===id;});
+  if(!item)return;
+  const fields=EDIT_FIELDS[type]||[];
+  fields.forEach(function(f){
+    const el=document.getElementById('edit_'+f.k);
+    if(el)item[f.k]=el.value;
+  });
+  if(type==='records')item.video=editVideoData||null;
+  // recompute fasting duration if needed
+  if(type==='fasting'&&item.start&&item.end){
+    const sp=item.start.split(':').map(Number),ep=item.end.split(':').map(Number);
+    let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;item.duration=((e-s)/60).toFixed(2);
+  }
+  save(type,store[type]);
+  editVideoData=null;
+  closeModal('editRecord');
+  render();
+}
 function setRange(r){currentRange=r;render();}
 
 let currentTab='panel';
@@ -1143,45 +1295,36 @@ function getSkyColors(hour,t){
 
 function getTodayDayId(){const d=new Date().getDay();return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][d];}
 
-// Philosophical quotes about health, food, and living well
+// Health & wellbeing quotes — Gurdjieff prominent, all health/food/body focused
 const HEALTH_QUOTES=[
   {text:"Si no eres consciente de tu cuerpo, no puedes ser consciente de tu mente.",author:"G.I. Gurdjieff"},
-  {text:"El hombre que no trabaja sobre sí mismo está muerto en vida.",author:"G.I. Gurdjieff"},
-  {text:"Come para vivir, no vivas para comer.",author:"Sócrates"},
+  {text:"El hombre debe trabajar sobre su cuerpo físico antes que sobre nada.",author:"G.I. Gurdjieff"},
+  {text:"La energía que no se gasta en exceso se transforma en salud y consciencia.",author:"G.I. Gurdjieff"},
+  {text:"Comer con atención plena es el primer ejercicio del hombre despierto.",author:"G.I. Gurdjieff"},
+  {text:"El cuerpo es el instrumento; manténlo afinado para que el ser pueda sonar.",author:"G.I. Gurdjieff"},
+  {text:"Cada respiración consciente alimenta cuerpo y espíritu por igual.",author:"G.I. Gurdjieff"},
   {text:"Que el alimento sea tu medicina y la medicina sea tu alimento.",author:"Hipócrates"},
   {text:"Caminar es la mejor medicina del hombre.",author:"Hipócrates"},
-  {text:"El despertar es posible solo para quienes lo buscan y lo desean.",author:"G.I. Gurdjieff"},
-  {text:"Cuida tu cuerpo. Es el único lugar que tienes para vivir.",author:"Jim Rohn"},
-  {text:"La salud es la mayor posesión. La satisfacción es el mayor tesoro.",author:"Lao Tzu"},
-  {text:"El mejor médico es la naturaleza: cura las tres cuartas partes de las enfermedades.",author:"Galeno"},
-  {text:"Cada día es una pequeña vida.",author:"Schopenhauer"},
-  {text:"No hay deber más urgente que el de devolver bondad.",author:"Cicerón"},
-  {text:"Conócete a ti mismo.",author:"Oráculo de Delfos"},
-  {text:"La vida sin examen no merece ser vivida.",author:"Sócrates"},
-  {text:"El silencio es la mejor respuesta a la ignorancia.",author:"Rumi"},
-  {text:"Donde hay disciplina, hay libertad.",author:"Epicteto"},
-  {text:"No es lo que te sucede, sino cómo reaccionas, lo que importa.",author:"Epicteto"},
-  {text:"La felicidad y la libertad comienzan con un principio claro.",author:"Epicteto"},
-  {text:"Mens sana in corpore sano.",author:"Juvenal"},
-  {text:"Quien tiene salud tiene esperanza, quien tiene esperanza lo tiene todo.",author:"Proverbio árabe"},
-  {text:"La temperancia es el mejor medicamento.",author:"Buda"},
-  {text:"Cuida los minutos y las horas se cuidarán solas.",author:"Lord Chesterfield"},
-  {text:"El que mueve montañas comienza apartando piedrecitas.",author:"Confucio"},
-  {text:"No te aflijas, lo que pierdas volverá a ti de otra forma.",author:"Rumi"},
-  {text:"El hombre razonable se adapta al mundo; el irrazonable lo cambia.",author:"G.B. Shaw"},
-  {text:"Solo conozco una libertad, la del pensamiento.",author:"Saint-Exupéry"},
-  {text:"La paciencia es amarga, pero su fruto es dulce.",author:"Rousseau"},
-  {text:"El que no puede gobernarse a sí mismo, no puede gobernar nada.",author:"Marco Aurelio"},
-  {text:"Confina la felicidad a tu propia compañía.",author:"Marco Aurelio"},
-  {text:"La verdadera riqueza está en no necesitar nada.",author:"Lao Tzu"},
-  {text:"Quien vence a otros es fuerte, quien se vence a sí mismo es poderoso.",author:"Lao Tzu"},
-  {text:"El sabio no acumula. Mientras más usa para los demás, más tiene.",author:"Lao Tzu"},
-  {text:"Cuanto más sencillo es algo, más perfecto.",author:"Antón Chéjov"},
-  {text:"Despertar es comprender que has dormido.",author:"G.I. Gurdjieff"}
+  {text:"La salud es el mayor regalo, la satisfacción la mayor riqueza.",author:"Buda"},
+  {text:"Mantener el cuerpo con buena salud es un deber.",author:"Buda"},
+  {text:"Come para vivir, no vivas para comer.",author:"Sócrates"},
+  {text:"Ninguna riqueza supera la salud del cuerpo.",author:"Eclesiástico"},
+  {text:"La temperancia y el trabajo son los dos verdaderos médicos del hombre.",author:"Rousseau"},
+  {text:"El mejor médico es la naturaleza: cura tres cuartas partes de las enfermedades.",author:"Galeno"},
+  {text:"La salud no lo es todo, pero sin ella todo lo demás es nada.",author:"Schopenhauer"},
+  {text:"Un cuerpo sano es la mejor casa para un alma sana.",author:"Juvenal"},
+  {text:"La moderación en la mesa prolonga la vida.",author:"Lao Tzu"},
+  {text:"Quien come hasta saciarse a medias necesita menos médicos.",author:"Proverbio"},
+  {text:"El movimiento es el aceite que mantiene joven la articulación de la vida.",author:"Proverbio"},
+  {text:"La salud del cuerpo nace de la calma de la mente.",author:"Séneca"},
+  {text:"Cuida tu cuerpo: es el único lugar que tienes para vivir.",author:"Jim Rohn"},
+  {text:"El ayuno es el primer principio de la medicina.",author:"Rumi"},
+  {text:"Quien tiene salud tiene esperanza, y quien tiene esperanza lo tiene todo.",author:"Proverbio árabe"},
+  {text:"El sueño es la cadena dorada que une salud y cuerpo.",author:"Thomas Dekker"},
+  {text:"La primera riqueza es la salud.",author:"Ralph W. Emerson"}
 ];
 
 function getRandomQuote(){
-  // Rotate quote based on date+hour so it changes through the day but is stable on re-renders
   const d=new Date();
   const seed=d.getFullYear()*1000+d.getMonth()*31+d.getDate()*7+Math.floor(d.getHours()/3);
   const idx=Math.abs(seed)%HEALTH_QUOTES.length;
@@ -1218,15 +1361,15 @@ checkWeeklyReset();
 const WIDGET_DEFS={
   weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date)}:null;}},
   weight_avg:{name:'Peso media mes',icon:'📊',section:'estado',get:function(){const v=avg(filterByRange(store.weight,'1m'),'value');return v>0?{val:v,unit:'kg',sub:'30d'}:null;}},
-  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'sueno',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date)}:null;}},
-  sleep_hours:{name:'Horas sueño',icon:'😴',section:'sueno',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hours,unit:'h',sub:fmtDate(s.date)}:null;}},
-  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'sueno',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.score,unit:'/100',sub:fmtDate(s.date)}:null;}},
-  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'sueno',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date)}:null;}},
-  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:f.duration,unit:'h',sub:fmtDate(f.date)}:null;}},
-  fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:v,unit:'h',sub:'30d'}:null;}},
+  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date)}:null;}},
+  sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:fmtDuration(s.hours),unit:'',sub:fmtDate(s.date)}:null;}},
+  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.score,unit:'/100',sub:fmtDate(s.date)}:null;}},
+  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date)}:null;}},
+  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date)}:null;}},
+  fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
-  meditation_today:{name:'Meditación hoy',icon:'🧘',section:'meditacion',get:function(){const td=today();const t=store.meditation.filter(function(m){return m.date===td;});if(!t.length)return{val:'0',unit:'min',sub:'hoy'};const total=t.reduce(function(s,m){return s+parseInt(m.duration);},0);return{val:Math.floor(total/60),unit:'min',sub:'hoy'};}},
-  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];const sp=store.sports.find(function(s){return s.id===(a&&a.type);});return a?{val:sp?sp.name:a.type,unit:'',sub:fmtDate(a.date)}:null;}},
+  meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s'};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(a.duration+'min');if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date))};}},
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date)}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date)}:null;}},
@@ -1452,23 +1595,17 @@ function renderSunPanel(times,hour,uv,isDay){
   const uva=uvaIndex(hour,times,true);
   const uvb=uvbIndex(hour,times,true);
   return '<div class="card" style="padding:10px;position:relative">'+
-    '<div class="sun-container" style="max-width:200px;margin:0 auto 4px;position:relative">'+
-      renderSunSVG(times,hour,uv,isDay,200,false)+
-      '<div class="sun-center-text" style="width:75%;pointer-events:none">'+
+    '<div class="sun-container" style="max-width:210px;margin:0 auto;position:relative">'+
+      renderSunSVG(times,hour,uv,isDay,210,false)+
+      '<div class="sun-center-text" style="width:72%;pointer-events:none">'+
         '<div class="sun-time-big" style="font-size:20px">'+fmtHour(hour)+'</div>'+
         '<div class="sun-time-small" style="font-size:7px;letter-spacing:1px;margin-top:2px">'+(sunLive?'<span class="sun-live-dot"></span>EN VIVO ':'')+phase+'</div>'+
         '<div class="sun-uv-big" style="color:'+uvColor+';font-size:13px;margin-top:3px">UV '+uv.toFixed(1)+'</div>'+
       '</div>'+
-    '</div>'+
-    // UVA / UVB live values
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">'+
-      '<div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.18);border-radius:8px;padding:5px 4px;text-align:center">'+
-        '<div style="font-size:8px;color:#60a5fa;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">UVA</div>'+
-        '<div style="font-family:var(--serif);font-size:15px;font-weight:500;color:#60a5fa;font-style:italic;line-height:1.1">'+uva.toFixed(1)+'</div>'+
-      '</div>'+
-      '<div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:8px;padding:5px 4px;text-align:center">'+
-        '<div style="font-size:8px;color:#c084fc;text-transform:uppercase;letter-spacing:0.8px;font-weight:600">UVB</div>'+
-        '<div style="font-family:var(--serif);font-size:15px;font-weight:500;color:#c084fc;font-style:italic;line-height:1.1">'+uvb.toFixed(1)+'</div>'+
+      // Small UVA/UVB chips overlaid bottom-right of the graph
+      '<div class="panel-uv-mini">'+
+        '<div class="panel-uv-chip" style="color:#60a5fa"><span>UVA</span>'+uva.toFixed(1)+'</div>'+
+        '<div class="panel-uv-chip" style="color:#c084fc"><span>UVB</span>'+uvb.toFixed(1)+'</div>'+
       '</div>'+
     '</div>'+
     // IR (top) + EN VIVO (below) stacked in top-right corner
@@ -1666,13 +1803,14 @@ function detectWeather(){
 // ============= PANEL =============
 function renderPanel(c){
   const now=new Date();
-  const hour=now.getHours()+now.getMinutes()/60;
   const times=calcSunTimes(store.settings.lat,store.settings.lng);
+  const hour=sunLive?(now.getHours()+now.getMinutes()/60):sunSliderHour;
   const uv=uvIndex(hour,times,true);
   const isDay=hour>=times.sunrise&&hour<=times.sunset;
+  const realHour=now.getHours()+now.getMinutes()/60;
   let greeting='BUENAS NOCHES';
-  if(hour>=6&&hour<12)greeting='BUENOS DÍAS';
-  else if(hour>=12&&hour<20)greeting='BUENAS TARDES';
+  if(realHour>=6&&realHour<12)greeting='BUENOS DÍAS';
+  else if(realHour>=12&&realHour<20)greeting='BUENAS TARDES';
   const sunCollapsed=store.panelCollapsed.sun===true;
   const weeklyCollapsed=store.panelCollapsed.weeklyPanel===true;
   const todayId=getTodayDayId();
@@ -1733,16 +1871,46 @@ function renderPanel(c){
   // WIDGETS
   html+='<div class="panel-section-title">'+
     '<span>TUS DATOS</span>'+
-    '<button class="collapse-btn" onclick="openModal(\'widgets\')">⚙</button>'+
-  '</div>'+
-  '<div class="panel-grid">'+
-    (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 2">Aún no hay datos.</div>')+
+    '<div style="display:flex;gap:6px;align-items:center">'+
+      '<button class="reorder-mini '+(widgetReorderMode?'active':'')+'" onclick="toggleWidgetReorder()" title="Reordenar">'+(widgetReorderMode?'✓':'↕')+'</button>'+
+      '<button class="collapse-btn" onclick="openModal(\'widgets\')">⚙</button>'+
+    '</div>'+
   '</div>';
+  if(widgetReorderMode){
+    html+='<div class="widget-reorder-list">'+
+      store.widgets.map(function(w,idx){
+        const def=WIDGET_DEFS[w];if(!def)return '';
+        return '<div class="widget-reorder-item">'+
+          '<span class="widget-reorder-name">'+def.icon+' '+def.name+'</span>'+
+          '<div class="reorder-bar" style="margin:0;width:auto;flex-shrink:0;padding:3px 5px">'+
+            (idx>0?'<button class="move-btn" onclick="moveWidget('+idx+',-1)">▲</button>':'<span style="width:30px"></span>')+
+            (idx<store.widgets.length-1?'<button class="move-btn" onclick="moveWidget('+idx+',1)">▼</button>':'<span style="width:30px"></span>')+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }else{
+    html+='<div class="panel-grid">'+
+      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 2">Aún no hay datos.</div>')+
+    '</div>';
+  }
 
   c.innerHTML=html;
 
   if(window.panelRefreshTimer)clearInterval(window.panelRefreshTimer);
   window.panelRefreshTimer=setInterval(function(){if(currentTab==='panel')render();},60000);
+}
+
+let widgetReorderMode=false;
+function toggleWidgetReorder(){widgetReorderMode=!widgetReorderMode;render();}
+function moveWidget(idx,dir){
+  const ni=idx+dir;
+  if(ni<0||ni>=store.widgets.length)return;
+  const arr=store.widgets.slice();
+  const t=arr[idx];arr[idx]=arr[ni];arr[ni]=t;
+  store.widgets=arr;
+  saveWidgets();
+  render();
 }
 
 function togglePanelSection(name){store.panelCollapsed[name]=!store.panelCollapsed[name];saveCollapsed();render();}
@@ -1873,61 +2041,88 @@ function blockHeader(id,icon,title,withHelp){
 //   label: display label
 //   itemRenderer(item): returns HTML string for the content of each item
 //   opts: { chartLabel, chartKey, chartColor, searchFn(item, q) }
+// Registry of item renderers so setRegSearch can rebuild list without full re-render
+const REG_RENDERERS={};
 function renderRegistros(key,label,itemRenderer,opts){
   opts=opts||{};
   const arr=Array.isArray(store[key])?store[key]:[];
   if(!arr.length)return '';
+  REG_RENDERERS[key]={renderer:itemRenderer,opts:opts,label:label};
   const collapsedId='reg_'+key;
   const collapsed=store.collapsed[collapsedId]===true; // expanded by default when data
-  const searchQ=(regSearch[key]||'').toLowerCase();
-  // filter by search if any
+  const searchQ=(regSearch[key]||'');
+  const total=filterRegItems(key,searchQ).length;
+  let h='<div class="registros-block" style="margin-top:10px">'+
+    '<div class="registros-header" onclick="toggleEstadoBlock(\''+collapsedId+'\')">'+
+      '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
+      '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
+    '</div>'+
+    '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
+    // Search row + chart button INLINE
+    '<div class="registros-toolbar">'+
+      '<input type="text" class="registros-search" id="regsearch_'+key+'" placeholder="🔍 Buscar (texto o fecha)..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
+      (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openChartModal(\''+escapeHTML(opts.chartLabel)+'\',\''+key+'\',\''+opts.chartKey+'\','+(opts.chartColor?'\''+opts.chartColor+'\'':'null')+')">📈</button>':'')+
+    '</div>'+
+    '<div class="registros-list" id="reglist_'+key+'">'+
+      buildRegItems(key,searchQ)+
+    '</div>'+
+    '</div></div>';
+  return h;
+}
+
+function filterRegItems(key,searchQ){
+  const arr=Array.isArray(store[key])?store[key]:[];
   let items=arr.slice().reverse();
-  if(searchQ){
+  const q=(searchQ||'').toLowerCase().trim();
+  if(q){
     items=items.filter(function(it){
       try{
-        // default search: stringify item
+        // match raw fields
         const str=JSON.stringify(it).toLowerCase();
-        return str.indexOf(searchQ)!==-1;
+        if(str.indexOf(q)!==-1)return true;
+        // match formatted date (e.g. "12 mar", "2024-03-12")
+        if(it.date){
+          const fd=fmtDate(it.date).toLowerCase();
+          if(fd.indexOf(q)!==-1)return true;
+          if(String(it.date).toLowerCase().indexOf(q)!==-1)return true;
+        }
+        return false;
       }catch(e){return true;}
     });
   }
-  const total=items.length;
-  // Header
-  let h='<div class="registros-block" style="margin-top:10px">'+
-    '<div class="registros-header" onclick="toggleEstadoBlock(\''+collapsedId+'\')">'+
-      '<span class="registros-title">📋 '+label+' <span class="registros-count">('+total+')</span></span>'+
-      '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
-    '</div>'+
-    '<div class="collapsible'+(collapsed?' collapsed':'')+'">';
-  if(opts.chartLabel&&opts.chartKey){
-    h+='<button class="chart-icon-btn" style="margin-top:8px;margin-bottom:6px" onclick="openChartModal(\''+escapeHTML(opts.chartLabel)+'\',\''+key+'\',\''+opts.chartKey+'\','+(opts.chartColor?'\''+opts.chartColor+'\'':'null')+')">📈 VER GRÁFICA</button>';
-  }
-  // Search bar
-  h+='<div class="registros-search-row">'+
-    '<input type="text" class="registros-search" placeholder="🔍 Buscar..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
-  '</div>';
-  // Scrollable list - 5 items visible
-  h+='<div class="registros-list">';
-  if(items.length){
-    items.forEach(function(it){
-      h+='<div class="history-item">'+
-        '<div class="history-item-content">'+
-          '<div class="history-item-date">'+fmtDate(it.date)+'</div>'+
-          itemRenderer(it)+
-        '</div>'+
+  return items;
+}
+
+function buildRegItems(key,searchQ){
+  const reg=REG_RENDERERS[key];if(!reg)return '';
+  const items=filterRegItems(key,searchQ);
+  if(!items.length)return '<div style="text-align:center;font-size:11px;color:var(--text-dim);padding:14px;font-style:italic;font-family:var(--serif)">Sin resultados</div>';
+  let h='';
+  items.forEach(function(it){
+    h+='<div class="history-item">'+
+      '<div class="history-item-content">'+
+        '<div class="history-item-date">'+fmtDate(it.date)+'</div>'+
+        reg.renderer(it)+
+      '</div>'+
+      '<div class="history-item-actions">'+
+        (it.video?'<button class="view-btn" onclick="openVideoViewer(\''+key+'\','+it.id+')" aria-label="Ver vídeo">▶</button>':'')+
+        '<button class="edit-btn" onclick="editItem(\''+key+'\','+it.id+')" aria-label="Editar">✎</button>'+
         '<button class="delete-btn" onclick="delItem(\''+key+'\','+it.id+')" aria-label="Eliminar">✕</button>'+
-      '</div>';
-    });
-  }else{
-    h+='<div style="text-align:center;font-size:11px;color:var(--text-dim);padding:14px;font-style:italic;font-family:var(--serif)">Sin resultados para "'+escapeHTML(searchQ)+'"</div>';
-  }
-  h+='</div>';
-  h+='</div></div>';
+      '</div>'+
+    '</div>';
+  });
   return h;
 }
 
 const regSearch={};
-function setRegSearch(key,val){regSearch[key]=val;render();}
+function setRegSearch(key,val){
+  regSearch[key]=val;
+  // Update ONLY the list + count, preserving the input focus (no full render)
+  const list=document.getElementById('reglist_'+key);
+  if(list)list.innerHTML=buildRegItems(key,val);
+  const cnt=document.getElementById('regcount_'+key);
+  if(cnt)cnt.textContent='('+filterRegItems(key,val).length+')';
+}
 
 function toggleEstadoBlock(id){store.collapsed[id]=!store.collapsed[id];saveCollapsed();render();}
 
@@ -1937,26 +2132,24 @@ function renderFastingBlock(){
   let h='<div class="card" id="s-fasting">'+
     blockHeader('fasting','🕐','AYUNOS INTERMITENTES','Ayuno Intermitente')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      '<div class="row-with-add" style="margin-bottom:6px">'+
+      // Single row: fecha, última, fin, tiempo (compact), + button
+      '<div class="fast-input-row">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
         '<div class="input-group"><label>ÚLTIMA</label><input type="time" id="fastStart" value="20:00" oninput="updateFastDur()"></div>'+
         '<div class="input-group"><label>FIN</label><input type="time" id="fastEnd" value="12:00" oninput="updateFastDur()"></div>'+
+        '<div class="input-group fast-dur-group"><label id="fastBadgeWrap"><span class="fast-goal-inline fast-goal-met">✓ 12-16h</span></label><div class="fast-dur-box" id="fastDurDisplay">16h:00m</div></div>'+
         '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
-      '</div>'+
-      '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 12px;background:var(--grad-soft);border-radius:10px;margin:6px 0;border:1px solid rgba(167,243,208,0.15);flex-wrap:wrap">'+
-        '<div style="font-family:var(--display);font-size:26px;font-weight:400;color:var(--accent);letter-spacing:-1px;font-style:italic;line-height:1;flex-shrink:0" id="fastDurDisplay">16.0h</div>'+
-        '<div id="fastBadgeWrap" style="display:flex;align-items:center"></div>'+
       '</div>';
   if(store.fasting.length){
     const maxF=Math.max.apply(null,store.fasting.map(function(f){return parseFloat(f.duration);}));
     h+='<div class="grid-3" style="margin-top:8px">'+
-      '<div class="stat"><div class="stat-label">MEDIA</div><div class="stat-value">'+avg(filterByRange(store.fasting,'1m'),'duration')+'<span class="stat-unit">h</span></div></div>'+
-      '<div class="stat"><div class="stat-label">HISTÓRICO</div><div class="stat-value">'+avg(store.fasting,'duration')+'<span class="stat-unit">h</span></div></div>'+
-      '<div class="stat"><div class="stat-label">MÁXIMO</div><div class="stat-value">'+maxF.toFixed(1)+'<span class="stat-unit">h</span></div></div>'+
+      '<div class="stat"><div class="stat-label">MEDIA</div><div class="stat-value" style="font-size:15px">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</div></div>'+
+      '<div class="stat"><div class="stat-label">HISTÓRICO</div><div class="stat-value" style="font-size:15px">'+fmtDuration(avg(store.fasting,'duration'))+'</div></div>'+
+      '<div class="stat"><div class="stat-label">MÁXIMO</div><div class="stat-value" style="font-size:15px">'+fmtDuration(maxF)+'</div></div>'+
     '</div>';
     h+=renderRegistros('fasting','AYUNOS',function(f){
-      return '<div class="history-item-value">'+f.start+' → '+f.end+' · <strong style="color:var(--accent)">'+f.duration+'h</strong>'+(parseFloat(f.duration)>12?'<span class="badge badge-success">+12h</span>':'')+'</div>';
-    },{chartLabel:'Ayunos',chartKey:'duration',chartColor:'#fbbf24'});
+      return '<div class="history-item-value">'+f.start+' → '+f.end+' · <strong style="color:var(--accent)">'+fmtDuration(f.duration)+'</strong>'+(parseFloat(f.duration)>12?'<span class="badge badge-success">+12h</span>':'')+'</div>';
+    },{chartLabel:'Ayunos (h)',chartKey:'duration',chartColor:'#fbbf24'},'fasting');
   }
   h+='</div></div>';
   return h;
@@ -2055,25 +2248,24 @@ function renderSleepBlock(){
   let h='<div class="card" id="s-sleep">'+
     '<div class="card-title" onclick="toggleEstadoBlock(\'sleep\')">'+
       '<div class="card-title-text"><span>😴 SUEÑO <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Sueño\')">?</button></span></div>'+
-      '<div style="display:flex;align-items:center;gap:6px">'+
-        '<button class="add-btn add-btn-mini" onclick="event.stopPropagation();addSleep()" title="Registrar sueño">+</button>'+
-        '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
-      '</div>'+
+      '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // Two compact rows of inputs
+      // Row 1: fecha + hrv + horas
       '<div class="grid-4" style="gap:5px;margin-top:6px">'+
         '<div class="input-group date-compact" style="grid-column:span 2"><label>FECHA</label><input type="date" id="sleepDate" value="'+today()+'"></div>'+
         '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
         '<div class="input-group"><label>HORAS</label><input type="number" step="0.1" id="sleepHours" placeholder="7.5"></div>'+
       '</div>'+
-      '<div class="grid-4" style="gap:5px;margin-top:5px">'+
-        '<div class="input-group" style="grid-column:span 2"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
-        '<div class="input-group" style="grid-column:span 2"><label>HR NOCTURNO</label><input type="number" id="sleepHR" placeholder="52"></div>'+
+      // Row 2: puntuacion + hr + (+) button aligned right
+      '<div class="sleep-row2" style="margin-top:5px">'+
+        '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
+        '<div class="input-group"><label>HR NOCTURNO</label><input type="number" id="sleepHR" placeholder="52"></div>'+
+        '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
       '</div>';
   if(store.sleep.length){
     h+=renderRegistros('sleep','SUEÑO',function(s){
-      return '<div style="font-size:11.5px;color:#bbb">HRV '+s.hrv+' · '+s.hours+'h · Score '+s.score+' · HR '+s.hr+'bpm</div>';
+      return '<div style="font-size:11.5px;color:#bbb">HRV '+s.hrv+' · '+fmtDuration(s.hours)+' · Score '+s.score+' · HR '+s.hr+'bpm</div>';
     },{chartLabel:'HRV',chartKey:'hrv',chartColor:'#a7f3d0'});
   }
   h+='</div></div>';
@@ -2084,18 +2276,18 @@ function renderSleepBlock(){
 function renderAllergyBlock(){
   const collapsed=store.collapsed.allergy!==false;
   let h='<div class="card" id="s-allergy">'+
-    blockHeader('allergy','🤧','SÍNTOMAS ALERGIA','Alergia')+
+    blockHeader('allergy','🤧','ALERGIAS','Alergia')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
       '<div class="row-with-add">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="allergyDate" value="'+today()+'"></div>'+
-        '<div class="input-group" style="max-width:90px"><label>INTENSIDAD</label><input type="number" id="allergyLevel" min="1" max="10" placeholder="1-10"></div>'+
+        '<div class="input-group" style="flex:0 0 72px"><label>INTENS.</label><input type="number" id="allergyLevel" min="1" max="10" placeholder="1-10"></div>'+
+        '<div class="input-group" style="flex:1"><label>NOTAS</label><input type="text" id="allergyNotes" placeholder="Síntomas, causas..."></div>'+
         '<button class="add-btn" onclick="addAllergy()" title="Registrar">+</button>'+
-      '</div>'+
-      '<div class="input-group" style="margin-top:6px"><label>NOTAS</label><textarea id="allergyNotes" placeholder="Síntomas, causas..."></textarea></div>';
+      '</div>';
   if(store.allergy.length){
-    h+=renderRegistros('allergy','ALERGIA',function(a){
+    h+=renderRegistros('allergy','ALERGIAS',function(a){
       return '<div class="history-item-value">Intensidad '+a.level+'/10</div>'+(a.notes?'<div style="font-size:10.5px;color:#777;margin-top:2px">'+escapeHTML(a.notes)+'</div>':'');
-    },{chartLabel:'Alergia',chartKey:'level',chartColor:'#f87171'});
+    },{chartLabel:'Alergias',chartKey:'level',chartColor:'#f87171'});
   }
   h+='</div></div>';
   return h;
@@ -2126,7 +2318,7 @@ function renderVO2Block(){
 
 function scrollTo2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 function addWeight(){const date=document.getElementById('weightDate').value;const value=document.getElementById('weightVal').value;if(!date||!value)return alert('Completa los campos');store.weight.push({id:Date.now(),date:date,value:value});save('weight',store.weight);render();}
-function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const dur=((e-s)/60).toFixed(1);const d=document.getElementById('fastDurDisplay');if(d){d.textContent=dur+'h';const f=parseFloat(dur);let badgeHtml='';if(f>16)badgeHtml='<div class="fast-goal-inline fast-goal-extended">🎯 +16h</div>';else if(f>=12)badgeHtml='<div class="fast-goal-inline fast-goal-met">✓ 12-16h</div>';else badgeHtml='<div class="fast-goal-inline fast-goal-pending">Meta 16h</div>';document.getElementById('fastBadgeWrap').innerHTML=badgeHtml;}}
+function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const durDec=(e-s)/60;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
 function addFast(){const date=document.getElementById('fastDate').value;const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
@@ -2205,17 +2397,22 @@ function renderActividad(c){
           const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
           const completed=data.done===true;
           const hasText=!!(data.text&&data.text.trim());
+          const hasImage=!!data.image;
           let content;
-          // Center: text fills, image goes RIGHT (push-to-right)
-          content='<div class="day-row-center" onclick="openDayEditor(\''+d.id+'\')">'+
-            (hasText
-              ?'<span class="day-row-text">'+escapeHTML(data.text.substring(0,30))+(data.text.length>30?'…':'')+'</span>'
-              :'<span class="day-row-text empty">+ Añadir entrenamiento</span>')+
-          '</div>'+
-          // Clear-text button (only if there is text)
-          (hasText?'<button class="day-clear-text-btn" onclick="event.stopPropagation();clearDayText(\''+d.id+'\')" title="Borrar texto">✕</button>':'')+
-          // Thumbnail pushed to the right
-          (data.image?'<div class="day-thumb-small day-thumb-right" onclick="event.stopPropagation();openImageViewer(\''+d.id+'\',\'actividad\')"><img src="'+data.image+'"></div>':'');
+          if(hasImage){
+            // Image present: centered thumbnail, no text
+            content='<div class="day-row-center day-row-img-center" onclick="event.stopPropagation();openImageViewer(\''+d.id+'\',\'actividad\')">'+
+              '<div class="day-thumb-centered"><img src="'+data.image+'"></div>'+
+            '</div>'+
+            (hasText?'<button class="day-clear-text-btn" onclick="event.stopPropagation();clearDayText(\''+d.id+'\')" title="Borrar texto">✕</button>':'');
+          }else{
+            content='<div class="day-row-center" onclick="openDayEditor(\''+d.id+'\')">'+
+              (hasText
+                ?'<span class="day-row-text">'+escapeHTML(data.text.substring(0,30))+(data.text.length>30?'…':'')+'</span>'
+                :'<span class="day-row-text empty">+ Añadir entrenamiento</span>')+
+            '</div>'+
+            (hasText?'<button class="day-clear-text-btn" onclick="event.stopPropagation();clearDayText(\''+d.id+'\')" title="Borrar texto">✕</button>':'');
+          }
           return '<div class="day-row '+(completed?'day-done':'')+'">'+
             '<div class="day-label" onclick="openDayEditor(\''+d.id+'\')">'+d.short+'</div>'+
             content+
@@ -2327,18 +2524,23 @@ function renderActividad(c){
     '</div>';
   }
 
-  // 2) RECORDS (mejores marcas)
+  // 2) RECORDS (mejores marcas) - with video support
   h+='<div class="card">'+
     '<div class="card-title" onclick="toggleEstadoBlock(\'records\')"><div class="card-title-text"><span>🥇 MEJORES MARCAS</span></div><button class="collapse-btn">'+(recordsCollapsed?'▼':'▲')+'</button></div>'+
     '<div class="collapsible'+(recordsCollapsed?' collapsed':'')+'">'+
-      '<div class="input-group"><label>EJERCICIO</label><input type="text" id="recName" placeholder="Back Squat, Fran, 5K..."></div>'+
+      // Line 1: ejercicio + video attach
       '<div class="row-with-add">'+
+        '<div class="input-group" style="flex:1"><label>EJERCICIO</label><input type="text" id="recName" placeholder="Back Squat, Fran, 5K..."></div>'+
+        '<div class="rec-video-area" id="recVideoArea" onclick="document.getElementById(\'recVideoInput\').click()" title="Adjuntar vídeo"><span id="recVideoIcon">🎬</span><input type="file" id="recVideoInput" accept="video/*" style="display:none" onchange="handleRecVideo(event)"></div>'+
+      '</div>'+
+      // Line 2: valor + fecha + add
+      '<div class="row-with-add" style="margin-top:6px">'+
         '<div class="input-group"><label>VALOR</label><input type="text" id="recValue" placeholder="140kg"></div>'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="recDate" value="'+today()+'"></div>'+
         '<button class="add-btn" onclick="addRecord()" title="Guardar marca">+</button>'+
       '</div>'+
       (store.records.length?renderRegistros('records','MARCAS',function(r){
-        return '<div style="font-size:12px"><strong>'+escapeHTML(r.name)+':</strong> <span style="color:var(--accent)">'+escapeHTML(r.value)+'</span></div>';
+        return '<div style="font-size:12px"><strong>'+escapeHTML(r.name)+':</strong> <span style="color:var(--accent)">'+escapeHTML(r.value)+'</span>'+(r.video?' <span style="color:#60a5fa;font-size:10px">🎬</span>':'')+'</div>';
       },{}):'')+
     '</div>'+
   '</div>';
@@ -2376,7 +2578,29 @@ function renderActividad(c){
 function setActType(t){actType=t;render();}
 function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:(document.getElementById('actDuration')||{}).value||'',result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);render();}
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
-function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date});save('records',store.records);render();}
+function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);render();}
+let recVideoData=null;
+function handleRecVideo(e){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>25*1024*1024){alert('El vídeo es muy grande (máx 25MB). Usa uno más corto.');return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){recVideoData=ev.target.result;const ic=document.getElementById('recVideoIcon');if(ic){ic.textContent='✓';const a=document.getElementById('recVideoArea');if(a)a.classList.add('has-video');}};
+  reader.readAsDataURL(file);
+}
+function openVideoViewer(key,id){
+  const item=(store[key]||[]).find(function(x){return x.id===id;});
+  if(!item||!item.video)return;
+  const v=document.getElementById('videoViewerEl');
+  v.src=item.video;
+  document.getElementById('videoViewer').classList.add('active');
+  try{v.play();}catch(e){}
+}
+function closeVideoViewer(){
+  const v=document.getElementById('videoViewerEl');
+  try{v.pause();}catch(e){}
+  v.src='';
+  document.getElementById('videoViewer').classList.remove('active');
+}
 function addSport(){const name=document.getElementById('newSportName').value.trim();if(!name)return alert('Pon un nombre');const id=name.toLowerCase().replace(/[^a-z0-9]/g,'_');if(store.sports.find(function(s){return s.id===id;}))return alert('Ya existe');store.sports.push({id:id,name:name});save('sports',store.sports);render();}
 function delSport(id){if(!confirm('¿Eliminar este deporte?'))return;store.sports=store.sports.filter(function(s){return s.id!==id;});save('sports',store.sports);if(store.sportParams&&store.sportParams[id]){delete store.sportParams[id];saveSportParams();}if(actType===id)actType=(store.sports[0]||{}).id||'crossfit';render();}
 function renameSport(id,newName){const sp=store.sports.find(function(s){return s.id===id;});if(!sp)return;sp.name=newName;save('sports',store.sports);}
@@ -2604,12 +2828,17 @@ function updateMedConfig(){
 }
 
 function toggleMed(){
-  unlockAudio().then(function(){
-    if(medState==='idle'){
-      if(medConfig.countdown>0)startCountdown();else startMeditation();
-    }else if(medState==='running')pauseMeditation();
-    else if(medState==='paused')resumeMeditation();
-  });
+  // Create + resume audio context SYNCHRONOUSLY inside the user gesture (iOS requirement)
+  try{
+    const ctx=getAudioCtx();
+    if(ctx&&ctx.state==='suspended')ctx.resume();
+    // Play a tiny silent buffer to fully unlock on iOS
+    if(ctx){const b=ctx.createBuffer(1,1,22050);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0);}
+  }catch(e){}
+  if(medState==='idle'){
+    if(medConfig.countdown>0)startCountdown();else startMeditation();
+  }else if(medState==='running')pauseMeditation();
+  else if(medState==='paused')resumeMeditation();
 }
 
 function startCountdown(){
@@ -2807,45 +3036,38 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
   if(id==='environment'){
     const autoW=store.settings.autoWeather;
     const hasLoc=store.settings.autoLocation;
+    const solUV=uv;
+    const uvColor=solUV>=8?'#dc2626':solUV>=6?'#f59e0b':solUV>=3?'#fbbf24':solUV>=1?'#a7f3d0':'#475569';
     return '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'environment\')"><div class="card-title-text"><span>🌍 ENTORNO <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Clima\')">?</button></span></div><button class="collapse-btn">'+(store.collapsed.environment?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.environment?' collapsed':'')+'">'+
-        // Location
+        // Location: toggle + coords + button ALL one line
         '<div class="sub-section-label">📍 UBICACIÓN</div>'+
-        '<div class="toggle-row" style="padding:4px 0">'+
-          '<span class="toggle-label" style="font-size:11px">Geolocalización auto</span>'+
+        '<div class="env-loc-row">'+
+          '<span class="toggle-label" style="font-size:10.5px;white-space:nowrap">Geo auto</span>'+
           '<div class="toggle '+(store.settings.autoLocation?'active':'')+'" onclick="toggleAutoLoc(this)"><div class="toggle-handle"></div></div>'+
+          '<span class="env-coords">'+store.settings.lat.toFixed(3)+'°, '+store.settings.lng.toFixed(3)+'°</span>'+
+          '<button class="env-loc-btn" onclick="refreshGeo()" title="Actualizar ubicación">📍</button>'+
         '</div>'+
-        (!store.settings.autoLocation?'<div class="grid-2" style="margin-top:4px"><div class="input-group"><label>LATITUD</label><input type="number" step="0.0001" id="manLat" value="'+store.settings.lat+'" onchange="updateManLoc()"></div><div class="input-group"><label>LONGITUD</label><input type="number" step="0.0001" id="manLng" value="'+store.settings.lng+'" onchange="updateManLoc()"></div></div>':'')+
-        '<div style="font-size:10.5px;color:var(--text-dim);text-align:center;margin-top:4px;font-family:var(--sans)">📍 '+store.settings.lat.toFixed(4)+'°, '+store.settings.lng.toFixed(4)+'°</div>'+
+        (!store.settings.autoLocation?'<div class="grid-2" style="margin-top:5px"><div class="input-group"><label>LAT</label><input type="number" step="0.0001" id="manLat" value="'+store.settings.lat+'" onchange="updateManLoc()"></div><div class="input-group"><label>LNG</label><input type="number" step="0.0001" id="manLng" value="'+store.settings.lng+'" onchange="updateManLoc()"></div></div>':'')+
         '<div class="env-divider"></div>'+
-        // Weather
-        '<div class="sub-section-label">🌤️ CLIMA</div>'+
-        '<div class="toggle-row" style="padding:4px 0">'+
-          '<div style="flex:1;min-width:0">'+
-            '<span class="toggle-label" style="font-size:11px">Detectar según ubicación</span>'+
-            '<div style="font-size:9px;color:var(--text-dim);font-family:var(--serif);font-style:italic;margin-top:1px">'+(autoW&&hasLoc?'Sincronizado':'Manual')+'</div>'+
-          '</div>'+
-          '<div class="toggle '+(autoW?'active':'')+'" onclick="toggleAutoWeather(this)"><div class="toggle-handle"></div></div>'+
+        // Weather: always-on label, just shows detected + toggle to switch manual
+        '<div class="env-loc-row">'+
+          '<span class="sub-section-label" style="margin:0;flex:0 0 auto">🌤️ CLIMA</span>'+
+          (autoW?'<span style="font-size:13px;margin-left:4px">'+(WEATHER_PRESETS[store.settings.weather||'soleado'].icon)+'</span><span style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.6px;font-size:10px">'+WEATHER_PRESETS[store.settings.weather||'soleado'].name+'</span>':'<span style="font-size:9px;color:var(--text-dim)">Manual</span>')+
+          '<div class="toggle '+(autoW?'active':'')+'" onclick="toggleAutoWeather(this)" style="margin-left:auto"><div class="toggle-handle"></div></div>'+
         '</div>'+
-        (autoW?'<div style="text-align:center;padding:6px 10px;margin:4px 0;background:rgba(167,243,208,0.04);border:1px solid rgba(167,243,208,0.15);border-radius:10px;font-size:13px;font-family:var(--sans)"><span style="font-size:18px;vertical-align:middle">'+(WEATHER_PRESETS[store.settings.weather||'soleado'].icon)+'</span> <span style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;font-size:11px;vertical-align:middle;margin-left:5px">'+WEATHER_PRESETS[store.settings.weather||'soleado'].name+'</span></div>':
-          '<div class="weather-tabs" style="margin-top:4px">'+
-            Object.entries(WEATHER_PRESETS).map(function(entry){
-              const k=entry[0],w=entry[1];
-              const active=(store.settings.weather||'soleado')===k;
-              return '<button class="weather-tab '+(active?'active':'')+'" onclick="setWeather(\''+k+'\')"><span>'+w.icon+'</span>'+w.name.toUpperCase()+'</button>';
-            }).join('')+
-          '</div>')+
-        // UV values
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'+
-          '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:7px;text-align:center">'+
-            '<div style="font-size:9px;color:#60a5fa;text-transform:uppercase;letter-spacing:1px;font-weight:600">UVA ACTUAL</div>'+
-            '<div style="font-family:var(--serif);font-size:20px;font-weight:500;color:#60a5fa;font-style:italic;margin-top:2px">'+uva.toFixed(1)+'</div>'+
-          '</div>'+
-          '<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:7px;text-align:center">'+
-            '<div style="font-size:9px;color:#c084fc;text-transform:uppercase;letter-spacing:1px;font-weight:600">UVB ACTUAL</div>'+
-            '<div style="font-family:var(--serif);font-size:20px;font-weight:500;color:#c084fc;font-style:italic;margin-top:2px">'+uvb.toFixed(1)+'</div>'+
-          '</div>'+
+        (!autoW?'<div class="weather-tabs" style="margin-top:5px">'+
+          Object.entries(WEATHER_PRESETS).map(function(entry){
+            const k=entry[0],w=entry[1];
+            const active=(store.settings.weather||'soleado')===k;
+            return '<button class="weather-tab '+(active?'active':'')+'" onclick="setWeather(\''+k+'\')"><span>'+w.icon+'</span>'+w.name.toUpperCase()+'</button>';
+          }).join('')+'</div>':'')+
+        // SOL / UVA / UVB chips - all on one line, small
+        '<div class="env-uv-row">'+
+          '<div class="env-uv-chip" style="border-color:'+uvColor+'33"><span style="color:'+uvColor+'">SOL</span><b style="color:'+uvColor+'">UV '+solUV.toFixed(1)+'</b></div>'+
+          '<div class="env-uv-chip" style="border-color:rgba(96,165,250,0.25)"><span style="color:#60a5fa">UVA</span><b style="color:#60a5fa">'+uva.toFixed(1)+'</b></div>'+
+          '<div class="env-uv-chip" style="border-color:rgba(192,132,252,0.25)"><span style="color:#c084fc">UVB</span><b style="color:#c084fc">'+uvb.toFixed(1)+'</b></div>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -3092,6 +3314,17 @@ function toggleAutoLoc(el){
   }else render();
 }
 function updateManLoc(){store.settings.lat=parseFloat(document.getElementById('manLat').value);store.settings.lng=parseFloat(document.getElementById('manLng').value);saveSettings();render();}
+function refreshGeo(){
+  if(!navigator.geolocation){alert('Geolocalización no disponible');return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    store.settings.lat=pos.coords.latitude;
+    store.settings.lng=pos.coords.longitude;
+    store.settings.autoLocation=true;
+    saveSettings();
+    if(store.settings.autoWeather)detectWeather();
+    render();
+  },function(){alert('No se pudo obtener la ubicación. Revisa los permisos.');},{enableHighAccuracy:true,timeout:8000});
+}
 function updateSunSlider(val){sunSliderHour=parseFloat(val);sunLive=false;render();}
 
 function toggleSunTimer(){
@@ -3203,7 +3436,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 15.0</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 16.0</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -3267,22 +3500,29 @@ function deleteAll(){
 window.addEventListener('error',function(e){console.warn('captured:',e.message);return true;});
 
 if(navigator.geolocation&&store.settings.autoLocation){
-  try{
-    navigator.geolocation.getCurrentPosition(function(pos){
-      store.settings.lat=pos.coords.latitude;
-      store.settings.lng=pos.coords.longitude;
-      saveSettings();
-      if(store.settings.autoWeather)detectWeather();
-      if(currentTab==='panel'||currentTab==='sol')render();
-    },function(){},{timeout:5000});
-  }catch(e){}
+  // Only request fresh location if we don't have a recent cached one (within 12h)
+  const lastGeo=parseInt(localStorage.getItem('h_lastGeoTime')||'0');
+  const geoAge=Date.now()-lastGeo;
+  const hasCached=store.settings.lat&&store.settings.lng;
+  if(!hasCached||geoAge>12*3600*1000){
+    try{
+      navigator.geolocation.getCurrentPosition(function(pos){
+        store.settings.lat=pos.coords.latitude;
+        store.settings.lng=pos.coords.longitude;
+        saveSettings();
+        localStorage.setItem('h_lastGeoTime',String(Date.now()));
+        if(store.settings.autoWeather)detectWeather();
+        if(currentTab==='panel'||currentTab==='sol')render();
+      },function(){},{timeout:8000,maximumAge:12*3600*1000});
+    }catch(e){}
+  }
 }
 
 if(store.settings.autoWeather){
   setTimeout(function(){detectWeather();},1200);
 }
 
-render();
+showTab('panel');
 </script>
 </body>
 </html>
