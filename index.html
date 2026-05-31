@@ -740,7 +740,17 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end}
 
 /* Panel sun UVA/UVB mini chips bottom-right of graph */
-.panel-uv-mini{position:absolute;bottom:6px;right:2px;display:flex;flex-direction:column;gap:3px;pointer-events:none;z-index:3}
+.panel-uv-mini{position:absolute;bottom:8px;right:4px;display:flex;flex-direction:column;gap:4px;pointer-events:none;z-index:3;align-items:stretch}
+.panel-uv-fused{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,0.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:2px 5px;line-height:1;width:98px;box-sizing:border-box}
+.puf-name{font-family:var(--sans);font-size:7.5px;font-weight:700;letter-spacing:0.3px;flex-shrink:0}
+.puf-val{font-family:var(--sans);font-size:11px;font-weight:600;color:#fff;flex-shrink:0;letter-spacing:-0.3px}
+.puf-state{font-family:var(--sans);font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.2px;margin-left:auto;text-align:right}
+.sun-uv-status{position:absolute;bottom:-8px;right:0;display:flex;flex-direction:column;gap:3px;pointer-events:none;z-index:4;align-items:stretch}
+.sun-uv-status-chip{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,0.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:2px 5px;width:108px;box-sizing:border-box}
+.suvc-name{font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.3px;line-height:1;flex-shrink:0}
+.suvc-state{font-family:var(--sans);font-size:6.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.2px;border:1px solid;border-radius:4px;padding:1px 3px;line-height:1;white-space:nowrap;margin-left:auto}
+.panel-uv-row{display:flex;align-items:center;gap:3px}
+.panel-uv-state{background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 5px;font-family:var(--sans);font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;line-height:1;white-space:nowrap}
 .panel-uv-chip{background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:2px 6px;font-family:var(--serif);font-style:italic;font-size:12px;font-weight:500;display:flex;align-items:center;gap:4px;line-height:1}
 .panel-uv-chip span{font-family:var(--sans);font-style:normal;font-size:7px;font-weight:700;letter-spacing:0.5px;opacity:0.8}
 
@@ -1687,6 +1697,15 @@ function calcSunTimes(lat,lng,date){
 function uvIndex(hour,t,w){if(hour<t.sunrise||hour>t.sunset)return 0;const nd=Math.abs(hour-t.noon);const dl=(t.sunset-t.sunrise)/2;let uv=Math.max(0,Math.min(11,11*(1-Math.pow(nd/dl,2))));if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];uv*=wp.uvMult;}return uv;}
 function uvaIndex(hour,t,w){if(hour<t.uvaStart||hour>t.uvaEnd)return 0;const nd=Math.abs(hour-t.noon);const dl=(t.uvaEnd-t.uvaStart)/2;let v=Math.max(0,Math.min(11,11*(1-Math.pow(nd/dl,1.6))));if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];v*=wp.uvMult;}return v;}
 function uvbIndex(hour,t,w){if(hour<t.uvbStart||hour>t.uvbEnd)return 0;const nd=Math.abs(hour-t.noon);const dl=(t.uvbEnd-t.uvbStart)/2;let v=Math.max(0,Math.min(11,11*(1-Math.pow(nd/dl,1.4))));if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];v*=wp.uvbMult;}return v;}
+// Classify a UV index value (0-11 scale) into WHO-style band with label + color.
+function uvLevel(v){
+  if(v<0.5)return{label:'Nulo',color:'#475569'};
+  if(v<3)return{label:'Bajo',color:'#34d399'};
+  if(v<6)return{label:'Moderado',color:'#fbbf24'};
+  if(v<8)return{label:'Alto',color:'#fb923c'};
+  if(v<11)return{label:'Muy alto',color:'#f87171'};
+  return{label:'Extremo',color:'#c084fc'};
+}
 
 // Vit D considering skin type, clothing AND age
 // Age factor: synthesis declines ~13% per decade after 20 (7-DHC depletion). 70yo makes ~25% of a 20yo.
@@ -2063,11 +2082,11 @@ function renderSunPanel(times,hour,uv,isDay){
         '<div class="sun-time-small" style="font-size:7px;letter-spacing:1px;margin-top:2px">'+(sunLive?'<span class="sun-live-dot"></span>EN VIVO ':'')+phase+'</div>'+
         '<div class="sun-uv-big" style="color:'+uvColor+';font-size:13px;margin-top:3px">UV '+uv.toFixed(1)+'</div>'+
       '</div>'+
-      // Small UVA/UVB chips overlaid bottom-right of the graph
-      '<div class="panel-uv-mini">'+
-        '<div class="panel-uv-chip" style="color:#60a5fa"><span>UVA</span>'+uva.toFixed(1)+'</div>'+
-        '<div class="panel-uv-chip" style="color:#c084fc"><span>UVB</span>'+uvb.toFixed(1)+'</div>'+
-      '</div>'+
+    '</div>'+
+    // Fused UVA/UVB chips placed in the card's bottom-right gap (outside the circle)
+    '<div class="panel-uv-mini">'+
+      '<div class="panel-uv-fused"><span class="puf-name" style="color:#60a5fa">UVA</span><span class="puf-val">'+uva.toFixed(1)+'</span><span class="puf-state" style="color:'+uvLevel(uva).color+'">'+uvLevel(uva).label+'</span></div>'+
+      '<div class="panel-uv-fused"><span class="puf-name" style="color:#c084fc">UVB</span><span class="puf-val">'+uvb.toFixed(1)+'</span><span class="puf-state" style="color:'+uvLevel(uvb).color+'">'+uvLevel(uvb).label+'</span></div>'+
     '</div>'+
     // EN VIVO button in top-right corner (IR moved to block header)
     '<div class="panel-sun-actions">'+
@@ -2080,6 +2099,8 @@ function renderSunPanel(times,hour,uv,isDay){
 function renderSunDashboard(times,hour,uv,isDay){
   const uvColor=uv>=8?'#dc2626':uv>=6?'#f59e0b':uv>=3?'#fbbf24':uv>=1?'#a7f3d0':'#475569';
   const phase=getCurrentPhase(hour,times);
+  const uvaL=uvaIndex(hour,times,true);
+  const uvbL=uvbIndex(hour,times,true);
   return '<div class="card" style="padding:14px 10px;position:relative">'+
     // Floating "Volver a en vivo" top-right (only when not live)
     (!sunLive?'<button class="live-mini-btn-floating" onclick="resetSunLive()" title="Volver a en vivo">⚡ EN VIVO</button>':'')+
@@ -2089,6 +2110,11 @@ function renderSunDashboard(times,hour,uv,isDay){
         '<div class="sun-time-big">'+fmtHour(hour)+'</div>'+
         '<div class="sun-time-small">'+(sunLive?'<span class="sun-live-dot"></span>EN VIVO ':'')+phase+'</div>'+
         '<div class="sun-uv-big" style="color:'+uvColor+'">UV '+uv.toFixed(1)+'</div>'+
+      '</div>'+
+      // Live UVA/UVB status chips overlaid in the empty corner (above the OCASO area)
+      '<div class="sun-uv-status">'+
+        '<div class="sun-uv-status-chip"><span class="suvc-name" style="color:#60a5fa">UVA '+uvaL.toFixed(1)+'</span><span class="suvc-state" style="color:'+uvLevel(uvaL).color+';border-color:'+uvLevel(uvaL).color+'55">'+uvLevel(uvaL).label+'</span></div>'+
+        '<div class="sun-uv-status-chip"><span class="suvc-name" style="color:#c084fc">UVB '+uvbL.toFixed(1)+'</span><span class="suvc-state" style="color:'+uvLevel(uvbL).color+';border-color:'+uvLevel(uvbL).color+'55">'+uvLevel(uvbL).label+'</span></div>'+
       '</div>'+
     '</div>'+
     '<div style="display:flex;justify-content:center;gap:14px;font-size:9.5px;color:var(--text-muted);margin-top:4px;flex-wrap:wrap;letter-spacing:0.4px;font-family:var(--sans)">'+
@@ -4992,7 +5018,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.38</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.42</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
