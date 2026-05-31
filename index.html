@@ -1832,7 +1832,7 @@ const WIDGET_DEFS={
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date)}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date)}:null;}},
-  vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const total=f.reduce(function(s,x){return s+(parseFloat(x.vitd)||0);},0);const ngml=total/100;return{val:ngml.toFixed(1),unit:'ng/ml',sub:'aporte 30 días'};}},
+  vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const avgDaily=(typeof vitDAvgDaily30==='function')?vitDAvgDaily30():0;const boost=Math.min(40,avgDaily/100);return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte del sol'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
   health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
 };
@@ -4992,7 +4992,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.37</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.38</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
