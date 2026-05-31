@@ -170,6 +170,10 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .range-buttons::-webkit-scrollbar{display:none}
 .range-btn{padding:5px 11px;background:transparent;border:1px solid var(--border-strong);border-radius:14px;color:var(--text-muted);font-size:10.5px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.18s;font-family:var(--sans);flex-shrink:0;text-transform:uppercase;letter-spacing:0.5px}
 .range-btn.active{background:rgba(167,243,208,0.06);color:var(--accent);font-weight:700;text-shadow:0 0 8px rgba(167,243,208,0.5);border-color:rgba(167,243,208,0.3)}
+.metric-buttons{display:flex;gap:5px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;width:100%}
+.metric-buttons::-webkit-scrollbar{display:none}
+.metric-btn{padding:6px 13px;background:rgba(255,255,255,0.03);border:1px solid var(--border-strong);border-radius:9px;color:var(--text-muted);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.18s;font-family:var(--sans);flex-shrink:0}
+.metric-btn.active{background:rgba(167,243,208,0.12);color:var(--accent);border-color:rgba(167,243,208,0.4);box-shadow:0 0 8px rgba(167,243,208,0.15)}
 
 /* HISTORY */
 .history{max-height:240px;overflow-y:auto;margin-top:8px;width:100%}
@@ -965,6 +969,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 <div class="modal-content">
 <div class="modal-handle"></div>
 <div class="modal-header"><div class="modal-title" id="chartModalTitle">Gráfica</div><button class="modal-close" onclick="closeModal('chart')">×</button></div>
+<div class="metric-buttons" id="chartModalMetrics" style="display:none"></div>
 <div class="range-buttons" id="chartModalRanges"></div>
 <div class="chart-container" style="height:260px"><canvas id="modalChart"></canvas></div>
 </div>
@@ -2494,21 +2499,104 @@ function toggleWidget(id,el){if(store.widgets.includes(id)){store.widgets=store.
 
 // ============= CHART MODAL =============
 let currentChartConfig=null;
-function openChartModal(title,dataSource,dataKey,color){
-  currentChartConfig={dataSource:dataSource,dataKey:dataKey,color:color||'#a7f3d0'};
+// Open a registro's chart using the opts stored in REG_RENDERERS (supports advanced opts).
+function openRegChart(key){
+  const r=REG_RENDERERS[key];
+  if(!r||!r.opts)return;
+  const o=r.opts;
+  openChartModal(o.chartLabel||r.label||'Gráfica',key,o.chartKey,o.chartColor,{
+    transform:o.chartTransform||null,
+    aggregate:o.chartAggregate||null,
+    yLabel:o.chartYLabel||o.chartLabel,
+    metrics:o.chartMetrics||null
+  });
+}
+// openChartModal(title, dataSource, dataKey, color, opts)
+// opts (all optional):
+//   transform: fn(value,item) -> number   (e.g. IU -> ng/ml)
+//   aggregate: 'count' | 'sum'             (totals per time bucket instead of per-record)
+//   yLabel: string                          (axis/tooltip label)
+//   metrics: [{key,label,color,transform,aggregate,yLabel}]  (selectable metric buttons)
+function openChartModal(title,dataSource,dataKey,color,opts){
+  opts=opts||{};
+  currentChartConfig={dataSource:dataSource,dataKey:dataKey,color:color||'#a7f3d0',
+    transform:opts.transform||null,aggregate:opts.aggregate||null,yLabel:opts.yLabel||title,
+    metrics:opts.metrics||null,metricIdx:0,title:title};
   document.getElementById('chartModalTitle').textContent=title;
-  const rangesDiv=document.getElementById('chartModalRanges');
-  rangesDiv.innerHTML=['1m','2m','6m','1y','all'].map(function(r){return '<button class="range-btn '+(currentRange===r?'active':'')+'" onclick="setModalRange(\''+r+'\')">'+(r==='all'?'TODO':r.toUpperCase())+'</button>';}).join('');
+  renderChartRangeButtons();
+  renderChartMetricButtons();
   openModal('chart');
   setTimeout(function(){renderModalChart();},80);
 }
-function setModalRange(r){currentRange=r;const rangesDiv=document.getElementById('chartModalRanges');rangesDiv.innerHTML=['1m','2m','6m','1y','all'].map(function(rg){return '<button class="range-btn '+(currentRange===rg?'active':'')+'" onclick="setModalRange(\''+rg+'\')">'+(rg==='all'?'TODO':rg.toUpperCase())+'</button>';}).join('');renderModalChart();}
+function renderChartRangeButtons(){
+  const rangesDiv=document.getElementById('chartModalRanges');
+  if(!rangesDiv)return;
+  rangesDiv.innerHTML=['1m','2m','6m','1y','all'].map(function(r){return '<button class="range-btn '+(currentRange===r?'active':'')+'" onclick="setModalRange(\''+r+'\')">'+(r==='all'?'TODO':r.toUpperCase())+'</button>';}).join('');
+}
+function renderChartMetricButtons(){
+  const el=document.getElementById('chartModalMetrics');
+  if(!el)return;
+  const cfg=currentChartConfig;
+  if(!cfg||!cfg.metrics){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='flex';
+  el.innerHTML=cfg.metrics.map(function(m,i){return '<button class="metric-btn '+(cfg.metricIdx===i?'active':'')+'" onclick="setChartMetric('+i+')">'+m.label+'</button>';}).join('');
+}
+function setChartMetric(i){
+  if(!currentChartConfig||!currentChartConfig.metrics)return;
+  currentChartConfig.metricIdx=i;
+  const m=currentChartConfig.metrics[i];
+  currentChartConfig.dataKey=m.key;
+  currentChartConfig.color=m.color||currentChartConfig.color;
+  currentChartConfig.transform=m.transform||null;
+  currentChartConfig.aggregate=m.aggregate||null;
+  currentChartConfig.yLabel=m.yLabel||m.label;
+  document.getElementById('chartModalTitle').textContent=m.label;
+  renderChartMetricButtons();
+  renderModalChart();
+}
+function setModalRange(r){currentRange=r;renderChartRangeButtons();renderModalChart();}
+// Aggregate records into time buckets (for totals over time).
+function aggregateByBucket(data,range,mode,dataKey){
+  // choose bucket granularity based on range
+  const byMonth=(range==='6m'||range==='1y'||range==='all');
+  const buckets={};
+  const order=[];
+  data.forEach(function(x){
+    if(!x.date)return;
+    const d=new Date(x.date);
+    const key=byMonth?(x.date.substring(0,7)):(x.date.substring(0,10));
+    if(!(key in buckets)){buckets[key]=0;order.push(key);}
+    if(mode==='count')buckets[key]+=1;
+    else buckets[key]+=(parseFloat(x[dataKey])||0);
+  });
+  order.sort();
+  const labels=order.map(function(k){
+    if(byMonth){const p=k.split('-');return new Date(p[0],p[1]-1,1).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});}
+    return fmtDate(k);
+  });
+  const vals=order.map(function(k){return buckets[k];});
+  return {labels:labels,data:vals};
+}
 function renderModalChart(){
   if(!currentChartConfig)return;
-  const filt=filterByRange(store[currentChartConfig.dataSource],currentRange);
-  const labels=filt.map(function(x){return fmtDate(x.date);});
-  const data=filt.map(function(x){return parseFloat(x[currentChartConfig.dataKey]);});
-  makeChart('modalChart',labels,data,currentChartConfig.dataKey,currentChartConfig.color);
+  const cfg=currentChartConfig;
+  const src=Array.isArray(store[cfg.dataSource])?store[cfg.dataSource].slice():[];
+  // sort chronologically by date
+  src.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  const filt=filterByRange(src,currentRange);
+  let labels,data;
+  if(cfg.aggregate){
+    const agg=aggregateByBucket(filt,currentRange,cfg.aggregate,cfg.dataKey);
+    labels=agg.labels;data=agg.data;
+  }else{
+    labels=filt.map(function(x){return fmtDate(x.date);});
+    data=filt.map(function(x){
+      let v=parseFloat(x[cfg.dataKey]);
+      if(cfg.transform)v=cfg.transform(v,x);
+      return v;
+    });
+  }
+  makeChart('modalChart',labels,data,cfg.yLabel||cfg.dataKey,cfg.color);
 }
 
 // ============= ESTADO =============
@@ -2638,7 +2726,7 @@ function renderRegistros(key,label,itemRenderer,opts){
     // Search row + chart button INLINE
     '<div class="registros-toolbar">'+
       '<input type="text" class="registros-search" id="regsearch_'+key+'" placeholder="🔍 Buscar (texto o fecha)..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
-      (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openChartModal(\''+escapeHTML(opts.chartLabel)+'\',\''+key+'\',\''+opts.chartKey+'\','+(opts.chartColor?'\''+opts.chartColor+'\'':'null')+')">📈</button>':'')+
+      (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openRegChart(\''+key+'\')">📈</button>':'')+
     '</div>'+
     '<div class="registros-list" id="reglist_'+key+'">'+
       buildRegItems(key,searchQ)+
@@ -2878,7 +2966,12 @@ function renderSleepBlock(){
       const ev=evalSleep(s);
       return '<div style="font-size:11.5px;color:#bbb">HRV '+s.hrv+' · '+fmtDuration(s.hours)+' · Score '+s.score+' · HR '+s.hr+'bpm</div>'+
         '<div style="display:inline-flex;align-items:center;gap:5px;margin-top:3px;cursor:pointer" onclick="event.stopPropagation();showSleepEvalById('+s.id+')"><span style="font-size:11px;font-weight:700;color:'+ev.color+'">'+ev.emoji+' '+ev.composite+'</span><span style="font-size:9px;color:'+ev.color+';text-transform:uppercase;letter-spacing:0.5px">'+ev.rating+'</span></div>';
-    },{chartLabel:'HRV',chartKey:'hrv',chartColor:'#a7f3d0'});
+    },{chartLabel:'HRV',chartKey:'hrv',chartColor:'#a7f3d0',
+       chartMetrics:[
+         {key:'hrv',label:'HRV',color:'#a7f3d0'},
+         {key:'score',label:'Puntuación',color:'#60a5fa'},
+         {key:'_global',label:'Valoración global',color:'#34d399',transform:function(v,item){var e=evalSleep(item);return e?e.composite:null;}}
+       ]});
   }
   h+='</div></div>';
   return h;
@@ -3503,7 +3596,11 @@ function renderActividad(c){
         const col=sportColor(a.type);
         return '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
           '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?a.duration+'min':'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
-      },{});
+      },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
+         chartMetrics:[
+           {key:'id',label:'Nº entrenos',color:'#34d399',aggregate:'count',yLabel:'entrenos'},
+           {key:'duration',label:'Minutos',color:'#60a5fa',aggregate:'sum',yLabel:'min'}
+         ]});
   }
   h+='</div></div>';
   actBlocks.sport=h.slice(_bs);h=h.slice(0,_bs);
@@ -4444,7 +4541,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
           return '<div style="font-size:11.5px">'+s.duration+' · UV '+s.uv+(s.vitd?' · <strong style="color:#fbbf24">'+parseFloat(s.vitd).toFixed(0)+' IU</strong>':'')+'</div>';
-        },{chartLabel:'Vit D (IU)',chartKey:'vitd',chartColor:'#fbbf24'})+'</div>':'')+
+        },{chartLabel:'Vit D (ng/ml)',chartKey:'vitd',chartColor:'#fbbf24',chartYLabel:'ng/ml',chartTransform:function(iu){return parseFloat((iu/100).toFixed(2));}})+'</div>':'')+
       '</div>'+
     '</div>';
   }
@@ -4821,7 +4918,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.35</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.36</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
