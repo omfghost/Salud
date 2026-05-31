@@ -819,6 +819,12 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 /* VitD blood analysis conversion card */
 .vitd-blood-card{margin-top:8px;background:rgba(248,113,113,0.03);border:1px solid rgba(248,113,113,0.12);border-radius:11px;padding:8px 10px}
 .vitd-blood-chip{flex:1;text-align:center;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;padding:6px 3px;min-width:0}
+.vitd-level-table{display:flex;flex-direction:column;gap:7px}
+.vitd-level-row{display:grid;grid-template-columns:84px 78px 1fr;gap:8px;align-items:center;background:rgba(255,255,255,0.03);border-left:3px solid var(--border);border-radius:8px;padding:8px 10px}
+.vitd-level-name{font-family:var(--sans);font-size:12.5px;font-weight:700}
+.vitd-level-range{font-family:var(--sans);font-size:11px;font-weight:600;color:#fff;line-height:1.25}
+.vitd-level-range span{font-size:9px;color:#888;font-weight:400}
+.vitd-level-desc{font-family:var(--sans);font-size:10.5px;color:#aaa;line-height:1.35}
 .vitd-blood-val{font-family:var(--sans);font-style:normal;font-size:18px;font-weight:600;color:#e0e0e0;line-height:1;letter-spacing:-0.5px}
 .vitd-blood-unit{font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;font-family:var(--sans)}
 
@@ -883,6 +889,22 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 <div class="modal-handle"></div>
 <div class="modal-header"><div class="modal-title" id="termTitle">Término</div><button class="modal-close" onclick="closeModal('term')">×</button></div>
 <div id="termContent" style="font-size:13px;color:#ccc;line-height:1.6;font-family:var(--sans)"></div>
+</div>
+</div>
+
+<div class="modal" id="modal-vitdLevels">
+<div class="modal-content" style="max-width:440px">
+<div class="modal-handle"></div>
+<div class="modal-header"><div class="modal-title">Niveles de Vitamina D</div><button class="modal-close" onclick="closeModal('vitdLevels')">×</button></div>
+<div style="font-size:12px;color:#bbb;line-height:1.5;font-family:var(--sans);margin-bottom:12px">Clasificación del nivel de 25-hidroxivitamina D [25(OH)D] en sangre, el marcador estándar del estado de vitamina D.</div>
+<div class="vitd-level-table">
+<div class="vitd-level-row" style="border-left-color:#f87171"><div class="vitd-level-name" style="color:#f87171">Deficiencia</div><div class="vitd-level-range">&lt; 20 ng/ml<br><span>&lt; 50 nmol/L</span></div><div class="vitd-level-desc">Riesgo de raquitismo/osteomalacia, debilidad ósea e inmunidad reducida.</div></div>
+<div class="vitd-level-row" style="border-left-color:#fbbf24"><div class="vitd-level-name" style="color:#fbbf24">Insuficiencia</div><div class="vitd-level-range">20–29 ng/ml<br><span>50–74 nmol/L</span></div><div class="vitd-level-desc">Subóptimo. Conviene aumentar exposición solar o suplementación.</div></div>
+<div class="vitd-level-row" style="border-left-color:#34d399"><div class="vitd-level-name" style="color:#34d399">Óptimo</div><div class="vitd-level-range">30–50 ng/ml<br><span>75–125 nmol/L</span></div><div class="vitd-level-desc">Rango ideal para salud ósea, inmune y muscular.</div></div>
+<div class="vitd-level-row" style="border-left-color:#fbbf24"><div class="vitd-level-name" style="color:#fbbf24">Alto</div><div class="vitd-level-range">51–100 ng/ml<br><span>126–250 nmol/L</span></div><div class="vitd-level-desc">Por encima de lo necesario. Sin beneficio extra; vigilar si se suplementa.</div></div>
+<div class="vitd-level-row" style="border-left-color:#f87171"><div class="vitd-level-name" style="color:#f87171">Excesivo</div><div class="vitd-level-range">&gt; 100 ng/ml<br><span>&gt; 250 nmol/L</span></div><div class="vitd-level-desc">Riesgo de toxicidad (hipercalcemia). Solo por exceso de suplementos, nunca por sol.</div></div>
+</div>
+<div style="font-size:10.5px;color:#888;line-height:1.5;font-family:var(--serif);font-style:italic;margin-top:12px">Conversión: ng/ml × 2.5 = nmol/L. La exposición solar nunca causa toxicidad: la piel autorregula la producción. Valores de referencia según Endocrine Society. Consulta a tu médico para interpretar tu analítica.</div>
 </div>
 </div>
 
@@ -4405,7 +4427,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               else if(ngml<=100){status='Alto';statusColor='#fbbf24';}
               else{status='Excesivo';statusColor='#f87171';}
               return '<div class="vitd-blood-card" style="margin-top:8px">'+
-                '<div class="sub-section-label" style="margin-top:0">🧬 NIVEL ESTIMADO 25(OH)D</div>'+
+                '<div class="sub-section-label" style="margin-top:0">🧬 NIVEL ESTIMADO 25(OH)D <button class="help-icon" onclick="event.stopPropagation();openModal(\'vitdLevels\')">?</button></div>'+
                 '<div style="display:flex;gap:6px;margin-top:5px;align-items:stretch">'+
                   '<div class="vitd-blood-chip"><div class="vitd-blood-val">'+ngml.toFixed(1)+'</div><div class="vitd-blood-unit">ng/ml</div></div>'+
                   '<div class="vitd-blood-chip"><div class="vitd-blood-val">'+nmol.toFixed(0)+'</div><div class="vitd-blood-unit">nmol/L</div></div>'+
@@ -4799,7 +4821,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.33</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.34</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -4807,7 +4829,7 @@ function renderAjustes(c){
 
 function buildExportData(){
   return {
-    _meta:{app:'HEALTH',version:16,exportedAt:new Date().toISOString()},
+    _meta:{app:'HEALTH',version:17,vitdFormula:'v32',exportedAt:new Date().toISOString()},
     sleep:store.sleep,activity:store.activity,weight:store.weight,allergy:store.allergy,
     vo2max:store.vo2max,vo2history:store.vo2history,fasting:store.fasting,measurements:store.measurements,
     meditation:store.meditation,programs:store.programs,sun:store.sun,wods:store.wods,records:store.records,
@@ -4835,6 +4857,8 @@ function importData(e){
   reader.onload=function(ev){
     try{
       const d=JSON.parse(ev.target.result);
+      // Detect whether the imported data already uses the v32 VitD formula.
+      const importedFormula=(d._meta&&d._meta.vitdFormula)?d._meta.vitdFormula:null;
       Object.keys(d).forEach(function(k){
         if(k==='_meta')return;
         if(d[k]!==undefined){
@@ -4854,7 +4878,23 @@ function importData(e){
           else localStorage.setItem('h_'+k,JSON.stringify(d[k]));
         }
       });
-      alert('✅ Datos importados — widgets, bloques y orden restaurados.');
+      // If the imported sun records predate the v32 formula, convert their IU now.
+      if(importedFormula!=='v32'&&Array.isArray(store.sun)&&store.sun.length){
+        const FACTOR=55/25;
+        store.sun.forEach(function(s){
+          if(s.vitd!=null&&s.vitd!==''){
+            const nv=Math.round((parseFloat(s.vitd)||0)*FACTOR);
+            s.vitd=nv.toString();
+            s.value=nv;
+          }
+        });
+        save('sun',store.sun);
+        alert('✅ Datos importados. Los registros de sol antiguos se han recalculado a la fórmula actual de vitamina D.');
+      }else{
+        alert('✅ Datos importados — widgets, bloques y orden restaurados.');
+      }
+      // Keep the device flag set so the startup migration won't double-convert.
+      localStorage.setItem('h_vitdRecalc_v32','1');
       render();
     }catch(err){alert('❌ Archivo inválido');}
   };
