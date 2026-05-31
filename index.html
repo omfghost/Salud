@@ -1015,10 +1015,10 @@ const SKIN_TYPES={
 const CLOTHING_LEVELS={
   swimsuit:{name:'Bañador',icon:'🩱',exposure:0.92,skinPct:90},
   pantsonly:{name:'Pantalón corto',icon:'🩳',exposure:0.80,skinPct:80},
-  shorts:{name:'Camiseta + short',icon:'👕',exposure:0.40,skinPct:35},
-  light:{name:'Manga corta',icon:'👔',exposure:0.25,skinPct:25},
-  long:{name:'Manga larga',icon:'🧥',exposure:0.10,skinPct:10},
-  covered:{name:'Cubierto',icon:'🧣',exposure:0.05,skinPct:5}
+  shorts:{name:'Camiseta + short',icon:'👕',exposure:0.36,skinPct:32},
+  light:{name:'Manga corta',icon:'👔',exposure:0.20,skinPct:18},
+  long:{name:'Manga larga',icon:'🧥',exposure:0.13,skinPct:12},
+  covered:{name:'Cubierto',icon:'🧣',exposure:0.04,skinPct:4}
 };
 const DAY_NAMES=[
   {id:'monday',name:'Lunes',short:'LUN'},
@@ -1278,7 +1278,7 @@ const GLOSSARY={
   'Hora Azul':{n:'Hora Azul',s:'Período crepuscular antes del amanecer y después del ocaso.',o:'Sol bajo el horizonte pero todavía iluminando el cielo.',c:'~30 min alrededor del amanecer/ocaso.',i:'Luz azulada característica. Importante para el ritmo circadiano.'},
   'Tipo de Piel':{n:'Fototipo de Piel (Fitzpatrick)',s:'Clasificación I-VI según respuesta a radiación UV.',o:'Autoclasificación según color de piel, pelo, ojos.',c:'I muy clara, II clara, III media, IV oliva, V oscura, VI muy oscura.',i:'Pieles más claras producen vitD más rápido pero también se queman antes.'},
   'TipoPiel':{n:'Fototipo de Piel (Fitzpatrick)',s:'Clasificación I-VI según respuesta a radiación UV.',o:'Autoclasificación según color de piel, pelo, ojos.',c:'I muy clara → VI muy oscura. Multiplicador para cálculo de vitD: I=1.5×, II=1.25×, III=1.0×, IV=0.75×, V=0.5×, VI=0.35×.',i:'Pieles más claras producen vitD más rápido pero también se queman antes. Imprescindible para calcular exposición segura.'},
-  'Ropa':{n:'Cobertura corporal',s:'Cantidad de piel expuesta al sol. Afecta directamente la síntesis de vitamina D.',o:'Estimación según prenda: bañador 85%, camiseta+short 45%, manga corta 25%, manga larga 10%, cubierto 5%.',c:'Porcentaje aproximado de superficie corporal expuesta.',i:'Para producir vitD basta exponer brazos y cara. Cara+cuello sin protección pero brazos cubiertos reduce ~80% la síntesis.'},
+  'Ropa':{n:'Cobertura corporal',s:'Cantidad de piel expuesta al sol. Afecta directamente la síntesis de vitamina D.',o:'Estimación según prenda: bañador 90%, pantalón corto 80%, camiseta+short 32%, manga corta 18%, manga larga 12%, cubierto 4%.',c:'Porcentaje aproximado de superficie corporal expuesta (regla de los 9).',i:'Para producir vitD basta exponer brazos y cara. Cara+cuello sin protección pero brazos cubiertos reduce ~80% la síntesis.'},
   'Clima':{n:'Condiciones climatológicas',s:'Estado del cielo y precipitaciones que modulan la radiación UV que llega a la piel.',o:'Detección automática por API meteorológica (Open-Meteo) según ubicación, o manual.',c:'Multiplicador UV: soleado 1.0×, parcial 0.75×, nublado 0.45×, muy nublado 0.25×, lluvia 0.15×.',i:'Las nubes ligeras dejan pasar hasta 80% del UV. Las nubes oscuras bloquean mucho más UVB que UVA, reduciendo la producción de vitD pero no el daño fotoenvejecedor.'},
   'Peso':{n:'Peso corporal',s:'Masa corporal total medida en kilogramos.',o:'Báscula doméstica, idealmente en ayunas tras orinar.',c:'Medición directa.',i:'Variable día a día (1-2 kg) por hidratación, glucógeno, intestino. Usa medias semanales/mensuales para tendencias reales.'},
   'Sueño':{n:'Calidad del sueño',s:'Cantidad y arquitectura del descanso nocturno (REM, profundo, ligero).',o:'Wearable o autoevaluación.',c:'Combina HRV, duración, eficiencia, fases.',i:'7-9 horas para adultos. Calidad importa más que cantidad: ciclos completos de 90 min, despertar al final de uno.'},
@@ -4821,7 +4821,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.34</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.35</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
