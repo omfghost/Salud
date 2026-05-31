@@ -217,6 +217,8 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 @keyframes countPulse{0%{transform:scale(0.5);opacity:0}50%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:0.5}}
 .med-time-input{display:flex;gap:4px;align-items:center;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:6px 8px;width:100%;box-sizing:border-box}
 .sleep-hm-input{display:flex;gap:3px;align-items:center;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:4px 6px;width:100%;box-sizing:border-box}
+.age-input{width:90px;height:40px;background:var(--bg-soft);border:1px solid rgba(251,191,36,0.25);border-radius:10px;color:#fbbf24;font-family:var(--sans);font-size:20px;font-weight:600;text-align:center;box-sizing:border-box;-moz-appearance:textfield}
+.age-input::-webkit-outer-spin-button,.age-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .sleep-hm-input input{flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-size:15px;text-align:center;font-family:var(--sans);-moz-appearance:textfield}
 .sleep-hm-input input::-webkit-outer-spin-button,.sleep-hm-input input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .sleep-hm-input span{color:var(--text-dim);font-weight:700;font-size:14px}
@@ -959,7 +961,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 <div class="image-viewer-topbar">
 <button class="image-viewer-close-x" onclick="closeVideoViewer()" style="margin-left:auto">✕</button>
 </div>
-<video id="videoViewerEl" controls playsinline style="max-width:100%;max-height:80vh;border-radius:12px"></video>
+<video id="videoViewerEl" controls playsinline webkit-playsinline preload="metadata" style="max-width:100%;max-height:80vh;border-radius:12px"></video>
 </div>
 <script>
 const DEFAULT_WIDGETS=['health_status','weight','sleep_hrv','sleep_hrv_avg','sleep_hours','sleep_score','fasting_last','vo2max','meditation_last','activity_last','waist'];
@@ -989,8 +991,9 @@ const SKIN_TYPES={
   VI:{name:'VI',desc:'Muy oscura',mult:0.35}
 };
 const CLOTHING_LEVELS={
-  swimsuit:{name:'Bañador',icon:'🩱',exposure:0.85,skinPct:80},
-  shorts:{name:'Camiseta + short',icon:'👕',exposure:0.45,skinPct:40},
+  swimsuit:{name:'Bañador',icon:'🩱',exposure:0.92,skinPct:90},
+  pantsonly:{name:'Pantalón corto',icon:'🩳',exposure:0.80,skinPct:80},
+  shorts:{name:'Camiseta + short',icon:'👕',exposure:0.40,skinPct:35},
   light:{name:'Manga corta',icon:'👔',exposure:0.25,skinPct:25},
   long:{name:'Manga larga',icon:'🧥',exposure:0.10,skinPct:10},
   covered:{name:'Cubierto',icon:'🧣',exposure:0.05,skinPct:5}
@@ -1198,6 +1201,27 @@ function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(sto
     store.solOrder=store.solOrder.filter(function(x){return x!=='skinclothing';});
     saveSolOrder();
   }
+})();
+
+// One-time migration: recalc historical VitD IU to the new production formula.
+// v17.32 changed the IU/min base from uvb*25 to uvb*55 (factor 55/25 = 2.2). Older sun
+// records stored IU with the old base; scale them so totals/averages stay consistent.
+(function(){
+  try{
+    if(localStorage.getItem('h_vitdRecalc_v32')==='1')return;
+    const FACTOR=55/25; // 2.2
+    if(Array.isArray(store.sun)&&store.sun.length){
+      store.sun.forEach(function(s){
+        if(s.vitd!=null&&s.vitd!==''){
+          const nv=Math.round((parseFloat(s.vitd)||0)*FACTOR);
+          s.vitd=nv.toString();
+          s.value=nv;
+        }
+      });
+      save('sun',store.sun);
+    }
+    localStorage.setItem('h_vitdRecalc_v32','1');
+  }catch(e){}
 })();
 function moveSolBlock(idx,dir){
   const newIdx=idx+dir;
@@ -1647,7 +1671,10 @@ function vitDAgeFactor(){
 }
 function vitDPerMinute(uvb){
   if(uvb<=0)return 0;
-  let base=uvb<=6?uvb*25:6*25+(uvb-6)*10;
+  // Whole-body summer-noon exposure produces roughly 10000-20000 IU in ~15-20 min.
+  // For full skin (exposure=1) at high UVB that's ~600-900 IU/min. We scale by UVB,
+  // skin type, exposed-skin fraction and age. Values are deliberately conservative.
+  let base=uvb<=6?uvb*55:6*55+(uvb-6)*22; // IU/min at full-body exposure, fair skin
   const skin=SKIN_TYPES[store.settings.skinType||'III'];
   const cloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
   return base*skin.mult*cloth.exposure*vitDAgeFactor();
@@ -3527,8 +3554,14 @@ let recVideoData=null;
 function handleRecVideo(e){
   const file=e.target.files[0];if(!file)return;
   const ic=document.getElementById('recVideoIcon');
+  // Warn about very large clips: iOS Safari (PWA) has a low memory ceiling and
+  // playing very large videos can crash the page. ~60MB is a safe-ish guideline.
+  const sizeMB=file.size/(1024*1024);
+  if(sizeMB>60){
+    const ok=confirm('Este vídeo ocupa '+sizeMB.toFixed(0)+' MB. Los vídeos muy grandes pueden no reproducirse bien en el iPhone y llegar a cerrar la app. Para mejores resultados, graba clips más cortos. ¿Guardarlo igualmente?');
+    if(!ok){if(ic)ic.textContent='🎬';e.target.value='';return;}
+  }
   if(ic)ic.textContent='⏳';
-  // Store the raw blob in IndexedDB (handles large iPhone clips >1min)
   saveVideoBlob(file).then(function(ref){
     recVideoData=ref;
     if(ic){ic.textContent='✓';const a=document.getElementById('recVideoArea');if(a)a.classList.add('has-video');}
@@ -3538,21 +3571,38 @@ function handleRecVideo(e){
     alert('No se pudo guardar el vídeo. Inténtalo de nuevo.');
   });
 }
+let _currentVideoURL=null;
 function openVideoViewer(key,id){
   const item=(store[key]||[]).find(function(x){return x.id===id;});
   if(!item||!item.video)return;
   const v=document.getElementById('videoViewerEl');
+  // Release any previously opened video URL first (prevents memory buildup → Safari crash)
+  if(_currentVideoURL){try{URL.revokeObjectURL(_currentVideoURL);}catch(e){}_currentVideoURL=null;}
+  try{v.pause();v.removeAttribute('src');v.load();}catch(e){}
   getVideoURL(item.video).then(function(url){
     if(!url){alert('No se encontró el vídeo.');return;}
+    _currentVideoURL=url;
+    // Don't autoload the whole clip; let the user press play (lighter on memory)
+    v.preload='metadata';
     v.src=url;
     document.getElementById('videoViewer').classList.add('active');
-    try{v.play();}catch(e){}
+    // One-time error handler: if the codec/format fails, inform instead of looping
+    v.onerror=function(){
+      try{v.pause();}catch(e){}
+      alert('No se pudo reproducir el vídeo. Puede estar en un formato que Safari no soporta (HEVC/H.265). Prueba a grabar en "Más compatible" en Ajustes > Cámara del iPhone.');
+    };
+    // Try to play only after enough data is buffered
+    v.oncanplay=function(){ try{v.play();}catch(e){} v.oncanplay=null; };
+    try{v.load();}catch(e){}
   });
 }
 function closeVideoViewer(){
   const v=document.getElementById('videoViewerEl');
   try{v.pause();}catch(e){}
-  v.src='';
+  v.onerror=null;v.oncanplay=null;
+  try{v.removeAttribute('src');v.load();}catch(e){}
+  // Free the blob URL so iOS reclaims the memory
+  if(_currentVideoURL){try{URL.revokeObjectURL(_currentVideoURL);}catch(e){}_currentVideoURL=null;}
   document.getElementById('videoViewer').classList.remove('active');
 }
 function addSport(){const name=document.getElementById('newSportName').value.trim();if(!name)return alert('Pon un nombre');const id=name.toLowerCase().replace(/[^a-z0-9]/g,'_');if(store.sports.find(function(s){return s.id===id;}))return alert('Ya existe');store.sports.push({id:id,name:name});save('sports',store.sports);render();}
@@ -4126,10 +4176,10 @@ function skinClothingInner(){
       }).join('')+
     '</div>'+
     '<div class="env-divider"></div>'+
-    '<div class="sub-section-label">🎂 EDAD <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;margin-left:auto">síntesis al '+ageFactor+'%</span></div>'+
+    '<div class="sub-section-label">🎂 EDAD <span id="ageSynthLabel" style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;margin-left:auto">síntesis al '+ageFactor+'%</span></div>'+
     '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">'+
-      '<input type="range" min="10" max="90" value="'+(store.settings.age||35)+'" oninput="setAge(this.value)" style="flex:1">'+
-      '<div style="font-family:var(--sans);font-size:22px;font-weight:600;font-style:normal;color:var(--accent);min-width:40px;text-align:center;letter-spacing:-0.5px">'+(store.settings.age||35)+'</div>'+
+      '<input type="number" min="1" max="120" value="'+(store.settings.age||35)+'" onchange="commitAge(this.value)" oninput="setAge(this.value)" class="age-input" placeholder="35">'+
+      '<span style="font-size:11px;color:#999;font-family:var(--sans)">años</span>'+
     '</div>'+
     '<div style="font-size:9px;color:#888;font-style:italic;font-family:var(--serif);margin-top:4px;line-height:1.4">La síntesis de vitamina D disminuye ~13% por década a partir de los 20 años (depleción de 7-dehidrocolesterol cutáneo).</div>';
 }
@@ -4267,7 +4317,24 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
       totalAll+=v;
     });
     const baseline=parseFloat(store.settings.vitDBaseline||0);
-    const estimateActual=baseline+totalAll;
+    // --- Realistic serum 25(OH)D estimate ---
+    // Physiology: serum 25(OH)D has a ~15-day half-life and reaches equilibrium, it does NOT
+    // accumulate forever. Roughly +100 IU/day sustained intake raises serum by ~1 ng/ml.
+    // So we use the AVERAGE daily sun production over the last 30 days, not the lifetime sum.
+    const _now=new Date();
+    let last30=0;
+    store.sun.forEach(function(s){
+      if(!s.date)return;
+      const d=new Date(s.date+'T12:00:00');
+      const days=(_now-d)/(1000*60*60*24);
+      if(days>=0&&days<=30)last30+=(parseFloat(s.vitd)||0);
+    });
+    const avgDaily=last30/30; // average IU/day produced from sun over last 30 days
+    // Sun contribution to serum at equilibrium (~1 ng/ml per 100 IU/day), capped to a
+    // physiologically plausible boost from sun alone.
+    const sunBoostNgml=Math.min(40,avgDaily/100);
+    // estimateActual: shown as "IU/día medios" context; keep total for the year display only.
+    const estimateActual=avgDaily;
     return '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div><button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.suntimer?' collapsed':'')+'">'+
@@ -4277,7 +4344,9 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           const vitdNow=sess?Math.round(sess.vitd||0):0;
           const paused=sess&&sess.paused;
           const running=sess&&!paused;
-          const sessNgml=(vitdNow/40);
+          // A single session's contribution to serum if sustained daily (~1 ng/ml per 100 IU/day).
+          // Shown as a small "+X ng/ml" to avoid implying one session sets the absolute level.
+          const sessNgml=(vitdNow/100);
           // Buttons: idle->play, running->pause, paused->resume+save
           let actionBtns;
           if(!sess){
@@ -4296,7 +4365,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
             (paused?'<div style="text-align:center;font-size:9.5px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-2px 0 6px;text-transform:uppercase">⏸ En pausa · reanuda o guarda</div>':'')+
             '<div class="vitd-sess-row">'+
               '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdValue">'+vitdNow+'</span><span class="vitd-sess-unit">IU sesión</span></div>'+
-              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdNgml">'+sessNgml.toFixed(1)+'</span><span class="vitd-sess-unit">ng/ml aprox</span></div>'+
+              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdNgml">+'+sessNgml.toFixed(1)+'</span><span class="vitd-sess-unit">ng/ml si diario</span></div>'+
               actionBtns+
             '</div>';
         })()+
@@ -4324,7 +4393,10 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO</div><div class="vitd-accum-val">'+Math.round(totalYear)+'</div><div class="vitd-accum-unit">IU</div></div>'+
             '</div>'+
             (function(){
-              const ngml=baseline>0?(baseline/40):(estimateActual/40);
+              // Serum estimate: analytic baseline (if entered) acts as the floor; otherwise
+              // assume a typical untreated baseline of ~20 ng/ml. Add the recent-sun boost.
+              const baseNgml=baseline>0?(baseline/40):20;
+              const ngml=Math.min(120,baseNgml+sunBoostNgml);
               const nmol=ngml*2.5;
               let status,statusColor;
               if(ngml<20){status='Deficiencia';statusColor='#f87171';}
@@ -4345,7 +4417,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (IU)</label><input type="number" id="vitDBaselineInput" value="'+baseline+'" placeholder="0" onchange="updateVitDBaseline(this.value)"></div>'+
               '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:38px">Reset</button>'+
             '</div>'+
-            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">Si tienes análisis con tu 25(OH)D, introdúcelo en IU (ng/ml × 40). ng/ml × 2.5 = nmol/L. Óptimo: 30-50 ng/ml.</p>'+
+            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el efecto del sol según tu media diaria de los últimos 30 días (~1 ng/ml por cada 100 IU/día). El nivel en sangre se equilibra y no se acumula sin límite. Introduce tu 25(OH)D en IU (ng/ml × 40) para mayor precisión. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
@@ -4424,8 +4496,17 @@ function toggleAutoWeather(el){
 }
 function setSkinType(t){store.settings.skinType=t;saveSettings();render();}
 function setClothing(c){store.settings.clothing=c;saveSettings();render();}
-function setAge(a){store.settings.age=parseInt(a);saveSettings();
-  // live-update labels without full re-render to keep slider smooth
+function setAge(a){
+  const n=parseInt(a);
+  if(isNaN(n))return;
+  store.settings.age=n;
+  saveSettings();
+  // Update the "síntesis al X%" label live without a full re-render (keeps input focus)
+  const lbl=document.getElementById('ageSynthLabel');
+  if(lbl)lbl.textContent='síntesis al '+Math.round(vitDAgeFactor()*100)+'%';
+}
+function commitAge(a){
+  setAge(a);
   if(currentTab==='sol')render();
 }
 function toggleAutoLoc(el){
@@ -4474,14 +4555,14 @@ function refreshSunTimerUI(){
   if(!sess){
     if(el)el.textContent='00:00:00';
     if(vd)vd.textContent='0';
-    if(ng)ng.textContent='0.0';
+    if(ng)ng.textContent='+0.0';
     return;
   }
   const elapsed=Math.floor((sess.elapsedMs||0)/1000);
   if(el)el.textContent=fmtClock(elapsed);
   const v=Math.round(sess.vitd||0);
   if(vd)vd.textContent=v.toString();
-  if(ng)ng.textContent=(v/40).toFixed(1);
+  if(ng)ng.textContent='+'+(v/100).toFixed(1);
 }
 
 // One tick: advance the session by real elapsed time using timestamps (robust to frozen intervals).
@@ -4718,7 +4799,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.30</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.33</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
