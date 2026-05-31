@@ -33,7 +33,7 @@
   --grad-soft:linear-gradient(135deg,rgba(167,243,208,0.18) 0%,rgba(52,211,153,0.06) 100%);
   --grad-secondary:linear-gradient(135deg,rgba(255,255,255,0.09) 0%,rgba(255,255,255,0.03) 100%);
   --grad-danger:linear-gradient(135deg,#7f1d1d 0%,#991b1b 50%,#7f1d1d 100%);
-  --grad-card:linear-gradient(135deg,#0d0d10 0%,#0a0a0c 100%);
+  --grad-card:linear-gradient(135deg,#16171c 0%,#101116 100%);
   --serif:'Instrument Serif','Georgia',serif;
   --sans:'Outfit','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   --display:'Outfit','Inter',-apple-system,sans-serif;
@@ -83,9 +83,9 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .card-title-text{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* CARDS */
-.card{background:var(--grad-card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;position:relative;transition:background 0.2s,border-color 0.2s}
+.card{background:var(--grad-card);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;position:relative;transition:background 0.2s,border-color 0.2s}
 /* Slight highlight for cards with an EXPANDED collapsible (easier to distinguish from background) */
-.card:has(>.collapsible:not(.collapsed)){background:linear-gradient(160deg,rgba(60,90,75,0.22),rgba(30,45,38,0.28));border-color:rgba(167,243,208,0.28);box-shadow:0 0 28px rgba(167,243,208,0.05) inset,0 4px 16px -6px rgba(0,0,0,0.5)}
+.card:has(>.collapsible:not(.collapsed)){background:linear-gradient(160deg,rgba(52,90,72,0.32),rgba(22,40,33,0.40));border-color:rgba(167,243,208,0.4);box-shadow:0 0 36px rgba(167,243,208,0.08) inset,0 6px 22px -6px rgba(0,0,0,0.6)}
 /* Inside an expanded (greenish) card, give inner controls a DARKER base so green accents stand out */
 .card:has(>.collapsible:not(.collapsed)) .toggle{background:rgba(0,0,0,0.4);border-color:rgba(255,255,255,0.18)}
 .card:has(>.collapsible:not(.collapsed)) .toggle.active{background:linear-gradient(135deg,#34d399,#10b981);border-color:transparent;box-shadow:0 0 14px rgba(52,211,153,0.5)}
@@ -145,11 +145,16 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 
 /* GRIDS */
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%}
+.sport-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%}
+.sport-form-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sport-form-grid .input-group{margin-bottom:0}
+.sport-form-grid .input-group label{font-size:8.5px;letter-spacing:0.2px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sport-form-grid .input-group input,.sport-form-grid .input-group select{font-size:13px;padding:7px 8px}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%}
 .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%}
 
 /* STATS */
-.stat{background:rgba(255,255,255,0.025);border-radius:10px;padding:8px 6px;text-align:center;border:1px solid var(--border);min-width:0;overflow:hidden;box-sizing:border-box}
+.stat{background:rgba(0,0,0,0.22);border-radius:10px;padding:8px 6px;text-align:center;border:1px solid rgba(255,255,255,0.07);min-width:0;overflow:hidden;box-sizing:border-box}
 .stat-label{font-size:8.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px;font-weight:500;font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat-value{font-family:var(--sans);font-size:18px;font-weight:600;color:var(--accent);letter-spacing:-0.4px;line-height:1.15;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat-unit{font-size:9px;color:var(--text-dim);margin-left:1px;font-weight:400;font-family:var(--sans);font-style:normal}
@@ -361,6 +366,19 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .vitd-box{background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(251,146,60,0.05));border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:10px;margin-top:8px;text-align:center}
 .vitd-value{font-family:var(--sans);font-size:27px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px;font-style:normal;line-height:1.15;padding:0 3px}
 .vitd-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-family:var(--sans)}
+/* Compact single-row session: stats + play/stop + plus */
+.vitd-sess-row{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(251,146,60,0.05));border:1px solid rgba(251,191,36,0.22);border-radius:12px;padding:8px 10px}
+.vitd-sess-stat{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.vitd-sess-num{font-family:var(--sans);font-size:19px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px}
+.vitd-sess-unit{font-size:8.5px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);margin-top:1px}
+.vitd-sess-main{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid rgba(167,243,208,0.4);background:rgba(167,243,208,0.12);color:var(--accent);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.vitd-sess-main.stop{border-color:rgba(248,113,113,0.5);background:rgba(248,113,113,0.15);color:#f87171}
+.vitd-sess-main:active{transform:scale(0.92)}
+.vitd-sess-plus{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--text-dim);font-size:22px;cursor:not-allowed;display:flex;align-items:center;justify-content:center;padding:0;opacity:0.4}
+.vitd-sess-plus.on{border-color:rgba(251,191,36,0.55);background:rgba(251,191,36,0.18);color:#fde047;cursor:pointer;opacity:1;box-shadow:0 0 10px rgba(251,191,36,0.3)}
+.vitd-sess-plus.on:active{transform:scale(0.92)}
+.vitd-sess-reset{flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid rgba(248,113,113,0.4);background:rgba(248,113,113,0.1);color:#f87171;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.vitd-sess-reset:active{transform:scale(0.92)}
 
 /* WEEKLY PLAN - 2 days per row */
 .weekly-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;width:100%}
@@ -415,7 +433,7 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .radio-cell.active .radio-cell-desc{color:#d1fae5}
 
 /* Dynamic body-state card in Panel (compact, 2-column) */
-.bodystate-card{background:linear-gradient(160deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:13px;padding:10px}
+.bodystate-card{background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.08);border-radius:13px;padding:10px}
 .bodystate-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .bodystate-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid;flex-shrink:0}
 .bodystate-phase{font-family:var(--sans);font-size:12.5px;font-weight:700;letter-spacing:0.2px;line-height:1.15}
@@ -612,12 +630,22 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .btn-mini-clear{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10.5px;font-weight:600;padding:6px 10px;border-radius:9px;cursor:pointer;font-family:var(--sans);letter-spacing:0.4px;white-space:nowrap;flex-shrink:0}
 .btn-mini-clear:active{background:rgba(239,68,68,0.15);transform:scale(0.95)}
 .weekly-cal-toggle{display:flex;align-items:center;gap:6px;flex-shrink:0}
+/* Action buttons in the SEMANA header (match collapse-btn style) */
+.weekly-card-title{gap:6px}
+.weekly-head-actions{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
+.weekly-head-btn{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 7px;color:var(--text-muted);font-size:11px;cursor:pointer;transition:all 0.15s;line-height:1;flex-shrink:0}
+.weekly-head-btn:active{background:rgba(255,255,255,0.1)}
+.weekly-head-sync{display:flex;align-items:center;gap:4px;font-family:var(--sans);font-size:9.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px}
+.weekly-head-sync .toggle{transform:scale(0.82)}
 .weekly-cal-toggle .toggle{width:36px;height:20px}
 .weekly-cal-toggle .toggle-handle{width:15px;height:15px}
 .weekly-cal-toggle .toggle.active .toggle-handle{left:18px}
 
 /* Vit D accumulated counters */
 .vitd-accum-card,.vitd-estim-card{margin-top:8px;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;width:100%;box-sizing:border-box}
+.vitd-expo-wrap .registros-block{margin-top:8px!important;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;box-sizing:border-box}
+.card:has(>.collapsible:not(.collapsed)) .vitd-expo-wrap .registros-block{background:rgba(251,191,36,0.06)!important;border-color:rgba(251,191,36,0.22)!important}
+.vitd-expo-wrap .registros-title{color:#fbbf24}
 .vitd-accum-header,.vitd-estim-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
 .vitd-accum-title,.vitd-estim-title{font-size:10.5px;font-weight:600;color:#fbbf24;text-transform:uppercase;letter-spacing:1.4px;font-family:var(--sans);flex:1;min-width:0;display:flex;align-items:center;gap:5px}
 .vitd-accum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}
@@ -700,10 +728,10 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-input-row .input-group{margin-bottom:0;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
 .fast-input-row .input-group.date-compact{flex:0 0 92px}
 .fast-input-row .input-group label{margin-bottom:4px;line-height:1.1;min-height:13px;font-size:8.5px}
-.fast-input-row input{height:36px;box-sizing:border-box;padding:0 4px;text-align:center;font-size:11px}
+.fast-input-row input,.fast-input-row input[type="date"],.fast-input-row input[type="time"]{height:38px!important;box-sizing:border-box;padding:0 4px!important;text-align:center;font-size:11px}
 .fast-dur-group{flex:0 0 64px}
-.fast-dur-box{height:36px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent);font-style:normal;letter-spacing:-0.2px;white-space:nowrap}
-.fast-input-row .add-btn{height:36px;width:32px;align-self:flex-end}
+.fast-dur-box{height:38px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent);font-style:normal;letter-spacing:-0.2px;white-space:nowrap;box-sizing:border-box}
+.fast-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end}
 
 /* Panel sun UVA/UVB mini chips bottom-right of graph */
 .panel-uv-mini{position:absolute;bottom:6px;right:2px;display:flex;flex-direction:column;gap:3px;pointer-events:none;z-index:3}
@@ -725,11 +753,16 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .view-btn:active{background:rgba(96,165,250,0.2);transform:scale(0.92)}
 
 /* Sleep row 2: puntuacion + hr + add button */
+.sleep-row1{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;margin-top:6px;margin-bottom:5px}
+.sleep-row1 .input-group{flex:1;min-width:0;margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end}
+.sleep-row1 .input-group label{margin-bottom:5px;line-height:1.1;font-size:9px}
+.sleep-row1 .input-group input{height:38px!important;box-sizing:border-box;text-align:center;padding:0 8px!important;font-size:13px}
+.sleep-row1 .sleep-hm-input{height:38px;box-sizing:border-box}
 .sleep-row2{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box}
-.sleep-row2 .input-group{flex:1;min-width:0;margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end}
-.sleep-row2 .input-group label{margin-bottom:5px;line-height:1.1}
-.sleep-row2 .input-group input{height:38px;box-sizing:border-box;text-align:center}
-.sleep-row2 .add-btn{height:38px;align-self:flex-end}
+.sleep-row2 .input-group{flex:1 1 0;min-width:0;margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end}
+.sleep-row2 .input-group label{margin-bottom:5px;line-height:1.1;font-size:9px}
+.sleep-row2 .input-group input{height:38px!important;box-sizing:border-box;text-align:center;padding:0 6px!important;font-size:13px}
+.sleep-row2 .add-btn{height:38px!important;width:38px;align-self:flex-end}
 
 /* Image/video viewer topbar with inline buttons */
 .image-viewer-topbar{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;padding:14px;padding-top:calc(env(safe-area-inset-top, 20px) + 64px);z-index:10}
@@ -1246,6 +1279,8 @@ function showTerm(key){
 // =========== AUDIO ===========
 let audioCtx=null;
 let bgNodes=null;
+// Max master gain for background music (higher = louder ceiling for the 100% slider)
+var MUSIC_VOL_CEIL=0.70;
 
 // Audio palettes — defined here (first script) so every <script> block can see them.
 var MUSIC_TRACKS=[
@@ -1286,15 +1321,22 @@ function playBell(volume){
   volume=volume!=null?volume:(store.settings.bellVolume!=null?store.settings.bellVolume:0.4);
   const ctx=getAudioCtx();if(!ctx)return;
   try{
+    if(ctx.state==='suspended'){try{ctx.resume();}catch(e){}}
     const now=ctx.currentTime;
     const bt=(typeof BELL_TYPES!=='undefined')?BELL_TYPES[store.settings.bellType||0]:{freq:523.25};
     const f=bt.freq;
-    [{r:1,v:1,d:5},{r:2.756,v:0.5,d:4},{r:5.404,v:0.3,d:3},{r:8.933,v:0.2,d:2}].forEach(function(h){
+    // Single master gain controls overall bell loudness (so the slider has full effect)
+    const master=ctx.createGain();
+    master.connect(ctx.destination);
+    // Map 0..1 slider to a clearly audible range with headroom (no clipping)
+    master.gain.setValueAtTime(Math.max(0.0001,volume*0.9),now);
+    // Partials sum to ~1.0 internally; master scales the whole thing
+    [{r:1,v:0.5,d:5},{r:2.756,v:0.25,d:4},{r:5.404,v:0.15,d:3},{r:8.933,v:0.1,d:2}].forEach(function(h){
       const o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);
+      o.connect(g);g.connect(master);
       o.frequency.value=f*h.r;o.type='sine';
       g.gain.setValueAtTime(0,now);
-      g.gain.linearRampToValueAtTime(volume*h.v,now+0.01);
+      g.gain.linearRampToValueAtTime(h.v,now+0.01);
       g.gain.exponentialRampToValueAtTime(0.001,now+h.d);
       o.start(now);o.stop(now+h.d+0.1);
     });
@@ -1340,15 +1382,16 @@ function startBgMusic(){
     const vol=(store.settings.musicVolume!=null?store.settings.musicVolume:0.5);
     const track=(typeof MUSIC_TRACKS!=='undefined')?MUSIC_TRACKS[store.settings.musicTrack||0]:{freqs:[110,164.81,220]};
     const master=ctx.createGain();
-    master.gain.setValueAtTime(0,now);
-    master.gain.linearRampToValueAtTime(vol*0.12,now+2);
+    master.gain.setValueAtTime(0.0001,now);
+    master.gain.linearRampToValueAtTime(vol*MUSIC_VOL_CEIL,now+1.5);
     master.connect(ctx.destination);
     const oscs=[];
     track.freqs.forEach(function(f,i){
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(master);
       o.frequency.value=f;o.type=i===0?'sine':'triangle';
-      g.gain.value=0.2/(i+1);
+      // Fuller base mix (master gain handles the overall level)
+      g.gain.value=0.6/(i+1);
       o.start(now);
       oscs.push(o);
     });
@@ -1462,7 +1505,8 @@ function editItem(type,id){
       const dec=parseFloat(val)||0;
       const hh=Math.floor(dec);
       const mm=Math.round((dec-hh)*60);
-      body+='<div class="input-group" style="margin-bottom:8px"><label>'+f.l.toUpperCase()+' (H:M)</label><div class="sleep-hm-input"><input type="number" id="edit_'+f.k+'_h" min="0" max="24" value="'+hh+'"><span>:</span><input type="number" id="edit_'+f.k+'_m" min="0" max="59" value="'+mm+'"></div></div>';
+      const tv=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+      body+='<div class="input-group" style="margin-bottom:8px"><label>'+f.l.toUpperCase()+' (H:M)</label><input type="time" id="edit_'+f.k+'_t" value="'+tv+'"></div>';
     }else{
       body+='<div class="input-group" style="margin-bottom:8px"><label>'+f.l.toUpperCase()+'</label><input type="'+f.t+'" id="edit_'+f.k+'" value="'+String(val).replace(/"/g,'&quot;')+'"'+(f.t==='number'?' step="0.1"':'')+'></div>';
     }
@@ -1491,11 +1535,11 @@ function saveEditRecord(){
   const fields=EDIT_FIELDS[type]||[];
   fields.forEach(function(f){
     if(f.t==='hm'){
-      const hEl=document.getElementById('edit_'+f.k+'_h');
-      const mEl=document.getElementById('edit_'+f.k+'_m');
-      if(hEl||mEl){
-        const hh=parseInt(hEl?hEl.value:0)||0;
-        const mm=parseInt(mEl?mEl.value:0)||0;
+      const tEl=document.getElementById('edit_'+f.k+'_t');
+      if(tEl){
+        const parts=(tEl.value||'').split(':');
+        const hh=parseInt(parts[0])||0;
+        const mm=parseInt(parts[1])||0;
         const dec=hh+mm/60;
         item[f.k]=dec?dec.toString():'';
       }
@@ -1546,6 +1590,7 @@ function updateHeaderQuote(forceNew){
 function showTab(tab,btn){
   currentTab=tab;
   reorderMode=false;
+  if(typeof collapseAllRegistros==='function')collapseAllRegistros();
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
   if(btn)btn.classList.add('active');
   else{const b=document.querySelector('[data-tab="'+tab+'"]');if(b)b.classList.add('active');}
@@ -1971,7 +2016,7 @@ function renderSunDashboard(times,hour,uv,isDay){
       '<div class="sun-time-cell"><div class="sun-time-cell-label">🌇 OCASO</div><div class="sun-time-cell-value">'+fmtHour(times.sunset)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">UVA ↑↓</div><div class="sun-time-cell-value" style="color:#3b82f6;font-size:11px">'+fmtHour(times.uvaStart)+'-'+fmtHour(times.uvaEnd)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">UVB ↑↓</div><div class="sun-time-cell-value" style="color:#a855f7;font-size:11px">'+fmtHour(times.uvbStart)+'-'+fmtHour(times.uvbEnd)+'</div></div>'+
-      '<div class="sun-time-cell"><div class="sun-time-cell-label">DÍA TOTAL</div><div class="sun-time-cell-value">'+times.dayLen.toFixed(1)+'h</div></div>'+
+      '<div class="sun-time-cell"><div class="sun-time-cell-label">DÍA TOTAL</div><div class="sun-time-cell-value">'+fmtDuration(times.dayLen)+'</div></div>'+
     '</div>'+
   '</div>';
 }
@@ -2513,17 +2558,30 @@ function blockHeader(id,icon,title,withHelp){
 //   opts: { chartLabel, chartKey, chartColor, searchFn(item, q) }
 // Registry of item renderers so setRegSearch can rebuild list without full re-render
 const REG_RENDERERS={};
+// Session-only open state for registro blocks (NOT persisted). Cleared on tab change / minimize.
+var regOpenSession={};
+function toggleRegistro(key){
+  regOpenSession[key]=!regOpenSession[key];
+  render();
+}
+function openRegistro(key){
+  regOpenSession[key]=true;
+}
+function collapseAllRegistros(){
+  regOpenSession={};
+}
 function renderRegistros(key,label,itemRenderer,opts){
   opts=opts||{};
   const arr=Array.isArray(store[key])?store[key]:[];
   if(!arr.length)return '';
   REG_RENDERERS[key]={renderer:itemRenderer,opts:opts,label:label};
-  const collapsedId='reg_'+key;
-  const collapsed=store.collapsed[collapsedId]===true; // expanded by default when data
+  // Registros are collapsed by default. They only open via tap or after a new entry,
+  // tracked in a session-only object (cleared on tab change / app minimize).
+  const collapsed=!regOpenSession[key];
   const searchQ=(regSearch[key]||'');
   const total=filterRegItems(key,searchQ).length;
   let h='<div class="registros-block" style="margin-top:10px">'+
-    '<div class="registros-header" onclick="toggleEstadoBlock(\''+collapsedId+'\')">'+
+    '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
       '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
     '</div>'+
@@ -2737,7 +2795,7 @@ function addBody(){
     photo:measPhotoData||null};
   if(m.waist||m.chest||m.thigh||m.bicep||m.hip||m.neck||m.photo){
     store.measurements.push(m);
-    save('measurements',store.measurements);
+    save('measurements',store.measurements);openRegistro('measurements');
     saved=true;
   }
   if(!saved)return alert('Introduce al menos un valor (peso o medida)');
@@ -2754,16 +2812,16 @@ function renderSleepBlock(){
       '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // Row 1: fecha + hrv + horas
-      '<div class="grid-4" style="gap:5px;margin-top:6px">'+
-        '<div class="input-group date-compact" style="grid-column:span 2"><label>FECHA</label><input type="date" id="sleepDate" value="'+today()+'"></div>'+
-        '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
-        '<div class="input-group"><label>SUEÑO (H:M)</label><div class="sleep-hm-input"><input type="number" id="sleepHoursH" min="0" max="24" placeholder="7"><span>:</span><input type="number" id="sleepHoursM" min="0" max="59" placeholder="30"></div></div>'+
+      // Row 1: fecha + sueño (h:m)
+      '<div class="sleep-row1">'+
+        '<div class="input-group"><label>FECHA</label><input type="date" id="sleepDate" value="'+today()+'"></div>'+
+        '<div class="input-group"><label>SUEÑO (H:M)</label><input type="time" id="sleepHoursTime" value="07:30"></div>'+
       '</div>'+
-      // Row 2: puntuacion + hr + (+) button aligned right
-      '<div class="sleep-row2" style="margin-top:5px">'+
+      // Row 2: hrv + puntuación + hr nocturno + (+) — three equal boxes
+      '<div class="sleep-row2">'+
+        '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
         '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
-        '<div class="input-group"><label>HR NOCTURNO</label><input type="number" id="sleepHR" placeholder="52"></div>'+
+        '<div class="input-group"><label>HR NOCT.</label><input type="number" id="sleepHR" placeholder="52"></div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
       '</div>';
   if(store.sleep.length){
@@ -2824,12 +2882,12 @@ function renderVO2Block(){
 function scrollTo2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 function addWeight(){const date=document.getElementById('weightDate').value;const value=document.getElementById('weightVal').value;if(!date||!value)return alert('Completa los campos');store.weight.push({id:Date.now(),date:date,value:value});save('weight',store.weight);render();}
 function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const durDec=(e-s)/60;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
-function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);render();}
+function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);openRegistro('fasting');render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
   if(!m.waist&&!m.chest&&!m.thigh&&!m.bicep&&!m.hip&&!m.neck&&!m.photo)return alert('Introduce al menos una medida');
   store.measurements.push(m);
-  save('measurements',store.measurements);
+  save('measurements',store.measurements);openRegistro('measurements');
   measPhotoData=null;
   render();
 }
@@ -2858,8 +2916,8 @@ function handleMeasPhoto(e){
   };
   reader.readAsDataURL(file);
 }
-function addAllergy(){const date=document.getElementById('allergyDate').value;const level=document.getElementById('allergyLevel').value;const notes=document.getElementById('allergyNotes').value;if(!date||!level)return alert('Completa fecha e intensidad');if(dateExists('allergy',date))return warnDuplicate('alergia');store.allergy.push({id:Date.now(),date:date,level:level,notes:notes});save('allergy',store.allergy);render();}
-function saveVO2(){const val=document.getElementById('vo2Val').value;const date=document.getElementById('vo2Date').value||today();if(!val)return alert('Introduce un valor');if(dateExists('vo2history',date))return warnDuplicate('VO₂ Max');store.vo2max=val;localStorage.setItem('h_vo2max',val);store.vo2history.push({id:Date.now(),date:date,value:val});save('vo2history',store.vo2history);render();}
+function addAllergy(){const date=document.getElementById('allergyDate').value;const level=document.getElementById('allergyLevel').value;const notes=document.getElementById('allergyNotes').value;if(!date||!level)return alert('Completa fecha e intensidad');if(dateExists('allergy',date))return warnDuplicate('alergia');store.allergy.push({id:Date.now(),date:date,level:level,notes:notes});save('allergy',store.allergy);openRegistro('allergy');render();}
+function saveVO2(){const val=document.getElementById('vo2Val').value;const date=document.getElementById('vo2Date').value||today();if(!val)return alert('Introduce un valor');if(dateExists('vo2history',date))return warnDuplicate('VO₂ Max');store.vo2max=val;localStorage.setItem('h_vo2max',val);store.vo2history.push({id:Date.now(),date:date,value:val});save('vo2history',store.vo2history);openRegistro('vo2history');render();}
 
 // ============= LIGHT LOG (Amanecer / Ocaso / Higiene lumínica) =============
 // Monthly calendar of checkmarks. Each habit stored as store.lightLog[habit][YYYY-MM][day]=true.
@@ -3168,13 +3226,15 @@ function evalSleep(s){
 }
 
 function addSleep(){
-  const hh=parseInt(document.getElementById('sleepHoursH').value)||0;
-  const mm=parseInt(document.getElementById('sleepHoursM').value)||0;
+  const t=(document.getElementById('sleepHoursTime')||{}).value||'';
+  const parts=t.split(':');
+  const hh=parseInt(parts[0])||0;
+  const mm=parseInt(parts[1])||0;
   const hoursDecimal=hh+mm/60;
   const s={id:Date.now(),date:document.getElementById('sleepDate').value,hrv:document.getElementById('sleepHRV').value,hours:hoursDecimal?hoursDecimal.toString():'',score:document.getElementById('sleepScore').value,hr:document.getElementById('sleepHR').value};
   if(!s.date)return alert('Selecciona fecha');
   if(dateExists('sleep',s.date))return warnDuplicate('sueño');
-  store.sleep.push(s);save('sleep',store.sleep);
+  store.sleep.push(s);save('sleep',store.sleep);openRegistro('sleep');
   showSleepEval(s);
   render();
 }
@@ -3252,16 +3312,22 @@ function renderActividad(c){
   // Day list including the special "extra" day at the end (after sunday)
   const WEEKLY_DAYS=DAY_NAMES.concat([{id:'extra',name:'T. Extra',short:'T+',isExtra:true}]);
   h+='<div class="card">'+
-    '<div class="card-title" onclick="toggleEstadoBlock(\'weekly\')"><div class="card-title-text"><span>📅 PROGRAMACIÓN SEMANAL</span></div><button class="collapse-btn">'+(weeklyCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="card-title weekly-card-title" onclick="toggleEstadoBlock(\'weekly\')">'+
+      '<div class="card-title-text"><span>📅 '+(weeklyCollapsed?'PROGRAMACIÓN SEMANAL':'SEMANA')+'</span></div>'+
+      // When expanded, show action buttons in the header (matching the collapse arrow style)
+      (!weeklyCollapsed?
+        '<div class="weekly-head-actions" onclick="event.stopPropagation()">'+
+          '<button class="weekly-head-btn" onclick="openModal(\'manageDays\');setTimeout(renderManageDays,30)" title="Configurar días">⚙</button>'+
+          '<button class="weekly-head-btn" onclick="clearAllWeeklyDays()" title="Limpiar todos los días">🧹</button>'+
+          '<div class="weekly-head-sync" title="Sincronizar con calendario">'+
+            '<span>Sincr.</span>'+
+            '<div class="toggle '+(store.weeklyPlan.calendarSync?'active':'')+'" onclick="toggleCalendarSync(this)"><div class="toggle-handle"></div></div>'+
+          '</div>'+
+        '</div>'
+      :'')+
+      '<button class="collapse-btn" onclick="event.stopPropagation();toggleEstadoBlock(\'weekly\')">'+(weeklyCollapsed?'▼':'▲')+'</button>'+
+    '</div>'+
     '<div class="collapsible'+(weeklyCollapsed?' collapsed':'')+'">'+
-      '<div class="weekly-top-row">'+
-        '<div class="weekly-cal-toggle">'+
-          '<span class="toggle-label" style="font-size:10.5px">📆 Sincr.</span>'+
-          '<div class="toggle '+(store.weeklyPlan.calendarSync?'active':'')+'" onclick="toggleCalendarSync(this)"><div class="toggle-handle"></div></div>'+
-        '</div>'+
-        '<button class="btn-mini-manage" onclick="openModal(\'manageDays\');setTimeout(renderManageDays,30)" title="Activar o desactivar días">⚙ DÍAS</button>'+
-        '<button class="btn-mini-clear" onclick="clearAllWeeklyDays()" title="Limpiar todos los días">🧹 LIMPIAR</button>'+
-      '</div>'+
       '<div class="weekly-plan-grid">'+
         WEEKLY_DAYS.filter(function(d){return store.activeDays[d.id]!==false;}).map(function(d){
           const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
@@ -3296,28 +3362,33 @@ function renderActividad(c){
   // ENTRENAMIENTOS (form + history fused)
   _bs=h.length;
   h+='<div class="card">'+
-    '<div class="card-title" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ ENTRENAMIENTOS</span></div><button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="card-title" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ REGISTRAR ENTRENAMIENTO</span></div><button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
     '<div class="collapsible'+(sportCollapsed?' collapsed':'')+'">'+
-      '<div class="sub-section-label" style="margin-top:2px">➕ NUEVO ENTRENO</div>'+
-      // Date + sport dropdown in same row
-      '<div class="row-with-add" style="margin-bottom:6px">'+
-        '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="actDate" value="'+today()+'"></div>'+
-        '<div class="input-group"><label>DEPORTE</label><select class="sport-dropdown" id="actTypeSelect" onchange="setActType(this.value)">'+
-          store.sports.map(function(s){return '<option value="'+s.id+'"'+(actType===s.id?' selected':'')+'>'+s.name+'</option>';}).join('')+
-        '</select></div>'+
-      '</div>';
+      (actType==='crossfit'
+        ?'<div class="sport-form-grid" style="margin-bottom:6px">'+
+            '<div class="input-group"><label>FECHA</label><input type="date" id="actDate" value="'+today()+'"></div>'+
+            '<div class="input-group"><label>DEPORTE</label><select class="sport-dropdown" id="actTypeSelect" onchange="setActType(this.value)">'+
+              store.sports.map(function(s){return '<option value="'+s.id+'"'+(actType===s.id?' selected':'')+'>'+s.name+'</option>';}).join('')+
+            '</select></div>'+
+            '<div class="input-group"><label>TIPO</label><select id="actSubtype"><option value="For Time">For Time</option><option value="AMRAP">AMRAP</option><option value="EMOM">EMOM</option><option value="Strength">Strength</option><option value="Skill">Skill</option><option value="Olympic">Olímpico</option><option value="Gymnastics">Gymnastics</option><option value="Hero WOD">Hero WOD</option><option value="Benchmark">Benchmark</option></select></div>'+
+          '</div>'
+        :'<div class="row-with-add" style="margin-bottom:6px">'+
+            '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="actDate" value="'+today()+'"></div>'+
+            '<div class="input-group"><label>DEPORTE</label><select class="sport-dropdown" id="actTypeSelect" onchange="setActType(this.value)">'+
+              store.sports.map(function(s){return '<option value="'+s.id+'"'+(actType===s.id?' selected':'')+'>'+s.name+'</option>';}).join('')+
+            '</select></div>'+
+          '</div>')+'';
   if(actType==='crossfit'){
-    h+='<div class="input-group"><label>TIPO DE ENTRENO</label><select id="actSubtype"><option value="WOD">WOD</option><option value="Strength">Strength</option><option value="EMOM">EMOM</option><option value="AMRAP">AMRAP</option><option value="For Time">For Time</option><option value="Skill">Skill</option><option value="Olympic">Olímpico</option><option value="Gymnastics">Gymnastics</option><option value="Hero WOD">Hero WOD</option><option value="Benchmark">Benchmark</option></select></div>'+
-    '<div class="grid-2">'+
-      '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="45"></div>'+
+    h+='<div class="sport-form-grid sport-form-grid-4">'+
+      '<div class="input-group"><label>DURACIÓN</label><input type="number" id="actDuration" placeholder="45"></div>'+
       '<div class="input-group"><label>TIEMPO/REPS</label><input type="text" id="actResult" placeholder="8:42"></div>'+
       '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="155"></div>'+
-      '<div class="input-group"><label>FC MÁXIMA</label><input type="number" id="actHRmax" placeholder="185"></div>'+
+      '<div class="input-group"><label>FC MÁX</label><input type="number" id="actHRmax" placeholder="185"></div>'+
     '</div>';
   }else if(actType==='carrera'){
     h+='<div class="input-group"><label>TIPO DE CARRERA</label><select id="actSubtype" onchange="setRunType(this.value)"><option value="continua"'+(runType==='continua'?' selected':'')+'>Continua</option><option value="series"'+(runType==='series'?' selected':'')+'>Series</option></select></div>';
     if(runType==='continua'){
-      h+='<div class="grid-2">'+
+      h+='<div class="sport-form-grid">'+
         '<div class="input-group"><label>DISTANCIA (KM)</label><input type="number" step="0.01" id="actDistance" placeholder="10"></div>'+
         '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="50"></div>'+
         '<div class="input-group"><label>RITMO MEDIO (min/km)</label><input type="text" id="actResult" placeholder="5:00"></div>'+
@@ -3326,7 +3397,7 @@ function renderActividad(c){
         '<div class="input-group"><label>DESNIVEL (m)</label><input type="number" id="actHRmax2" placeholder="opcional"></div>'+
       '</div>';
     }else{
-      h+='<div class="grid-2">'+
+      h+='<div class="sport-form-grid">'+
         '<div class="input-group"><label>SERIES (Nº × distancia)</label><input type="text" id="actDistance" placeholder="10×400m"></div>'+
         '<div class="input-group"><label>DURACIÓN TOTAL (min)</label><input type="number" id="actDuration" placeholder="45"></div>'+
         '<div class="input-group"><label>RITMO POR SERIE (min/km)</label><input type="text" id="actResult" placeholder="3:45"></div>'+
@@ -3336,7 +3407,7 @@ function renderActividad(c){
       '</div>';
     }
   }else if(actType==='piscina'){
-    h+='<div class="grid-2">'+
+    h+='<div class="sport-form-grid">'+
       '<div class="input-group"><label>DISTANCIA (M)</label><input type="number" id="actDistance" placeholder="2000"></div>'+
       '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="40"></div>'+
       '<div class="input-group"><label>ESTILO</label><select id="actResult"><option>Crol</option><option>Espalda</option><option>Braza</option><option>Mariposa</option><option>Combinado</option></select></div>'+
@@ -3346,14 +3417,14 @@ function renderActividad(c){
     // Custom sport - use defined params from store.sportParams[sportId] if present
     const customParams=store.sportParams&&store.sportParams[actType];
     if(customParams&&customParams.length){
-      h+='<div class="grid-2">'+
+      h+='<div class="sport-form-grid">'+
         customParams.map(function(p,i){
           const idAttr=i===0?'actDistance':(i===1?'actDuration':(i===2?'actResult':(i===3?'actHRavg':'actHRmax')));
           return '<div class="input-group"><label>'+escapeHTML(p.toUpperCase())+'</label><input type="text" id="'+idAttr+'" placeholder=""></div>';
         }).join('')+
       '</div>';
     }else{
-      h+='<div class="grid-2">'+
+      h+='<div class="sport-form-grid">'+
         '<div class="input-group"><label>DISTANCIA</label><input type="text" id="actDistance" placeholder="opcional"></div>'+
         '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="60"></div>'+
         '<div class="input-group"><label>RESULTADO</label><input type="text" id="actResult" placeholder="opcional"></div>'+
@@ -3449,9 +3520,9 @@ function renderActividad(c){
 }
 
 function setActType(t){actType=t;render();}
-function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:(document.getElementById('actDuration')||{}).value||'',result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);render();}
+function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:(document.getElementById('actDuration')||{}).value||'',result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);openRegistro('activity');render();}
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
-function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);render();}
+function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);openRegistro('records');render();}
 let recVideoData=null;
 function handleRecVideo(e){
   const file=e.target.files[0];if(!file)return;
@@ -3939,8 +4010,57 @@ function finishMeditation(){
 let musicVolOpen=false,bellVolOpen=false;
 function toggleMusicVol(){musicVolOpen=!musicVolOpen;bellVolOpen=false;render();}
 function toggleBellVol(){bellVolOpen=!bellVolOpen;musicVolOpen=false;render();}
-function setMusicVolume(v){store.settings.musicVolume=parseInt(v)/100;saveSettings();if(bgNodes&&bgNodes.master){try{bgNodes.master.gain.value=store.settings.musicVolume*0.12;}catch(e){}}var n=document.getElementById('musicVolNum');if(n)n.textContent=parseInt(v);}
-function setBellVolume(v){store.settings.bellVolume=parseInt(v)/100;saveSettings();var n=document.getElementById('bellVolNum');if(n)n.textContent=parseInt(v);}
+var _musicPreviewTimer=null,_musicPreviewNodes=null;
+function setMusicVolume(v){
+  const val=parseInt(v)/100;
+  store.settings.musicVolume=val;
+  saveSettings();
+  var n=document.getElementById('musicVolNum');if(n)n.textContent=parseInt(v);
+  if(bgNodes&&bgNodes.master){
+    // Music is playing → apply live
+    try{
+      const ctx=getAudioCtx();
+      const now=ctx?ctx.currentTime:0;
+      bgNodes.master.gain.cancelScheduledValues(now);
+      bgNodes.master.gain.setValueAtTime(Math.max(0.0001,val*MUSIC_VOL_CEIL),now);
+    }catch(e){
+      try{bgNodes.master.gain.value=val*MUSIC_VOL_CEIL;}catch(e2){}
+    }
+  }else{
+    // Music not playing → short audible preview at this level (debounced)
+    if(_musicPreviewTimer)clearTimeout(_musicPreviewTimer);
+    _musicPreviewTimer=setTimeout(function(){playMusicPreview(val);},200);
+  }
+}
+function playMusicPreview(val){
+  const ctx=getAudioCtx();if(!ctx)return;
+  try{
+    // stop any previous preview
+    if(_musicPreviewNodes){try{_musicPreviewNodes.osc.stop();}catch(e){}_musicPreviewNodes=null;}
+    const now=ctx.currentTime;
+    const track=(typeof MUSIC_TRACKS!=='undefined')?MUSIC_TRACKS[store.settings.musicTrack||0]:{freqs:[110,164.81,220]};
+    const g=ctx.createGain();
+    g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001,now);
+    g.gain.linearRampToValueAtTime(val*MUSIC_VOL_CEIL,now+0.05);
+    g.gain.setValueAtTime(val*MUSIC_VOL_CEIL,now+0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001,now+1.1);
+    const o=ctx.createOscillator();
+    o.type='sine';o.frequency.value=track.freqs[0];
+    o.connect(g);o.start(now);o.stop(now+1.2);
+    _musicPreviewNodes={osc:o};
+  }catch(e){}
+}
+var _bellPreviewTimer=null;
+function setBellVolume(v){
+  const val=parseInt(v)/100;
+  store.settings.bellVolume=val;
+  saveSettings();
+  var n=document.getElementById('bellVolNum');if(n)n.textContent=parseInt(v);
+  // Audible feedback: play a sample bell at the new volume (debounced)
+  if(_bellPreviewTimer)clearTimeout(_bellPreviewTimer);
+  _bellPreviewTimer=setTimeout(function(){playBell(val);},140);
+}
 function cycleMusic(){const cur=store.settings.musicTrack||0;store.settings.musicTrack=(cur+1)%MUSIC_TRACKS.length;saveSettings();if(store.settings.music&&medState==='running'){stopBgMusic();startBgMusic();}render();}
 function cycleBell(){const cur=store.settings.bellType||0;store.settings.bellType=(cur+1)%BELL_TYPES.length;saveSettings();playBell(store.settings.bellVolume!=null?store.settings.bellVolume:0.4);render();}
 
@@ -4156,27 +4276,31 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           const elapsed=sess?Math.floor((sess.elapsedMs||0)/1000):0;
           const vitdNow=sess?Math.round(sess.vitd||0):0;
           const paused=sess&&sess.paused;
-          let btns='';
+          const running=sess&&!paused;
+          const sessNgml=(vitdNow/40);
+          // Buttons: idle->play, running->pause, paused->resume+save
+          let actionBtns;
           if(!sess){
-            btns='<button class="btn btn-primary" style="margin-top:10px" onclick="toggleSunTimer()">INICIAR EXPOSICIÓN</button>';
+            actionBtns='<button class="vitd-sess-main" onclick="toggleSunTimer()" title="Iniciar">▶</button>'+
+                       '<button class="vitd-sess-plus" disabled title="Guardar">✓</button>';
           }else if(paused){
-            btns='<div style="display:flex;gap:8px;margin-top:10px">'+
-              '<button class="btn btn-primary" style="flex:1" onclick="resumeSunTimer()">▶ REANUDAR</button>'+
-              '<button class="btn btn-secondary" style="flex:1" onclick="toggleSunTimer()">GUARDAR</button>'+
-            '</div>';
+            actionBtns='<button class="vitd-sess-main" onclick="resumeSunTimer()" title="Reanudar">▶</button>'+
+                       '<button class="vitd-sess-reset" onclick="discardSunTimer()" title="Reiniciar sin guardar">↺</button>'+
+                       '<button class="vitd-sess-plus on" onclick="saveSunTimer()" title="Guardar sesión">✓</button>';
           }else{
-            btns='<button class="btn btn-primary" style="margin-top:10px" onclick="toggleSunTimer()">DETENER Y GUARDAR</button>';
+            actionBtns='<button class="vitd-sess-main stop" onclick="toggleSunTimer()" title="Pausar">■</button>'+
+                       '<button class="vitd-sess-plus" disabled title="Guardar (pausa primero)">✓</button>';
           }
           return ''+
-            '<div class="timer-display" id="sunTimerDisplay" style="font-size:38px;margin:10px 0">'+fmtClock(elapsed)+'</div>'+
-            (paused?'<div style="text-align:center;font-size:10px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-4px 0 6px;text-transform:uppercase">⏸ En pausa · sesión guardada</div>':'')+
-            '<div class="vitd-box">'+
-              '<div class="vitd-value" id="vitdValue">'+vitdNow+'</div>'+
-              '<div class="vitd-label">UI SESIÓN ACTUAL</div>'+
-            '</div>'+
-            btns;
+            '<div class="timer-display" id="sunTimerDisplay" style="font-size:36px;margin:8px 0 6px">'+fmtClock(elapsed)+'</div>'+
+            (paused?'<div style="text-align:center;font-size:9.5px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-2px 0 6px;text-transform:uppercase">⏸ En pausa · reanuda o guarda</div>':'')+
+            '<div class="vitd-sess-row">'+
+              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdValue">'+vitdNow+'</span><span class="vitd-sess-unit">IU sesión</span></div>'+
+              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdNgml">'+sessNgml.toFixed(1)+'</span><span class="vitd-sess-unit">ng/ml aprox</span></div>'+
+              actionBtns+
+            '</div>';
         })()+
-        '<p style="font-size:10px;color:var(--text-dim);margin-top:8px;line-height:1.4;font-family:var(--serif);font-style:italic">Calculado según UVB, hora, clima, tipo de piel y ropa.</p>'+
+        '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">Calculado según UVB, hora, clima, tipo de piel y ropa.</p>'+
         // Piel, ropa y edad — factors that drive the calculation (placed below the timer)
         '<div class="vitd-accum-card">'+
           '<div class="vitd-accum-header" onclick="toggleEstadoBlockSimple(\'skinclothing\')">'+
@@ -4187,10 +4311,10 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
             skinClothingInner()+
           '</div>'+
         '</div>'+
-        // VitD ACCUMULATED counter (day/month/year)
+        // VitD ACCUMULATED + ESTIMATED LEVEL — merged subsection
         '<div class="vitd-accum-card">'+
-          '<div class="vitd-accum-header" onclick="toggleEstadoBlock(\'vitdAccum\')">'+
-            '<span class="vitd-accum-title">📊 Vit D acumulada</span>'+
+          '<div class="vitd-accum-header" onclick="toggleEstadoBlockSimple(\'vitdAccum\')">'+
+            '<span class="vitd-accum-title">📊 Vit D acumulada y nivel <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span>'+
             '<button class="collapse-btn">'+(store.collapsed.vitdAccum?'▼':'▲')+'</button>'+
           '</div>'+
           '<div class="collapsible'+(store.collapsed.vitdAccum?' collapsed':'')+'">'+
@@ -4199,23 +4323,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               '<div class="vitd-accum-cell"><div class="vitd-accum-label">MES</div><div class="vitd-accum-val">'+Math.round(totalMonth)+'</div><div class="vitd-accum-unit">IU</div></div>'+
               '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO</div><div class="vitd-accum-val">'+Math.round(totalYear)+'</div><div class="vitd-accum-unit">IU</div></div>'+
             '</div>'+
-          '</div>'+
-        '</div>'+
-        // Estimated personal level
-        '<div class="vitd-estim-card">'+
-          '<div class="vitd-estim-header" onclick="toggleEstadoBlock(\'vitdEstim\')">'+
-            '<span class="vitd-estim-title">🧬 Mi nivel de Vit D estimado <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span>'+
-            '<button class="collapse-btn">'+(store.collapsed.vitdEstim?'▼':'▲')+'</button>'+
-          '</div>'+
-          '<div class="collapsible'+(store.collapsed.vitdEstim?' collapsed':'')+'">'+
-            '<div style="text-align:center;padding:10px 0">'+
-              '<div style="font-family:var(--sans);font-size:33px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px;font-style:normal;line-height:1.15">'+Math.round(estimateActual)+'</div>'+
-              '<div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:3px;font-family:var(--sans)">IU TOTALES ESTIMADOS</div>'+
-            '</div>'+
-            // Blood analysis equivalent conversion
             (function(){
-              // Approx: serum 25(OH)D ng/ml ≈ baseline IU / 40 if user entered an analítica baseline,
-              // otherwise estimate contribution: every ~100 IU/day sustained ≈ +1 ng/ml.
               const ngml=baseline>0?(baseline/40):(estimateActual/40);
               const nmol=ngml*2.5;
               let status,statusColor;
@@ -4224,25 +4332,25 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               else if(ngml<=50){status='Óptimo';statusColor='#34d399';}
               else if(ngml<=100){status='Alto';statusColor='#fbbf24';}
               else{status='Excesivo';statusColor='#f87171';}
-              return '<div class="vitd-blood-card">'+
-                '<div class="sub-section-label" style="margin-top:0">🩸 EQUIVALENTE EN ANALÍTICA</div>'+
-                '<div style="display:flex;gap:6px;margin-top:5px">'+
+              return '<div class="vitd-blood-card" style="margin-top:8px">'+
+                '<div class="sub-section-label" style="margin-top:0">🧬 NIVEL ESTIMADO 25(OH)D</div>'+
+                '<div style="display:flex;gap:6px;margin-top:5px;align-items:stretch">'+
                   '<div class="vitd-blood-chip"><div class="vitd-blood-val">'+ngml.toFixed(1)+'</div><div class="vitd-blood-unit">ng/ml</div></div>'+
                   '<div class="vitd-blood-chip"><div class="vitd-blood-val">'+nmol.toFixed(0)+'</div><div class="vitd-blood-unit">nmol/L</div></div>'+
-                  '<div class="vitd-blood-chip" style="border-color:'+statusColor+'44"><div class="vitd-blood-val" style="font-size:13px;color:'+statusColor+'">'+status+'</div><div class="vitd-blood-unit">25(OH)D</div></div>'+
+                  '<div class="vitd-blood-chip" style="border-color:'+statusColor+'44"><div class="vitd-blood-val" style="font-size:13px;color:'+statusColor+'">'+status+'</div><div class="vitd-blood-unit">estado</div></div>'+
                 '</div>'+
               '</div>';
             })()+
             '<div class="row-with-add" style="margin-top:8px">'+
-              '<div class="input-group" style="flex:1"><label>VALOR BASE (IU)</label><input type="number" id="vitDBaselineInput" value="'+baseline+'" placeholder="0" onchange="updateVitDBaseline(this.value)"></div>'+
+              '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (IU)</label><input type="number" id="vitDBaselineInput" value="'+baseline+'" placeholder="0" onchange="updateVitDBaseline(this.value)"></div>'+
               '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:38px">Reset</button>'+
             '</div>'+
-            '<p style="font-size:10px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">Si tienes un análisis de sangre con tu valor de 25(OH)D, introdúcelo aquí en IU (ng/ml × 40). Conversión: ng/ml × 2.5 = nmol/L. Óptimo: 30-50 ng/ml (75-125 nmol/L).</p>'+
+            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">Si tienes análisis con tu 25(OH)D, introdúcelo en IU (ng/ml × 40). ng/ml × 2.5 = nmol/L. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
-        (store.sun.length?renderRegistros('sun','EXPOSICIONES',function(s){
+        (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
           return '<div style="font-size:11.5px">'+s.duration+' · UV '+s.uv+(s.vitd?' · <strong style="color:#fbbf24">'+parseFloat(s.vitd).toFixed(0)+' IU</strong>':'')+'</div>';
-        },{chartLabel:'Vit D (IU)',chartKey:'vitd',chartColor:'#fbbf24'}):'')+
+        },{chartLabel:'Vit D (IU)',chartKey:'vitd',chartColor:'#fbbf24'})+'</div>':'')+
       '</div>'+
     '</div>';
   }
@@ -4362,14 +4470,18 @@ function refreshSunTimerUI(){
   const sess=loadSunSession();
   const el=document.getElementById('sunTimerDisplay');
   const vd=document.getElementById('vitdValue');
+  const ng=document.getElementById('vitdNgml');
   if(!sess){
     if(el)el.textContent='00:00:00';
     if(vd)vd.textContent='0';
+    if(ng)ng.textContent='0.0';
     return;
   }
   const elapsed=Math.floor((sess.elapsedMs||0)/1000);
   if(el)el.textContent=fmtClock(elapsed);
-  if(vd)vd.textContent=Math.round(sess.vitd||0).toString();
+  const v=Math.round(sess.vitd||0);
+  if(vd)vd.textContent=v.toString();
+  if(ng)ng.textContent=(v/40).toFixed(1);
 }
 
 // One tick: advance the session by real elapsed time using timestamps (robust to frozen intervals).
@@ -4459,20 +4571,13 @@ function resumeSunSession(){
 function toggleSunTimer(){
   const sess=loadSunSession();
   if(sess){
-    // A session exists → this button stops & saves it.
-    const elapsed=Math.floor((sess.elapsedMs||0)/1000);
-    const h=Math.floor(elapsed/3600);
-    const m=Math.floor((elapsed%3600)/60);
-    const s=elapsed%60;
-    const times=calcSunTimes(store.settings.lat,store.settings.lng);
-    const hour=new Date().getHours()+new Date().getMinutes()/60;
-    const uv=uvIndex(hour,times,true);
-    store.sun.push({id:Date.now(),date:today(),duration:h+':'+m.toString().padStart(2,'0')+':'+s.toString().padStart(2,'0'),uv:uv.toFixed(1),vitd:Math.round(sess.vitd||0).toString(),value:parseFloat((sess.vitd||0).toFixed(0)),weather:store.settings.weather||'soleado'});
-    save('sun',store.sun);
-    stopSunTickLoop();
-    saveSunSession(null);
-    sunSessionVitD=0;
-    render();
+    if(sess.paused){
+      // resume
+      sess.paused=false;sess.lastActive=Date.now();saveSunSession(sess);startSunTickLoop();render();
+    }else{
+      // pause (do NOT save/discard — keep the session)
+      sess.paused=true;sess.lastActive=Date.now();saveSunSession(sess);stopSunTickLoop();render();
+    }
   }else{
     // Start a new persistent session.
     const now=Date.now();
@@ -4481,6 +4586,33 @@ function toggleSunTimer(){
     startSunTickLoop();
     render();
   }
+}
+
+// Discard the current session without saving (reset to zero).
+function discardSunTimer(){
+  stopSunTickLoop();
+  saveSunSession(null);
+  sunSessionVitD=0;
+  render();
+}
+
+// Save the current (paused) session to history and clear it.
+function saveSunTimer(){
+  const sess=loadSunSession();
+  if(!sess)return;
+  const elapsed=Math.floor((sess.elapsedMs||0)/1000);
+  const h=Math.floor(elapsed/3600);
+  const m=Math.floor((elapsed%3600)/60);
+  const s=elapsed%60;
+  const times=calcSunTimes(store.settings.lat,store.settings.lng);
+  const hour=new Date().getHours()+new Date().getMinutes()/60;
+  const uv=uvIndex(hour,times,true);
+  store.sun.push({id:Date.now(),date:today(),duration:h+':'+m.toString().padStart(2,'0')+':'+s.toString().padStart(2,'0'),uv:uv.toFixed(1),vitd:Math.round(sess.vitd||0).toString(),value:parseFloat((sess.vitd||0).toFixed(0)),weather:store.settings.weather||'soleado'});
+  save('sun',store.sun);openRegistro('sun');
+  stopSunTickLoop();
+  saveSunSession(null);
+  sunSessionVitD=0;
+  render();
 }
 
 // Resume a paused session (e.g. after >1h inactivity) without losing accumulated time.
@@ -4586,7 +4718,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.24</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.30</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -4721,6 +4853,9 @@ document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'){
     resumeSunSession();
     if(currentTab==='sol')refreshSunTimerUI();
+  }else{
+    // App minimized / backgrounded → collapse all registro blocks
+    if(typeof collapseAllRegistros==='function')collapseAllRegistros();
   }
 });
 
