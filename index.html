@@ -1707,6 +1707,37 @@ function vitDPerMinute(uvb){
   return base*skin.mult*cloth.exposure*vitDAgeFactor();
 }
 
+// --- Reusable serum 25(OH)D estimation (shared by Sol section and Panel widget) ---
+// Average daily IU produced from sun over the last 30 days.
+function vitDAvgDaily30(){
+  if(!Array.isArray(store.sun)||!store.sun.length)return 0;
+  const now=new Date();
+  let last30=0;
+  store.sun.forEach(function(s){
+    if(!s.date)return;
+    const d=new Date(s.date+'T12:00:00');
+    const days=(now-d)/(1000*60*60*24);
+    if(days>=0&&days<=30)last30+=(parseFloat(s.vitd)||0);
+  });
+  return last30/30;
+}
+// Estimated serum level in ng/ml: analytic baseline (or ~20 default) + recent-sun boost
+// (~1 ng/ml per 100 IU/day sustained), capped to a plausible maximum.
+function estimatedVitDNgml(){
+  const baseline=parseFloat(store.settings.vitDBaseline||0);
+  const baseNgml=baseline>0?(baseline/40):20;
+  const sunBoost=Math.min(40,vitDAvgDaily30()/100);
+  return Math.min(120,baseNgml+sunBoost);
+}
+// Status classification for a given ng/ml value.
+function vitDStatus(ngml){
+  if(ngml<20)return{label:'Deficiencia',color:'#f87171'};
+  if(ngml<30)return{label:'Insuficiencia',color:'#fbbf24'};
+  if(ngml<=50)return{label:'Óptimo',color:'#34d399'};
+  if(ngml<=100)return{label:'Alto',color:'#fbbf24'};
+  return{label:'Excesivo',color:'#f87171'};
+}
+
 function getSkyColors(hour,t){
   if(!store.settings.sunEffects)return{outer:'#0a0a0a',inner:'#000'};
   const isDay=hour>=t.sunrise&&hour<=t.sunset;
@@ -1801,7 +1832,8 @@ const WIDGET_DEFS={
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date)}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date)}:null;}},
-  vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const total=f.reduce(function(s,x){return s+(parseFloat(x.vitd)||0);},0);return{val:Math.round(total),unit:'IU',sub:'30 días'};}},
+  vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const total=f.reduce(function(s,x){return s+(parseFloat(x.vitd)||0);},0);const ngml=total/100;return{val:ngml.toFixed(1),unit:'ng/ml',sub:'aporte 30 días'};}},
+  vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
   health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
 };
 </script>
@@ -2507,6 +2539,7 @@ function openRegChart(key){
   openChartModal(o.chartLabel||r.label||'Gráfica',key,o.chartKey,o.chartColor,{
     transform:o.chartTransform||null,
     aggregate:o.chartAggregate||null,
+    computed:o.chartComputed||null,
     yLabel:o.chartYLabel||o.chartLabel,
     metrics:o.chartMetrics||null
   });
@@ -2520,9 +2553,19 @@ function openRegChart(key){
 function openChartModal(title,dataSource,dataKey,color,opts){
   opts=opts||{};
   currentChartConfig={dataSource:dataSource,dataKey:dataKey,color:color||'#a7f3d0',
-    transform:opts.transform||null,aggregate:opts.aggregate||null,yLabel:opts.yLabel||title,
+    transform:opts.transform||null,aggregate:opts.aggregate||null,computed:opts.computed||null,yLabel:opts.yLabel||title,
     metrics:opts.metrics||null,metricIdx:0,title:title};
-  document.getElementById('chartModalTitle').textContent=title;
+  // If metrics provided, initialize from the first metric so its computed/aggregate/transform apply.
+  if(opts.metrics&&opts.metrics.length){
+    const m0=opts.metrics[0];
+    currentChartConfig.dataKey=m0.key;
+    currentChartConfig.color=m0.color||currentChartConfig.color;
+    currentChartConfig.transform=m0.transform||null;
+    currentChartConfig.aggregate=m0.aggregate||null;
+    currentChartConfig.computed=m0.computed||null;
+    currentChartConfig.yLabel=m0.yLabel||m0.label;
+  }
+  document.getElementById('chartModalTitle').textContent=(opts.metrics&&opts.metrics.length?opts.metrics[0].label:title);
   renderChartRangeButtons();
   renderChartMetricButtons();
   openModal('chart');
@@ -2549,6 +2592,7 @@ function setChartMetric(i){
   currentChartConfig.color=m.color||currentChartConfig.color;
   currentChartConfig.transform=m.transform||null;
   currentChartConfig.aggregate=m.aggregate||null;
+  currentChartConfig.computed=m.computed||null;
   currentChartConfig.yLabel=m.yLabel||m.label;
   document.getElementById('chartModalTitle').textContent=m.label;
   renderChartMetricButtons();
@@ -2585,7 +2629,11 @@ function renderModalChart(){
   src.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
   const filt=filterByRange(src,currentRange);
   let labels,data;
-  if(cfg.aggregate){
+  if(cfg.computed){
+    // Custom computed series: fn(filteredRecords, range, allRecords) -> {labels, data}
+    const res=cfg.computed(filt,currentRange,src);
+    labels=res.labels;data=res.data;
+  }else if(cfg.aggregate){
     const agg=aggregateByBucket(filt,currentRange,cfg.aggregate,cfg.dataKey);
     labels=agg.labels;data=agg.data;
   }else{
@@ -2597,6 +2645,41 @@ function renderModalChart(){
     });
   }
   makeChart('modalChart',labels,data,cfg.yLabel||cfg.dataKey,cfg.color);
+}
+
+// Estimated serum 25(OH)D (ng/ml) over time: for each day in range, compute the level
+// from the trailing-30-day average sun production plus the analytic baseline.
+function computeVitDSerumSeries(filt,range,allRecords){
+  const baseline=parseFloat(store.settings.vitDBaseline||0);
+  const baseNgml=baseline>0?(baseline/40):20;
+  // Build a date axis. For long ranges sample weekly/monthly to keep it readable.
+  const all=(allRecords||[]).filter(function(x){return x.date;});
+  if(!all.length)return{labels:[],data:[]};
+  // Determine span start from the filtered set (range already applied), end = today.
+  let startDate;
+  if(filt.length)startDate=new Date(filt[0].date+'T12:00:00');
+  else startDate=new Date(all[0].date+'T12:00:00');
+  const end=new Date();
+  const dayMs=86400000;
+  const totalDays=Math.max(1,Math.round((end-startDate)/dayMs));
+  let step=1;
+  if(totalDays>365)step=14; else if(totalDays>180)step=7; else if(totalDays>60)step=3;
+  const labels=[],data=[];
+  for(let t=0;t<=totalDays;t+=step){
+    const cur=new Date(startDate.getTime()+t*dayMs);
+    // trailing 30-day average of sun IU up to 'cur'
+    let sum=0;
+    all.forEach(function(x){
+      const d=new Date(x.date+'T12:00:00');
+      const diff=(cur-d)/dayMs;
+      if(diff>=0&&diff<=30)sum+=(parseFloat(x.vitd)||0);
+    });
+    const avgDaily=sum/30;
+    const ngml=Math.min(120,baseNgml+Math.min(40,avgDaily/100));
+    labels.push(cur.toLocaleDateString('es-ES',{day:'2-digit',month:'short'}));
+    data.push(parseFloat(ngml.toFixed(1)));
+  }
+  return{labels:labels,data:data};
 }
 
 // ============= ESTADO =============
@@ -4436,23 +4519,10 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
       totalAll+=v;
     });
     const baseline=parseFloat(store.settings.vitDBaseline||0);
-    // --- Realistic serum 25(OH)D estimate ---
-    // Physiology: serum 25(OH)D has a ~15-day half-life and reaches equilibrium, it does NOT
-    // accumulate forever. Roughly +100 IU/day sustained intake raises serum by ~1 ng/ml.
-    // So we use the AVERAGE daily sun production over the last 30 days, not the lifetime sum.
-    const _now=new Date();
-    let last30=0;
-    store.sun.forEach(function(s){
-      if(!s.date)return;
-      const d=new Date(s.date+'T12:00:00');
-      const days=(_now-d)/(1000*60*60*24);
-      if(days>=0&&days<=30)last30+=(parseFloat(s.vitd)||0);
-    });
-    const avgDaily=last30/30; // average IU/day produced from sun over last 30 days
-    // Sun contribution to serum at equilibrium (~1 ng/ml per 100 IU/day), capped to a
-    // physiologically plausible boost from sun alone.
+    // Realistic serum 25(OH)D estimate (shared helpers, see h2):
+    // serum equilibrates (~15-day half-life), it does NOT accumulate forever.
+    const avgDaily=vitDAvgDaily30();
     const sunBoostNgml=Math.min(40,avgDaily/100);
-    // estimateActual: shown as "IU/día medios" context; keep total for the year display only.
     const estimateActual=avgDaily;
     return '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div><button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
@@ -4541,7 +4611,11 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
           return '<div style="font-size:11.5px">'+s.duration+' · UV '+s.uv+(s.vitd?' · <strong style="color:#fbbf24">'+parseFloat(s.vitd).toFixed(0)+' IU</strong>':'')+'</div>';
-        },{chartLabel:'Vit D (ng/ml)',chartKey:'vitd',chartColor:'#fbbf24',chartYLabel:'ng/ml',chartTransform:function(iu){return parseFloat((iu/100).toFixed(2));}})+'</div>':'')+
+        },{chartLabel:'Nivel estimado',chartKey:'vitd',chartColor:'#fbbf24',chartYLabel:'ng/ml',
+           chartMetrics:[
+             {key:'vitd',label:'Total en cuerpo',color:'#fbbf24',yLabel:'ng/ml',computed:computeVitDSerumSeries},
+             {key:'vitd',label:'Por día',color:'#fb923c',aggregate:'sum',yLabel:'IU/día'}
+           ]})+'</div>':'')+
       '</div>'+
     '</div>';
   }
@@ -4918,7 +4992,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.36</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.37</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
