@@ -735,7 +735,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-input-row .input-group.date-compact{flex:0 0 92px}
 .fast-input-row .input-group label{margin-bottom:4px;line-height:1.1;min-height:13px;font-size:8.5px}
 .fast-input-row input,.fast-input-row input[type="date"],.fast-input-row input[type="time"]{height:38px!important;box-sizing:border-box;padding:0 4px!important;text-align:center;font-size:11px}
-.fast-time-input.dimmed{color:var(--text-dim);opacity:0.55}
+.fast-time-input.dimmed{color:var(--text-muted);opacity:1}
 .fast-time-input.active{color:#fff;opacity:1}
 .fast-preload-dot{color:#34d399;font-size:7px;vertical-align:middle}
 .fast-dur-group{flex:0 0 64px}
@@ -4758,6 +4758,8 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
 }
 
 function renderSol(c){
+  // Safety: make sure newer blocks exist in the order (covers users with an older saved order)
+  if(store.solOrder.indexOf('lightfreq')===-1){store.solOrder.push('lightfreq');saveSolOrder();}
   const lat=store.settings.lat;
   const lng=store.settings.lng;
   const times=calcSunTimes(lat,lng);
@@ -5127,7 +5129,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.43</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.44</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
