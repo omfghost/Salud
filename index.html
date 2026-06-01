@@ -655,10 +655,13 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .vitd-accum-header,.vitd-estim-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
 .vitd-accum-title,.vitd-estim-title{font-size:10.5px;font-weight:600;color:#fbbf24;text-transform:uppercase;letter-spacing:1.4px;font-family:var(--sans);flex:1;min-width:0;display:flex;align-items:center;gap:5px}
 .vitd-accum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}
-.vitd-accum-cell{text-align:center;padding:8px 4px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;min-width:0;overflow:hidden}
-.vitd-accum-label{font-size:8.5px;color:#fbbf24;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;font-family:var(--sans)}
-.vitd-accum-val{font-family:var(--sans);font-size:20px;font-weight:600;color:#fde047;font-style:normal;margin-top:2px;line-height:1.1;letter-spacing:-0.5px}
-.vitd-accum-unit{font-size:8.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);margin-top:1px}
+.vitd-accum-cell{text-align:center;padding:6px 3px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;min-width:0;overflow:hidden}
+.vitd-accum-label{font-size:8px;color:#fbbf24;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;font-family:var(--sans)}
+.vitd-accum-val{font-family:var(--sans);font-size:16px;font-weight:600;color:#fde047;font-style:normal;margin-top:1px;line-height:1.1;letter-spacing:-0.5px}
+.vitd-accum-unit{font-size:7.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.4px;font-family:var(--sans);margin-top:0}
+.vitd-accum-ng{font-size:9px;color:#a7f3d0;font-family:var(--sans);font-weight:600;margin-top:3px;letter-spacing:-0.2px}
+.vitd-baseline-row{display:flex;gap:6px;align-items:flex-end;margin-top:8px}
+.vitd-baseline-input{height:34px!important;font-size:13px;padding:0 8px!important;text-align:center}
 
 /* Panel sun corner actions: IR + EN VIVO stacked */
 .panel-sun-actions{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:5px;z-index:5;align-items:flex-end}
@@ -738,6 +741,8 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-time-input.dimmed{color:var(--text-muted);opacity:1}
 .fast-time-input.active{color:#fff;opacity:1}
 .fast-preload-dot{color:#34d399;font-size:7px;vertical-align:middle}
+.fast-time-set-btn{color:var(--accent);font-weight:700;cursor:pointer;border:none;background:none;padding:0;text-decoration:none;-webkit-tap-highlight-color:transparent}
+.fast-time-set-btn:active{opacity:0.6}
 .fast-dur-group{flex:0 0 64px}
 .fast-dur-box{height:38px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent);font-style:normal;letter-spacing:-0.2px;white-space:nowrap;box-sizing:border-box}
 .fast-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end}
@@ -1255,6 +1260,26 @@ function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(sto
     store.solOrder.push('lightfreq');
     saveSolOrder();
   }
+  // Light frequencies block starts collapsed by default (first time only)
+  if(localStorage.getItem('h_lightfreqInit')!=='1'){
+    if(store.collapsed.lightfreq===undefined){store.collapsed.lightfreq=true;saveCollapsed();}
+    localStorage.setItem('h_lightfreqInit','1');
+  }
+})();
+
+// One-time: convert VitD analytic baseline from old IU units to ng/ml.
+// Old values were stored in IU (e.g. 1200). ng/ml is ~IU/40. Any value >120 is almost
+// certainly an old IU figure (serum ng/ml maxes ~120), so divide it down once.
+(function(){
+  try{
+    if(localStorage.getItem('h_vitdBaselineNgml')==='1')return;
+    const b=parseFloat(store.settings.vitDBaseline||0);
+    if(b>120){
+      store.settings.vitDBaseline=Math.round((b/40)*10)/10;
+      saveSettings();
+    }
+    localStorage.setItem('h_vitdBaselineNgml','1');
+  }catch(e){}
 })();
 
 // One-time migration: recalc historical VitD IU to the new production formula.
@@ -1761,7 +1786,7 @@ function vitDAvgDaily30(){
 // (~1 ng/ml per 100 IU/day sustained), capped to a plausible maximum.
 function estimatedVitDNgml(){
   const baseline=parseFloat(store.settings.vitDBaseline||0);
-  const baseNgml=baseline>0?(baseline/40):20;
+  const baseNgml=baseline>0?baseline:20; // baseline now stored directly in ng/ml
   const sunBoost=Math.min(40,vitDAvgDaily30()/100);
   return Math.min(120,baseNgml+sunBoost);
 }
@@ -2961,8 +2986,8 @@ function renderFastingBlock(){
         const startActive=!!savedLast;
         return '<div class="fast-input-row">'+
           '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
-          '<div class="input-group"><label>ÚLTIMA'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
-          '<div class="input-group"><label>FIN</label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
+          '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'start\')" title="Poner hora actual">ÚLTIMA</span>'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
+          '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'end\')" title="Poner hora actual">FIN</span></label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
           '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-inline fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-box" id="fastDurDisplay">19h:00m</div></div>'+
           '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
         '</div>';
@@ -3155,16 +3180,29 @@ function renderVO2Block(){
 
 function scrollTo2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 function addWeight(){const date=document.getElementById('weightDate').value;const value=document.getElementById('weightVal').value;if(!date||!value)return alert('Completa los campos');store.weight.push({id:Date.now(),date:date,value:value});save('weight',store.weight);render();}
+function setFastNow(which){
+  const now=new Date();
+  const hh=now.getHours().toString().padStart(2,'0');
+  const mm=now.getMinutes().toString().padStart(2,'0');
+  const val=hh+':'+mm;
+  if(which==='start'){
+    const el=document.getElementById('fastStart');
+    if(el){el.value=val;onFastStartInput();}
+  }else{
+    const el=document.getElementById('fastEnd');
+    if(el){el.value=val;onFastEndInput();}
+  }
+}
 function onFastStartInput(){
   const el=document.getElementById('fastStart');
   if(el&&el.value){
     el.classList.remove('dimmed');el.classList.add('active');
     // Persist the "Última" time so it stays loaded until registered or cleared
     localStorage.setItem('h_fastLastTime',el.value);
-    // show the active dot in the label if not present
+    // show the active dot in the label if not present (keep the clickable button)
     const lbl=el.parentNode.querySelector('label');
     if(lbl&&lbl.innerHTML.indexOf('fast-preload-dot')===-1){
-      lbl.innerHTML='ÚLTIMA <span class="fast-preload-dot" title="Hora preguardada activa">●</span>';
+      lbl.innerHTML='<span class="fast-time-set-btn" onclick="setFastNow(\'start\')" title="Poner hora actual">ÚLTIMA</span> <span class="fast-preload-dot" title="Hora preguardada activa">●</span>';
     }
   }
   updateFastDur();
@@ -4651,14 +4689,14 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           '</div>'+
           '<div class="collapsible'+(store.collapsed.vitdAccum?' collapsed':'')+'">'+
             '<div class="vitd-accum-grid">'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">MES</div><div class="vitd-accum-val">'+Math.round(totalMonth)+'</div><div class="vitd-accum-unit">IU</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO</div><div class="vitd-accum-val">'+Math.round(totalYear)+'</div><div class="vitd-accum-unit">IU</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+(totalDay/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">MES</div><div class="vitd-accum-val">'+Math.round(totalMonth)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+Math.min(40,(totalMonth/30)/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO</div><div class="vitd-accum-val">'+Math.round(totalYear)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+Math.min(40,(totalYear/365)/100).toFixed(1)+' ng/ml</div></div>'+
             '</div>'+
             (function(){
               // Serum estimate: analytic baseline (if entered) acts as the floor; otherwise
               // assume a typical untreated baseline of ~20 ng/ml. Add the recent-sun boost.
-              const baseNgml=baseline>0?(baseline/40):20;
+              const baseNgml=baseline>0?baseline:20; // baseline now stored directly in ng/ml
               const ngml=Math.min(120,baseNgml+sunBoostNgml);
               const nmol=ngml*2.5;
               let status,statusColor;
@@ -4676,11 +4714,11 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
                 '</div>'+
               '</div>';
             })()+
-            '<div class="row-with-add" style="margin-top:8px">'+
-              '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (IU)</label><input type="number" id="vitDBaselineInput" value="'+baseline+'" placeholder="0" onchange="updateVitDBaseline(this.value)"></div>'+
-              '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:38px">Reset</button>'+
+            '<div class="vitd-baseline-row">'+
+              '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (ng/ml)</label><input type="number" step="0.1" id="vitDBaselineInput" class="vitd-baseline-input" value="'+(baseline||'')+'" placeholder="20" onchange="updateVitDBaseline(this.value)"></div>'+
+              '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:34px">Reset</button>'+
             '</div>'+
-            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el efecto del sol según tu media diaria de los últimos 30 días (~1 ng/ml por cada 100 IU/día). El nivel en sangre se equilibra y no se acumula sin límite. Introduce tu 25(OH)D en IU (ng/ml × 40) para mayor precisión. Óptimo: 30-50 ng/ml.</p>'+
+            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el efecto del sol según tu media diaria de los últimos 30 días (~1 ng/ml por cada 100 IU/día). El nivel en sangre se equilibra y no se acumula sin límite. Introduce el 25(OH)D de tu análisis en ng/ml. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
@@ -4810,6 +4848,7 @@ function updateVitDBaseline(val){
   const v=parseFloat(val);
   store.settings.vitDBaseline=isNaN(v)?0:v;
   saveSettings();
+  if(currentTab==='sol'||currentTab==='panel')render();
 }
 function resetVitDBaseline(){
   if(!confirm('¿Reiniciar el valor base de Vit D a 0?'))return;
@@ -5129,7 +5168,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.44</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.46</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
