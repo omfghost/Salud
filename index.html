@@ -735,6 +735,9 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-input-row .input-group.date-compact{flex:0 0 92px}
 .fast-input-row .input-group label{margin-bottom:4px;line-height:1.1;min-height:13px;font-size:8.5px}
 .fast-input-row input,.fast-input-row input[type="date"],.fast-input-row input[type="time"]{height:38px!important;box-sizing:border-box;padding:0 4px!important;text-align:center;font-size:11px}
+.fast-time-input.dimmed{color:var(--text-dim);opacity:0.55}
+.fast-time-input.active{color:#fff;opacity:1}
+.fast-preload-dot{color:#34d399;font-size:7px;vertical-align:middle}
 .fast-dur-group{flex:0 0 64px}
 .fast-dur-box{height:38px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent);font-style:normal;letter-spacing:-0.2px;white-space:nowrap;box-sizing:border-box}
 .fast-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end}
@@ -794,6 +797,15 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 
 /* Environment block: location row one line */
 .env-loc-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.auto-toggle-label{font-family:var(--sans);font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
+.lightfreq-ctx{font-family:var(--sans);font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin:2px 0 8px}
+.lightfreq-row{margin-bottom:9px}
+.lightfreq-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.lightfreq-name{font-family:var(--sans);font-size:12px;font-weight:700}
+.lightfreq-wl{font-family:var(--sans);font-size:9px;color:var(--text-dim);font-weight:500}
+.lightfreq-bar-track{width:100%;height:7px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.lightfreq-bar-fill{height:100%;border-radius:4px;transition:width 0.4s ease}
+.lightfreq-note{font-family:var(--sans);font-size:9.5px;color:#aaa;margin-top:3px;line-height:1.3}
 .env-coords{font-size:10px;color:var(--text-dim);font-family:var(--sans);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .env-loc-btn{flex-shrink:0;width:30px;height:28px;background:rgba(167,243,208,0.08);border:1px solid rgba(167,243,208,0.2);border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0}
 .env-loc-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.2)}
@@ -1085,7 +1097,7 @@ const store={
   activityOrder:JSON.parse(localStorage.getItem('h_activityOrder')||'null')||['weekly','sport','records','wods'],
   panelOrder:JSON.parse(localStorage.getItem('h_panelOrder')||'null')||['sun','weekly','bodyState','widgets'],
   lightLog:JSON.parse(localStorage.getItem('h_lightLog')||'{"amanecer":{},"ocaso":{},"higiene":{}}'),
-  solOrder:JSON.parse(localStorage.getItem('h_solOrder')||'null')||['environment','hormones','suntimer'],
+  solOrder:JSON.parse(localStorage.getItem('h_solOrder')||'null')||['environment','hormones','suntimer','lightfreq'],
   activeDays:JSON.parse(localStorage.getItem('h_activeDays')||'null')||{monday:true,tuesday:true,wednesday:true,thursday:true,friday:true,saturday:true,sunday:true},
   weeklyPlan:JSON.parse(localStorage.getItem('h_weeklyPlan')||'null')||{
     monday:{text:'',image:null},tuesday:{text:'',image:null},wednesday:{text:'',image:null},
@@ -1236,6 +1248,11 @@ function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(sto
   // skinclothing is now folded inside the VitD block — remove it from sol order
   if(store.solOrder.indexOf('skinclothing')!==-1){
     store.solOrder=store.solOrder.filter(function(x){return x!=='skinclothing';});
+    saveSolOrder();
+  }
+  // Add the new "light frequencies" block to existing users' order (once)
+  if(store.solOrder.indexOf('lightfreq')===-1){
+    store.solOrder.push('lightfreq');
     saveSolOrder();
   }
 })();
@@ -2904,7 +2921,7 @@ function setRegSearch(key,val){
 const ACCORDION_GROUPS={
   estado:['fasting','sleep','body','allergy','vo2','light','health'],
   actividad:['weekly','sport','records','wods'],
-  sol:['environment','hormones','suntimer'],
+  sol:['environment','hormones','suntimer','lightfreq'],
   ajustes:['setdata','setloc','setsports','setsummary','setglossary','setabout']
 };
 function findAccordionGroup(id){
@@ -2937,13 +2954,19 @@ function renderFastingBlock(){
     blockHeader('fasting','🕐','AYUNOS INTERMITENTES','Ayuno Intermitente')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
       // Single row: fecha, última, fin, tiempo (compact), + button
-      '<div class="fast-input-row">'+
-        '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
-        '<div class="input-group"><label>ÚLTIMA</label><input type="time" id="fastStart" value="17:00" oninput="updateFastDur()"></div>'+
-        '<div class="input-group"><label>FIN</label><input type="time" id="fastEnd" value="12:00" oninput="updateFastDur()"></div>'+
-        '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-inline fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-box" id="fastDurDisplay">19h:00m</div></div>'+
-        '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
-      '</div>';
+      (function(){
+        // Persistent "Última" pre-load: kept in localStorage until registered or cleared.
+        const savedLast=localStorage.getItem('h_fastLastTime')||'';
+        const startVal=savedLast||'17:00';
+        const startActive=!!savedLast;
+        return '<div class="fast-input-row">'+
+          '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
+          '<div class="input-group"><label>ÚLTIMA'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
+          '<div class="input-group"><label>FIN</label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
+          '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-inline fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-box" id="fastDurDisplay">19h:00m</div></div>'+
+          '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
+        '</div>';
+      })();
   if(store.fasting.length){
     const maxF=Math.max.apply(null,store.fasting.map(function(f){return parseFloat(f.duration);}));
     h+='<div class="grid-3" style="margin-top:8px">'+
@@ -3066,8 +3089,8 @@ function renderSleepBlock(){
       // Row 2: hrv + puntuación + hr nocturno + (+) — three equal boxes
       '<div class="sleep-row2">'+
         '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
-        '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
         '<div class="input-group"><label>HR NOCT.</label><input type="number" id="sleepHR" placeholder="52"></div>'+
+        '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
       '</div>';
   if(store.sleep.length){
@@ -3132,8 +3155,31 @@ function renderVO2Block(){
 
 function scrollTo2(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 function addWeight(){const date=document.getElementById('weightDate').value;const value=document.getElementById('weightVal').value;if(!date||!value)return alert('Completa los campos');store.weight.push({id:Date.now(),date:date,value:value});save('weight',store.weight);render();}
+function onFastStartInput(){
+  const el=document.getElementById('fastStart');
+  if(el&&el.value){
+    el.classList.remove('dimmed');el.classList.add('active');
+    // Persist the "Última" time so it stays loaded until registered or cleared
+    localStorage.setItem('h_fastLastTime',el.value);
+    // show the active dot in the label if not present
+    const lbl=el.parentNode.querySelector('label');
+    if(lbl&&lbl.innerHTML.indexOf('fast-preload-dot')===-1){
+      lbl.innerHTML='ÚLTIMA <span class="fast-preload-dot" title="Hora preguardada activa">●</span>';
+    }
+  }
+  updateFastDur();
+}
+function onFastEndInput(){
+  const el=document.getElementById('fastEnd');
+  if(el&&el.value){el.classList.remove('dimmed');el.classList.add('active');}
+  updateFastDur();
+}
+function clearFastLast(){
+  localStorage.removeItem('h_fastLastTime');
+  render();
+}
 function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const durDec=(e-s)/60;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
-function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);openRegistro('fasting');render();}
+function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);localStorage.removeItem('h_fastLastTime');openRegistro('fasting');render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
   if(!m.waist&&!m.chest&&!m.thigh&&!m.bicep&&!m.hip&&!m.neck&&!m.photo)return alert('Introduce al menos una medida');
@@ -4427,6 +4473,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           '<span class="sub-section-label" style="margin:0;flex:0 0 auto">📍 UBICACIÓN</span>'+
           '<span class="env-coords">'+store.settings.lat.toFixed(3)+'°, '+store.settings.lng.toFixed(3)+'°</span>'+
           '<button class="env-loc-btn" onclick="refreshGeo()" title="Actualizar ubicación">📍</button>'+
+          '<span class="auto-toggle-label">Auto</span>'+
           '<div class="toggle '+(store.settings.autoLocation?'active':'')+'" onclick="toggleAutoLoc(this)"><div class="toggle-handle"></div></div>'+
         '</div>'+
         (!store.settings.autoLocation?'<div class="grid-2" style="margin-top:5px"><div class="input-group"><label>LAT</label><input type="number" step="0.0001" id="manLat" value="'+store.settings.lat+'" onchange="updateManLoc()"></div><div class="input-group"><label>LNG</label><input type="number" step="0.0001" id="manLng" value="'+store.settings.lng+'" onchange="updateManLoc()"></div></div>':'')+
@@ -4435,7 +4482,8 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         '<div class="env-loc-row">'+
           '<span class="sub-section-label" style="margin:0;flex:0 0 auto">🌤️ CLIMA</span>'+
           (autoW?'<span style="font-size:13px;margin-left:4px">'+(WEATHER_PRESETS[store.settings.weather||'soleado'].icon)+'</span><span style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.6px;font-size:10px">'+WEATHER_PRESETS[store.settings.weather||'soleado'].name+'</span>':'<span style="font-size:9px;color:var(--text-dim)">Manual</span>')+
-          '<div class="toggle '+(autoW?'active':'')+'" onclick="toggleAutoWeather(this)" style="margin-left:auto"><div class="toggle-handle"></div></div>'+
+          '<span class="auto-toggle-label" style="margin-left:auto">Auto</span>'+
+          '<div class="toggle '+(autoW?'active':'')+'" onclick="toggleAutoWeather(this)"><div class="toggle-handle"></div></div>'+
         '</div>'+
         (!autoW?'<div class="weather-tabs" style="margin-top:5px">'+
           Object.entries(WEATHER_PRESETS).map(function(entry){
@@ -4642,6 +4690,67 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
              {key:'vitd',label:'Total en cuerpo',color:'#fbbf24',yLabel:'ng/ml',computed:computeVitDSerumSeries},
              {key:'vitd',label:'Por día',color:'#fb923c',aggregate:'sum',yLabel:'IU/día'}
            ]})+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }
+  if(id==='lightfreq'){
+    // Informative block: dominant light wavelengths present at the current graph hour.
+    const h=currentHour;
+    const sr=times.sunrise,ss=times.sunset,noon=times.noon;
+    const isNight=(h<sr-0.5||h>ss+0.5);
+    const isGolden=((h>=sr-0.3&&h<=sr+1.2)||(h>=ss-1.2&&h<=ss+0.3));
+    const isMidday=(h>=noon-2.5&&h<=noon+2.5);
+    // Each band: name, wavelength, % presence at this hour (0-100), color, note
+    function band(name,wl,pct,color,note){return{name:name,wl:wl,pct:Math.max(0,Math.min(100,Math.round(pct))),color:color,note:note};}
+    let bands;
+    if(isNight){
+      bands=[
+        band('Infrarrojo','>700 nm',15,'#7f1d1d','Calor residual'),
+        band('Rojo','620-700 nm',8,'#ef4444','Mínimo'),
+        band('Azul','450-490 nm',2,'#3b82f6','Casi nulo — favorece melatonina'),
+        band('UV','<400 nm',0,'#a855f7','Ausente')
+      ];
+    }else if(isGolden){
+      bands=[
+        band('Rojo','620-700 nm',90,'#ef4444','Máximo — luz cálida'),
+        band('Infrarrojo','>700 nm',80,'#b91c1c','Alto — reparador'),
+        band('Naranja/Ámbar','590-620 nm',75,'#fb923c','Abundante'),
+        band('Azul','450-490 nm',25,'#3b82f6','Bajo — transición a descanso'),
+        band('UV','<400 nm',10,'#a855f7','Muy bajo')
+      ];
+    }else if(isMidday){
+      bands=[
+        band('Azul','450-490 nm',95,'#3b82f6','Máximo — alerta y ánimo'),
+        band('Verde','490-560 nm',90,'#22c55e','Alto'),
+        band('UVB','280-315 nm',85,'#c084fc','Pico — síntesis vitamina D'),
+        band('UVA','315-400 nm',90,'#a855f7','Alto'),
+        band('Rojo','620-700 nm',70,'#ef4444','Presente — espectro completo')
+      ];
+    }else{
+      // general daytime (morning/afternoon, not golden, not peak)
+      const dist=Math.abs(h-noon);
+      const blue=Math.max(20,90-dist*12);
+      bands=[
+        band('Azul','450-490 nm',blue,'#3b82f6','Regula ritmo circadiano'),
+        band('Verde','490-560 nm',blue*0.9,'#22c55e','Visión diurna'),
+        band('UVA','315-400 nm',Math.max(10,blue*0.8),'#a855f7','Bronceado'),
+        band('UVB','280-315 nm',Math.max(5,blue*0.6),'#c084fc','Vitamina D'),
+        band('Rojo','620-700 nm',55,'#ef4444','Presente')
+      ];
+    }
+    const ctxLabel=isNight?'Noche':isGolden?'Hora dorada':isMidday?'Mediodía solar':'Luz diurna';
+    return '<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'lightfreq\')"><div class="card-title-text"><span>🌈 FRECUENCIAS DE LUZ</span></div><button class="collapse-btn">'+(store.collapsed.lightfreq?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(store.collapsed.lightfreq?' collapsed':'')+'">'+
+        '<div class="lightfreq-ctx">'+ctxLabel+' · '+fmtHour(h)+'</div>'+
+        bands.map(function(b){
+          return '<div class="lightfreq-row">'+
+            '<div class="lightfreq-head"><span class="lightfreq-name" style="color:'+b.color+'">'+b.name+'</span><span class="lightfreq-wl">'+b.wl+'</span></div>'+
+            '<div class="lightfreq-bar-track"><div class="lightfreq-bar-fill" style="width:'+b.pct+'%;background:'+b.color+'"></div></div>'+
+            '<div class="lightfreq-note">'+b.note+'</div>'+
+          '</div>';
+        }).join('')+
+        '<p style="font-size:9.5px;color:var(--text-dim);margin-top:8px;line-height:1.4;font-family:var(--serif);font-style:italic">Composición aproximada del espectro solar según la altura del sol. La luz azul domina al mediodía (alerta, vitamina D vía UVB); el rojo e infrarrojo predominan al amanecer y atardecer (luz cálida, reparadora); de noche el espectro es mínimo, favoreciendo la melatonina.</p>'+
       '</div>'+
     '</div>';
   }
@@ -5018,7 +5127,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.42</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.43</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5164,12 +5273,28 @@ if(store.settings.autoWeather){
 
 checkAutoExport();
 
+// Auto weather: refresh on load, on foreground, and periodically (throttled to 30 min)
+// so it's genuinely automatic rather than only when toggled.
+let _lastWeatherCheck=0;
+function maybeAutoWeather(force){
+  if(!store.settings.autoWeather)return;
+  const now=Date.now();
+  if(!force&&(now-_lastWeatherCheck)<30*60*1000)return; // throttle 30 min
+  _lastWeatherCheck=now;
+  if(typeof detectWeather==='function')detectWeather();
+}
+// Initial check shortly after load (give geolocation a moment)
+setTimeout(function(){maybeAutoWeather(true);},1500);
+// Periodic check while app is open
+setInterval(function(){maybeAutoWeather(false);},10*60*1000);
+
 // Resume any in-progress sun-exposure session that survived a screen lock / reload.
 resumeSunSession();
 // When the app returns to the foreground, reconcile elapsed time (handles iOS suspending timers).
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'){
     resumeSunSession();
+    maybeAutoWeather(true); // re-detect weather each time the app is reopened/maximized
     if(currentTab==='sol')refreshSunTimerUI();
   }else{
     // App minimized / backgrounded → collapse all registro blocks
