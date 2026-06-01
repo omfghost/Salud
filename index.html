@@ -180,6 +180,9 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .history::-webkit-scrollbar{width:3px}
 .history::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 .history-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%}
+.today-dot{color:#34d399;font-size:9px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 4px rgba(52,211,153,0.6))}
+.history-item-today{background:rgba(52,211,153,0.07);border-left:3px solid #34d399;border-radius:0 8px 8px 0;padding-left:8px;margin-left:-2px}
+.history-today-tag{display:inline-block;background:rgba(52,211,153,0.2);color:#34d399;font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.4px;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle}
 .history-item:last-child{border-bottom:none}
 .history-item-content{flex:1;min-width:0;overflow:hidden}
 .history-item-date{color:var(--text-dim);font-size:9.5px;margin-bottom:3px;letter-spacing:0.5px;text-transform:uppercase;font-weight:500;font-family:var(--sans)}
@@ -202,7 +205,8 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .fast-badge{display:inline-block;background:var(--grad-primary);color:#022c22;padding:5px 11px;border-radius:13px;font-weight:600;font-size:11px;margin-top:6px;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(52,211,153,0.25)}
 
 /* MEDITATION */
-.med-screen{display:flex;flex-direction:column;align-items:center;padding:4px 0 8px;width:100%}
+.med-screen{display:flex;flex-direction:column;align-items:center;padding:4px 0 8px;width:100%;position:relative}
+.med-today-dot{position:absolute;top:4px;right:6px;color:#34d399;font-size:11px;line-height:1;z-index:5;filter:drop-shadow(0 0 5px rgba(52,211,153,0.7))}
 .breath-orb-container{position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center;margin:4px 0 8px;max-width:100%}
 .breath-orb{width:75px;height:75px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#d1fae5,#86efac 50%,#10b981);box-shadow:0 0 30px rgba(167,243,208,0.4),inset 0 -8px 22px rgba(0,0,0,0.25),inset 0 8px 22px rgba(255,255,255,0.15);transition:transform 0.3s ease-out,box-shadow 0.3s ease-out,background 0.3s ease;position:relative;z-index:2}
 .breath-orb.exhale-color{background:radial-gradient(circle at 30% 30%,#e9d5ff,#c084fc 50%,#9333ea);box-shadow:0 0 30px rgba(192,132,252,0.5),inset 0 -8px 22px rgba(0,0,0,0.25),inset 0 8px 22px rgba(255,255,255,0.15)}
@@ -236,6 +240,8 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .med-time-input input:focus{box-shadow:none}
 .med-time-input span{color:var(--text-dim);font-size:11px;font-family:var(--sans);font-weight:500}
 .med-controls{display:flex;gap:6px;margin-top:6px;width:100%}
+.btn-finish-med{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:#f87171;font-weight:700}
+.btn-finish-med:active{background:rgba(248,113,113,0.25)}
 .med-controls .btn{flex:1}
 
 /* NAV BOTTOM - 6 buttons evenly spaced, glow text */
@@ -1552,6 +1558,17 @@ document.addEventListener('visibilitychange',function(){
 
 // UTILS
 function today(){return new Date().toISOString().split('T')[0];}
+// True if the given store array has an entry dated today (for "registered today" markers).
+function hasTodayEntry(key){
+  const arr=store[key];
+  if(!Array.isArray(arr))return false;
+  const t=today();
+  return arr.some(function(x){return x&&x.date&&String(x.date).substring(0,10)===t;});
+}
+// Small green dot shown in a block header when that parameter was logged today.
+function todayDot(key){
+  return hasTodayEntry(key)?'<span class="today-dot" title="Registrado hoy">●</span>':'';
+}
 function fmtDate(d){return new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});}
 function filterByRange(data,range){if(range==='all')return data;const days={'1w':7,'2w':14,'1m':30,'2m':60,'6m':180,'1y':365}[range]||30;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);return data.filter(function(d){return new Date(d.date)>=cutoff;});}
 function avg(arr,key){if(!arr.length)return 0;const vals=arr.map(function(d){return parseFloat(d[key]||0);}).filter(function(v){return !isNaN(v);});if(!vals.length)return 0;return(vals.reduce(function(s,v){return s+v;},0)/vals.length).toFixed(1);}
@@ -2836,9 +2853,13 @@ function moveActBlock(idx,dir){
 
 function blockHeader(id,icon,title,withHelp){
   const collapsed=store.collapsed[id]!==false;
+  // Map block id -> store key that holds dated records, to show a "logged today" dot.
+  const dataKeyMap={fasting:'fasting',sleep:'sleep',body:'measurements',weight:'weight',allergy:'allergy',vo2:'vo2history',sport:'activity',records:'records',meditation:'meditation',suntimer:'sun'};
+  const dk=dataKeyMap[id];
+  const dot=dk?todayDot(dk):'';
   let h='<div class="card-title" onclick="toggleEstadoBlock(\''+id+'\')"><div class="card-title-text"><span>'+icon+' '+title+'</span>';
   if(withHelp){h+='<span class="help-icon" onclick="event.stopPropagation();showTerm(\''+withHelp+'\')">?</span>';}
-  h+='</div><button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button></div>';
+  h+='</div>'+dot+'<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button></div>';
   return h;
 }
 
@@ -2919,10 +2940,12 @@ function buildRegItems(key,searchQ){
   const items=filterRegItems(key,searchQ);
   if(!items.length)return '<div style="text-align:center;font-size:11px;color:var(--text-dim);padding:14px;font-style:italic;font-family:var(--serif)">Sin resultados</div>';
   let h='';
+  const t=today();
   items.forEach(function(it){
-    h+='<div class="history-item">'+
+    const isToday=it.date&&String(it.date).substring(0,10)===t;
+    h+='<div class="history-item'+(isToday?' history-item-today':'')+'">'+
       '<div class="history-item-content">'+
-        '<div class="history-item-date">'+fmtDate(it.date)+'</div>'+
+        '<div class="history-item-date">'+fmtDate(it.date)+(isToday?' <span class="history-today-tag">HOY</span>':'')+'</div>'+
         reg.renderer(it)+
       '</div>'+
       '<div class="history-item-actions">'+
@@ -3113,7 +3136,7 @@ function renderSleepBlock(){
   const collapsed=store.collapsed.sleep!==false;
   let h='<div class="card" id="s-sleep">'+
     '<div class="card-title" onclick="toggleEstadoBlock(\'sleep\')">'+
-      '<div class="card-title-text"><span>😴 SUEÑO <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Sueño\')">?</button></span></div>'+
+      '<div class="card-title-text"><span>😴 SUEÑO <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Sueño\')">?</button></span></div>'+todayDot('sleep')+
       '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
@@ -3708,7 +3731,7 @@ function renderActividad(c){
   // ENTRENAMIENTOS (form + history fused)
   _bs=h.length;
   h+='<div class="card">'+
-    '<div class="card-title" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ REGISTRAR ENTRENAMIENTO</span></div><button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="card-title" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ REGISTRAR ENTRENAMIENTO</span></div>'+todayDot('activity')+'<button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
     '<div class="collapsible'+(sportCollapsed?' collapsed':'')+'">'+
       (actType==='crossfit'
         ?'<div class="sport-form-grid" style="margin-bottom:6px">'+
@@ -3812,7 +3835,7 @@ function renderActividad(c){
   // 2) RECORDS (mejores marcas) - with video support
   _bs=h.length;
   h+='<div class="card">'+
-    '<div class="card-title" onclick="toggleEstadoBlock(\'records\')"><div class="card-title-text"><span>🥇 MEJORES MARCAS</span></div><button class="collapse-btn">'+(recordsCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="card-title" onclick="toggleEstadoBlock(\'records\')"><div class="card-title-text"><span>🥇 MEJORES MARCAS</span></div>'+todayDot('records')+'<button class="collapse-btn">'+(recordsCollapsed?'▼':'▲')+'</button></div>'+
     '<div class="collapsible'+(recordsCollapsed?' collapsed':'')+'">'+
       // Line 1: ejercicio + video attach
       '<div class="row-with-add">'+
@@ -4087,6 +4110,7 @@ function renderMeditacion(c){
       (musicVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🎵</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'" oninput="setMusicVolume(this.value)"><span class="med-vol-num" id="musicVolNum">'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'</span></div>':'')+
       (bellVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🔔</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'" oninput="setBellVolume(this.value)"><span class="med-vol-num" id="bellVolNum">'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'</span></div>':'')+
       '<div class="med-screen">'+
+        (hasTodayEntry('meditation')?'<span class="med-today-dot" title="Meditación registrada hoy">●</span>':'')+
         '<div class="breath-orb-container" onclick="toggleMed()" style="cursor:pointer">'+
           '<div class="breath-rings">'+
             '<div class="breath-ring breath-ring-3"></div>'+
@@ -4131,7 +4155,8 @@ function renderMeditacion(c){
       '<div class="med-controls">'+
         (medState==='running'||medState==='paused'||medState==='countdown'?
           '<button class="btn btn-secondary" onclick="resetMed()">⟲ REINICIAR</button>'+
-          '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()">'+(medState==='paused'?'▶ REANUDAR':'⏸ PAUSAR')+'</button>':
+          '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()">'+(medState==='paused'?'▶ REANUDAR':'⏸ PAUSAR')+'</button>'+
+          (medState==='paused'?'<button class="btn btn-finish-med" onclick="endMeditationEarly()" title="Finalizar y guardar el tiempo realizado">⏹ FINALIZAR</button>':''):
           '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()" style="flex:1">▶ COMENZAR</button>'
         )+
       '</div>'+
@@ -4237,7 +4262,8 @@ function updateMedControls(){
       '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()">⏸ PAUSAR</button>';
   }else if(medState==='paused'){
     ctrl.innerHTML='<button class="btn btn-secondary" onclick="resetMed()">⟲ REINICIAR</button>'+
-      '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()">▶ REANUDAR</button>';
+      '<button class="btn btn-primary" id="medBtn" onclick="toggleMed()">▶ REANUDAR</button>'+
+      '<button class="btn btn-finish-med" onclick="endMeditationEarly()" title="Finalizar y guardar el tiempo realizado">⏹ FINALIZAR</button>';
   }else{
     ctrl.innerHTML='<button class="btn btn-primary" id="medBtn" onclick="toggleMed()" style="flex:1">▶ COMENZAR</button>';
   }
@@ -4359,6 +4385,22 @@ function resetMed(){
   medPhaseLabel='';
   const overlay=document.getElementById('countdownOverlay');
   if(overlay)overlay.style.display='none';
+  render();
+}
+
+// Finish a paused session early, saving the time actually practised (not the full target).
+function endMeditationEarly(){
+  releaseWakeLock();
+  clearInterval(medTimer);
+  stopBgMusic();
+  // Time practised = configured total minus the time that was left when paused.
+  const done=Math.max(0,Math.round(medConfig.total-(medTimeLeft||0)));
+  if(done>=10){ // only save if at least ~10s were practised
+    store.meditation.push({id:Date.now(),date:today(),duration:done,inhale:medConfig.inhale,exhale:medConfig.exhale,value:done,partial:true});
+    save('meditation',store.meditation);
+    playBell(0.4);
+  }
+  medState='idle';medTimeLeft=medConfig.total;medPhaseLabel='';
   render();
 }
 
@@ -4648,7 +4690,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
     const sunBoostNgml=Math.min(40,avgDaily/100);
     const estimateActual=avgDaily;
     return '<div class="card">'+
-      '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div><button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div>'+todayDot('sun')+'<button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.suntimer?' collapsed':'')+'">'+
         (function(){
           const sess=loadSunSession();
@@ -5179,7 +5221,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.47</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.49</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
