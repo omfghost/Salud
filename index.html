@@ -194,6 +194,11 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 /* BADGES */
 .badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:600;margin-left:4px;letter-spacing:0.4px;text-transform:uppercase;font-family:var(--sans)}
 .badge-success{background:rgba(167,243,208,0.15);color:var(--accent)}
+.fast-chip{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:10px;font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:0.2px;vertical-align:middle;white-space:nowrap}
+.fast-chip-low{background:rgba(148,163,184,0.18);color:#94a3b8;border:1px solid rgba(148,163,184,0.3)}
+.fast-chip-12{background:rgba(96,165,250,0.18);color:#60a5fa;border:1px solid rgba(96,165,250,0.35)}
+.fast-chip-16{background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.35)}
+.fast-chip-24{background:rgba(251,191,36,0.2);color:#fde047;border:1px solid rgba(251,191,36,0.45);box-shadow:0 0 8px rgba(251,191,36,0.2)}
 .fast-badge{display:inline-block;background:var(--grad-primary);color:#022c22;padding:5px 11px;border-radius:13px;font-weight:600;font-size:11px;margin-top:6px;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(52,211,153,0.25)}
 
 /* MEDITATION */
@@ -3000,7 +3005,13 @@ function renderFastingBlock(){
       '<div class="stat"><div class="stat-label">MÁXIMO</div><div class="stat-value" style="font-size:15px">'+fmtDuration(maxF)+'</div></div>'+
     '</div>';
     h+=renderRegistros('fasting','AYUNOS',function(f){
-      return '<div class="history-item-value">'+f.start+' → '+f.end+' · <strong style="color:var(--accent)">'+fmtDuration(f.duration)+'</strong>'+(parseFloat(f.duration)>12?'<span class="badge badge-success">+12h</span>':'')+'</div>';
+      const dur=parseFloat(f.duration)||0;
+      let chip;
+      if(dur<12)chip='<span class="fast-chip fast-chip-low">&lt;12h</span>';
+      else if(dur<16)chip='<span class="fast-chip fast-chip-12">+12h</span>';
+      else if(dur<24)chip='<span class="fast-chip fast-chip-16">+16h</span>';
+      else chip='<span class="fast-chip fast-chip-24">+24h</span>';
+      return '<div class="history-item-value">'+f.start+' → '+f.end+' · <strong style="color:var(--accent)">'+fmtDuration(f.duration)+'</strong>'+chip+'</div>';
     },{chartLabel:'Ayunos (h)',chartKey:'duration',chartColor:'#fbbf24'},'fasting');
   }
   h+='</div></div>';
@@ -5168,7 +5179,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.46</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.47</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
