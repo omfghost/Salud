@@ -322,6 +322,9 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 /* PANEL CARDS */
 .panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px;width:100%}
 .panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:11px 10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
+.panel-card-today{border-color:rgba(52,211,153,0.45);box-shadow:0 0 0 1px rgba(52,211,153,0.25),0 0 14px rgba(52,211,153,0.12)}
+.panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
+.panel-card-today-badge{position:absolute;top:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
 .panel-card-icon{font-size:16px;margin-bottom:5px;display:block}
 .panel-card-title{font-size:9.5px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.8px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--sans)}
@@ -1908,21 +1911,21 @@ function checkWeeklyReset(){
 checkWeeklyReset();
 
 const WIDGET_DEFS={
-  weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date)}:null;}},
+  weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date),date:w.date}:null;}},
   weight_avg:{name:'Peso media mes',icon:'📊',section:'estado',get:function(){const v=avg(filterByRange(store.weight,'1m'),'value');return v>0?{val:v,unit:'kg',sub:'30d'}:null;}},
-  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date)}:null;}},
+  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date),date:s.date}:null;}},
   sleep_hrv_avg:{name:'HRV media mes',icon:'💗',section:'estado',get:function(){const v=avg(filterByRange(store.sleep,'1m'),'hrv');return v>0?{val:v,unit:'ms',sub:'30 días'}:null;}},
-  sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate};}},
-  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating};}},
-  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date)}:null;}},
-  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date)}:null;}},
+  sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate,date:s.date};}},
+  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating,date:s.date};}},
+  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
+  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date),date:f.date}:null;}},
   fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
-  meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s'};}},
-  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(a.duration+'min');if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date))};}},
+  meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s',date:m.date};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(a.duration+'min');if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
-  waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date)}:null;}},
-  chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date)}:null;}},
+  waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
+  chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const avgDaily=(typeof vitDAvgDaily30==='function')?vitDAvgDaily30():0;const boost=Math.min(40,avgDaily/100);return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte del sol'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
   health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
@@ -2614,7 +2617,11 @@ function renderWidget(id){
     // Show empty placeholder instead of hiding entirely
     return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
   }
-  return '<div class="panel-card" onclick="showTab(\''+def.section+'\')"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
+  // Highlight when the shown datum was recorded today
+  const isToday=data.date&&String(data.date).substring(0,10)===today();
+  const todayCls=isToday?' panel-card-today':'';
+  const todayBadge=isToday?'<span class="panel-card-today-badge">HOY</span>':'';
+  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
 }
 
 function renderWidgetsModal(){
@@ -5248,7 +5255,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.50</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.51</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
