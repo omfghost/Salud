@@ -1755,7 +1755,15 @@ function calcSunTimes(lat,lng,date){
   const sunset=12+hourAngle/15-lng/15+tzOff;
   const noon=(sunrise+sunset)/2;
   const dayLen=sunset-sunrise;
-  return{sunrise:sunrise,sunset:sunset,noon:noon,uvbStart:sunrise+dayLen*0.30,uvbEnd:sunset-dayLen*0.30,uvaStart:sunrise+dayLen*0.08,uvaEnd:sunset-dayLen*0.08,goldenMorning:{start:sunrise,end:sunrise+dayLen*0.08},goldenEvening:{start:sunset-dayLen*0.08,end:sunset},blueMorning:{start:sunrise-0.5,end:sunrise},blueEvening:{start:sunset,end:sunset+0.5},dayLen:dayLen};
+  // Civil twilight: sun at -6° below horizon = first/last daylight ("primeros/últimos rayos").
+  // Solar altitude h: sin(h)=sin(lat)sin(decl)+cos(lat)cos(decl)cos(HA). Solve HA for h=-6°.
+  const h6=-6*Math.PI/180;
+  const cosHA6=(Math.sin(h6)-Math.sin(latRad)*Math.sin(declRad))/(Math.cos(latRad)*Math.cos(declRad));
+  let ha6=hourAngle; // fallback
+  if(cosHA6>=-1&&cosHA6<=1)ha6=Math.acos(cosHA6)*180/Math.PI;
+  const dawn=12-ha6/15-lng/15+tzOff;   // first rays (civil dawn)
+  const dusk=12+ha6/15-lng/15+tzOff;   // last rays (civil dusk)
+  return{sunrise:sunrise,sunset:sunset,dawn:dawn,dusk:dusk,noon:noon,uvbStart:sunrise+dayLen*0.30,uvbEnd:sunset-dayLen*0.30,uvaStart:sunrise+dayLen*0.08,uvaEnd:sunset-dayLen*0.08,goldenMorning:{start:sunrise,end:sunrise+dayLen*0.08},goldenEvening:{start:sunset-dayLen*0.08,end:sunset},blueMorning:{start:dawn,end:sunrise},blueEvening:{start:sunset,end:dusk},dayLen:dayLen};
 }
 
 function uvIndex(hour,t,w){if(hour<t.sunrise||hour>t.sunset)return 0;const nd=Math.abs(hour-t.noon);const dl=(t.sunset-t.sunrise)/2;let uv=Math.max(0,Math.min(11,11*(1-Math.pow(nd/dl,2))));if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];uv*=wp.uvMult;}return uv;}
@@ -2029,8 +2037,8 @@ function renderSunSVG(times,hour,uv,isDay,size,mini){
       const pos=p2x(a,r);
       return '<text x="'+pos.x+'" y="'+pos.y+'" fill="'+color+'" font-size="7" text-anchor="middle" dominant-baseline="middle" font-family="Outfit" font-weight="600" letter-spacing="0.5">'+text+'</text>';
     }
-    arcLabels+=al(times.sunrise,'AMANECER','#fb923c',radius+38);
-    arcLabels+=al(times.sunset,'OCASO','#dc2626',radius+38);
+    arcLabels+=al(times.dawn,'AMANECER','#fb923c',radius+38);
+    arcLabels+=al(times.dusk,'OCASO','#dc2626',radius+38);
     arcLabels+=al(times.noon,'CENIT','#fbbf24',radius+38);
   }
 
@@ -2187,9 +2195,9 @@ function renderSunDashboard(times,hour,uv,isDay){
       '<span><span style="display:inline-block;width:8px;height:3px;background:#a855f7;vertical-align:middle;margin-right:3px"></span>UVB</span>'+
     '</div>'+
     '<div class="sun-times-list">'+
-      '<div class="sun-time-cell"><div class="sun-time-cell-label">🌅 AMANECER</div><div class="sun-time-cell-value">'+fmtHour(times.sunrise)+'</div></div>'+
+      '<div class="sun-time-cell"><div class="sun-time-cell-label">🌅 AMANECER</div><div class="sun-time-cell-value">'+fmtHour(times.dawn)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">☀️ CENIT</div><div class="sun-time-cell-value">'+fmtHour(times.noon)+'</div></div>'+
-      '<div class="sun-time-cell"><div class="sun-time-cell-label">🌇 OCASO</div><div class="sun-time-cell-value">'+fmtHour(times.sunset)+'</div></div>'+
+      '<div class="sun-time-cell"><div class="sun-time-cell-label">🌇 OCASO</div><div class="sun-time-cell-value">'+fmtHour(times.dusk)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">UVA ↑↓</div><div class="sun-time-cell-value" style="color:#3b82f6;font-size:11px">'+fmtHour(times.uvaStart)+'-'+fmtHour(times.uvaEnd)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">UVB ↑↓</div><div class="sun-time-cell-value" style="color:#a855f7;font-size:11px">'+fmtHour(times.uvbStart)+'-'+fmtHour(times.uvbEnd)+'</div></div>'+
       '<div class="sun-time-cell"><div class="sun-time-cell-label">DÍA TOTAL</div><div class="sun-time-cell-value">'+fmtDuration(times.dayLen)+'</div></div>'+
@@ -5138,6 +5146,25 @@ function renderAjustes(c){
         '<div class="sub-section-label" style="margin-top:2px">📦 COPIA DE SEGURIDAD</div>'+
         '<button class="btn btn-primary" onclick="exportData()" style="margin:6px 0">📤 EXPORTAR AHORA</button>'+
         '<label class="btn btn-secondary" style="display:block;text-align:center;cursor:pointer;margin-bottom:6px">📥 IMPORTAR DATOS<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>'+
+        // Google Drive backup
+        '<div class="env-divider"></div>'+
+        '<div class="sub-section-label" style="margin-top:2px">☁️ GOOGLE DRIVE</div>'+
+        (store.settings.gdriveClientId?
+          '<button class="btn btn-primary" onclick="exportToDrive()" style="margin:6px 0;background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa">☁️ GUARDAR EN DRIVE</button>'+
+          '<div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:4px;font-family:var(--sans)" id="driveStatus">'+(store.settings.gdriveLastBackup?'Última copia en Drive: '+store.settings.gdriveLastBackup:'Conectado · sin copias aún')+'</div>'+
+          '<div class="auto-export-tabs" style="margin-top:4px">'+
+            ['off','onexport'].map(function(mode){
+              const labels={off:'Manual',onexport:'Auto al exportar'};
+              const active=(store.settings.gdriveAuto||'off')===mode;
+              return '<button class="auto-export-tab '+(active?'active':'')+'" onclick="setGdriveAuto(\''+mode+'\')">'+labels[mode]+'</button>';
+            }).join('')+
+          '</div>'+
+          '<button class="btn btn-secondary" onclick="clearGdriveConfig()" style="margin-top:6px;font-size:11px;padding:6px">Desconectar Drive</button>'
+          :
+          '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Para guardar tus copias en Google Drive necesitas un <b>Client ID</b> de Google Cloud (gratuito). <span class="fast-time-set-btn" onclick="showDriveHelp()">Ver cómo →</span></p>'+
+          '<input type="text" id="gdriveClientIdInput" placeholder="Tu Client ID de Google (...apps.googleusercontent.com)" style="font-size:11px;margin-bottom:6px">'+
+          '<button class="btn btn-primary" onclick="saveGdriveConfig()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa">☁️ Conectar Google Drive</button>'
+        )+
         // Scheduled auto-export
         '<div class="env-divider"></div>'+
         '<div class="sub-section-label" style="margin-top:2px">⏱️ EXPORTACIÓN AUTOMÁTICA</div>'+
@@ -5221,7 +5248,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.49</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.50</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5249,6 +5276,133 @@ function exportData(){
   a.download='health-backup-'+today()+'.json';
   a.click();
   URL.revokeObjectURL(url);
+  // If auto-to-Drive is on and Drive is configured, also push a copy to Drive.
+  if(store.settings.gdriveAuto==='onexport'&&store.settings.gdriveClientId){
+    exportToDrive(true);
+  }
+}
+
+// ---------- Google Drive backup (Google Identity Services + Drive REST) ----------
+let _gdriveToken=null,_gdriveTokenExp=0,_gisLoaded=false,_gisClient=null;
+
+function showDriveHelp(){
+  alert('Cómo conectar Google Drive:\n\n1. Entra en console.cloud.google.com y crea un proyecto (gratis).\n2. En "APIs y servicios" → "Biblioteca", activa "Google Drive API".\n3. En "Credenciales", crea un "ID de cliente de OAuth 2.0" de tipo "Aplicación web".\n4. En "Orígenes autorizados de JavaScript" añade la dirección donde abres la app (p. ej. https://tuusuario.github.io).\n5. Copia el "ID de cliente" (termina en .apps.googleusercontent.com) y pégalo aquí.\n\nTus datos se guardan en TU Drive; la app solo accede a los archivos que ella misma crea.');
+}
+
+function saveGdriveConfig(){
+  const el=document.getElementById('gdriveClientIdInput');
+  const id=(el&&el.value||'').trim();
+  if(!id||id.indexOf('.apps.googleusercontent.com')===-1){
+    alert('Introduce un Client ID válido (debe terminar en .apps.googleusercontent.com).');
+    return;
+  }
+  store.settings.gdriveClientId=id;
+  if(!store.settings.gdriveAuto)store.settings.gdriveAuto='onexport';
+  saveSettings();
+  render();
+}
+function clearGdriveConfig(){
+  if(!confirm('¿Desconectar Google Drive? Se borrará el Client ID guardado (tus archivos en Drive no se tocan).'))return;
+  store.settings.gdriveClientId='';
+  _gdriveToken=null;_gdriveTokenExp=0;
+  saveSettings();render();
+}
+function setGdriveAuto(mode){
+  store.settings.gdriveAuto=mode;
+  saveSettings();render();
+}
+
+// Load the Google Identity Services script once.
+function loadGIS(cb){
+  if(_gisLoaded&&window.google&&google.accounts&&google.accounts.oauth2){cb();return;}
+  const existing=document.getElementById('gis-script');
+  if(existing){existing.addEventListener('load',function(){_gisLoaded=true;cb();});return;}
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';
+  s.id='gis-script';s.async=true;s.defer=true;
+  s.onload=function(){_gisLoaded=true;cb();};
+  s.onerror=function(){alert('No se pudo cargar Google Identity Services. Revisa tu conexión.');};
+  document.head.appendChild(s);
+}
+
+// Get a valid OAuth access token (prompts the user the first time / when expired).
+function getDriveToken(cb){
+  const now=Date.now();
+  if(_gdriveToken&&now<_gdriveTokenExp-60000){cb(_gdriveToken);return;}
+  loadGIS(function(){
+    try{
+      if(!_gisClient){
+        _gisClient=google.accounts.oauth2.initTokenClient({
+          client_id:store.settings.gdriveClientId,
+          scope:'https://www.googleapis.com/auth/drive.file',
+          callback:function(resp){
+            if(resp&&resp.access_token){
+              _gdriveToken=resp.access_token;
+              _gdriveTokenExp=Date.now()+(resp.expires_in?resp.expires_in*1000:3600000);
+              cb(_gdriveToken);
+            }else{
+              alert('No se pudo obtener autorización de Google Drive.');
+            }
+          }
+        });
+      }
+      _gisClient.requestAccessToken({prompt:_gdriveToken?'':'consent'});
+    }catch(e){
+      alert('Error iniciando Google Drive: '+e.message);
+    }
+  });
+}
+
+// Find an existing file by name in the app's Drive scope; returns id or null.
+function driveFindFile(token,name,cb){
+  const q=encodeURIComponent("name='"+name+"' and trashed=false");
+  fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&spaces=drive&fields=files(id,name)',{
+    headers:{'Authorization':'Bearer '+token}
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.files&&d.files.length)cb(d.files[0].id);else cb(null);
+  }).catch(function(){cb(null);});
+}
+
+// Upload (create or update) the backup JSON to Drive via multipart.
+function exportToDrive(silent){
+  if(!store.settings.gdriveClientId){alert('Primero conecta Google Drive en Ajustes.');return;}
+  const setStatus=function(t){const el=document.getElementById('driveStatus');if(el)el.textContent=t;};
+  setStatus('Conectando con Drive…');
+  getDriveToken(function(token){
+    const name='health-backup.json';
+    const content=JSON.stringify(buildExportData(),null,2);
+    setStatus('Subiendo copia…');
+    driveFindFile(token,name,function(existingId){
+      const metadata={name:name,mimeType:'application/json'};
+      const boundary='-------health'+Date.now();
+      const delimiter='\r\n--'+boundary+'\r\n';
+      const closeDelim='\r\n--'+boundary+'--';
+      let body=delimiter+'Content-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+
+        delimiter+'Content-Type: application/json\r\n\r\n'+content+closeDelim;
+      const method=existingId?'PATCH':'POST';
+      const url=existingId?
+        'https://www.googleapis.com/upload/drive/v3/files/'+existingId+'?uploadType=multipart':
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      fetch(url,{
+        method:method,
+        headers:{'Authorization':'Bearer '+token,'Content-Type':'multipart/related; boundary='+boundary},
+        body:body
+      }).then(function(r){return r.json();}).then(function(d){
+        if(d&&d.id){
+          const stamp=new Date().toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+          store.settings.gdriveLastBackup=stamp;saveSettings();
+          setStatus('✓ Guardado en Drive · '+stamp);
+          if(!silent)alert('✅ Copia guardada en tu Google Drive como "'+name+'".');
+        }else{
+          setStatus('Error al subir a Drive');
+          if(!silent)alert('No se pudo guardar en Drive. Intenta de nuevo.');
+        }
+      }).catch(function(e){
+        setStatus('Error de red con Drive');
+        if(!silent)alert('Error subiendo a Drive: '+e.message);
+      });
+    });
+  });
 }
 
 function importData(e){
