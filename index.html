@@ -1816,6 +1816,32 @@ function vitDPerMinute(uvb){
 
 // --- Reusable serum 25(OH)D estimation (shared by Sol section and Panel widget) ---
 // Average daily IU produced from sun over the last 30 days.
+// --- Serum 25(OH)D kinetics: exponential decay model (half-life ~15 days) ---
+// Each IU produced by sun adds to serum and decays exponentially. The serum level is the
+// sum of every past session's contribution, each decayed by e^(-k·daysAgo), plus the
+// analytic baseline. Calibrated so 100 IU/day sustained ≈ +1 ng/ml at equilibrium.
+var VITD_HALFLIFE=15; // days
+var VITD_K=Math.log(2)/VITD_HALFLIFE; // decay constant per day
+var VITD_C=(1-Math.exp(-VITD_K))/100; // ng/ml added per IU (single dose), calibrated
+
+// Sun-derived serum boost (ng/ml) at a given reference date, summing decayed contributions
+// of all sun sessions up to that date.
+function vitDSunBoostAt(refDate){
+  if(!Array.isArray(store.sun)||!store.sun.length)return 0;
+  const ref=refDate?new Date(refDate):new Date();
+  let boost=0;
+  store.sun.forEach(function(s){
+    if(!s.date)return;
+    const d=new Date(s.date+'T12:00:00');
+    const daysAgo=(ref-d)/(1000*60*60*24);
+    if(daysAgo<0)return; // session is in the future relative to ref
+    const iu=parseFloat(s.vitd)||0;
+    boost+=iu*VITD_C*Math.exp(-VITD_K*daysAgo);
+  });
+  return boost;
+}
+
+// Average daily sun IU over the last 30 days (kept for the accumulation cells display).
 function vitDAvgDaily30(){
   if(!Array.isArray(store.sun)||!store.sun.length)return 0;
   const now=new Date();
@@ -1828,13 +1854,12 @@ function vitDAvgDaily30(){
   });
   return last30/30;
 }
-// Estimated serum level in ng/ml: analytic baseline (or ~20 default) + recent-sun boost
-// (~1 ng/ml per 100 IU/day sustained), capped to a plausible maximum.
+// Estimated serum level in ng/ml: analytic baseline (or ~20 default) + decayed sun boost.
 function estimatedVitDNgml(){
   const baseline=parseFloat(store.settings.vitDBaseline||0);
-  const baseNgml=baseline>0?baseline:20; // baseline now stored directly in ng/ml
-  const sunBoost=Math.min(40,vitDAvgDaily30()/100);
-  return Math.min(120,baseNgml+sunBoost);
+  const baseNgml=baseline>0?baseline:20; // baseline stored directly in ng/ml
+  const sunBoost=Math.min(60,vitDSunBoostAt(new Date()));
+  return Math.min(150,baseNgml+sunBoost);
 }
 // Status classification for a given ng/ml value.
 function vitDStatus(ngml){
@@ -1939,7 +1964,7 @@ const WIDGET_DEFS={
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
-  vitd_total:{name:'Vit D mes',icon:'☀️',section:'sol',get:function(){const f=filterByRange(store.sun,'1m');if(!f.length)return null;const avgDaily=(typeof vitDAvgDaily30==='function')?vitDAvgDaily30():0;const boost=Math.min(40,avgDaily/100);return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte del sol'};}},
+  vitd_total:{name:'Vit D sol',icon:'☀️',section:'sol',get:function(){if(!Array.isArray(store.sun)||!store.sun.length)return null;const boost=(typeof vitDSunBoostAt==='function')?Math.min(60,vitDSunBoostAt(new Date())):0;return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte actual'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
   health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
 };
@@ -2769,11 +2794,9 @@ function renderModalChart(){
 // from the trailing-30-day average sun production plus the analytic baseline.
 function computeVitDSerumSeries(filt,range,allRecords){
   const baseline=parseFloat(store.settings.vitDBaseline||0);
-  const baseNgml=baseline>0?(baseline/40):20;
-  // Build a date axis. For long ranges sample weekly/monthly to keep it readable.
+  const baseNgml=baseline>0?baseline:20; // baseline stored directly in ng/ml
   const all=(allRecords||[]).filter(function(x){return x.date;});
   if(!all.length)return{labels:[],data:[]};
-  // Determine span start from the filtered set (range already applied), end = today.
   let startDate;
   if(filt.length)startDate=new Date(filt[0].date+'T12:00:00');
   else startDate=new Date(all[0].date+'T12:00:00');
@@ -2785,15 +2808,15 @@ function computeVitDSerumSeries(filt,range,allRecords){
   const labels=[],data=[];
   for(let t=0;t<=totalDays;t+=step){
     const cur=new Date(startDate.getTime()+t*dayMs);
-    // trailing 30-day average of sun IU up to 'cur'
-    let sum=0;
+    // Sum decayed contributions of every session up to 'cur' (exponential, half-life 15d)
+    let boost=0;
     all.forEach(function(x){
       const d=new Date(x.date+'T12:00:00');
-      const diff=(cur-d)/dayMs;
-      if(diff>=0&&diff<=30)sum+=(parseFloat(x.vitd)||0);
+      const daysAgo=(cur-d)/dayMs;
+      if(daysAgo<0)return;
+      boost+=(parseFloat(x.vitd)||0)*VITD_C*Math.exp(-VITD_K*daysAgo);
     });
-    const avgDaily=sum/30;
-    const ngml=Math.min(120,baseNgml+Math.min(40,avgDaily/100));
+    const ngml=Math.min(150,baseNgml+Math.min(60,boost));
     labels.push(cur.toLocaleDateString('es-ES',{day:'2-digit',month:'short'}));
     data.push(parseFloat(ngml.toFixed(1)));
   }
@@ -4829,10 +4852,9 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
       totalAll+=v;
     });
     const baseline=parseFloat(store.settings.vitDBaseline||0);
-    // Realistic serum 25(OH)D estimate (shared helpers, see h2):
-    // serum equilibrates (~15-day half-life), it does NOT accumulate forever.
+    // Realistic serum 25(OH)D estimate using exponential-decay kinetics (half-life ~15d).
     const avgDaily=vitDAvgDaily30();
-    const sunBoostNgml=Math.min(40,avgDaily/100);
+    const sunBoostNgml=Math.min(60,vitDSunBoostAt(new Date()));
     const estimateActual=avgDaily;
     return '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div>'+todayDot('sun')+'<button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
@@ -4887,15 +4909,15 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           '</div>'+
           '<div class="collapsible'+(store.collapsed.vitdAccum?' collapsed':'')+'">'+
             '<div class="vitd-accum-grid">'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+(totalDay/100).toFixed(1)+' ng/ml</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">MES</div><div class="vitd-accum-val">'+Math.round(totalMonth)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+Math.min(40,(totalMonth/30)/100).toFixed(1)+' ng/ml</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO</div><div class="vitd-accum-val">'+Math.round(totalYear)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">'+Math.min(40,(totalYear/365)/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">+'+Math.min(40,totalDay/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">30 DÍAS · media</div><div class="vitd-accum-val">'+Math.round(avgDaily)+'</div><div class="vitd-accum-unit">IU/día</div><div class="vitd-accum-ng">+'+Math.min(40,avgDaily/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO · media/día</div><div class="vitd-accum-val">'+Math.round(totalYear/365)+'</div><div class="vitd-accum-unit">IU/día</div><div class="vitd-accum-ng">+'+Math.min(40,(totalYear/365)/100).toFixed(1)+' ng/ml</div></div>'+
             '</div>'+
             (function(){
               // Serum estimate: analytic baseline (if entered) acts as the floor; otherwise
               // assume a typical untreated baseline of ~20 ng/ml. Add the recent-sun boost.
               const baseNgml=baseline>0?baseline:20; // baseline now stored directly in ng/ml
-              const ngml=Math.min(120,baseNgml+sunBoostNgml);
+              const ngml=Math.min(150,baseNgml+sunBoostNgml);
               const nmol=ngml*2.5;
               let status,statusColor;
               if(ngml<20){status='Deficiencia';statusColor='#f87171';}
@@ -5386,7 +5408,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.57</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.59</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
