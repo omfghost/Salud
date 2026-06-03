@@ -2928,7 +2928,7 @@ function renderRegistros(key,label,itemRenderer,opts){
     '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
       '<div style="display:flex;align-items:center;gap:4px">'+
-        (!collapsed&&fields.length?'<button class="reg-star-btn'+(maxOn?' active':'')+'" id="regstar_'+key+'" onclick="event.stopPropagation();toggleRegMax(\''+key+'\')" title="Mostrar solo el valor más alto">★</button>':'')+
+        (!collapsed&&fields.length?'<button class="reg-star-btn'+(maxOn?' active':'')+'" id="regstar_'+key+'" onclick="event.stopPropagation();toggleRegMax(\''+key+'\')" title="Mostrar solo el valor más '+(opts.starMin?'bajo':'alto')+'">★</button>':'')+
         '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
       '</div>'+
     '</div>'+
@@ -3030,9 +3030,17 @@ function filterRegItems(key,searchQ){
     if(flt&&flt.field)fdef=fields.filter(function(f){return f.key===flt.field;})[0];
     if(!fdef&&fields.length)fdef=fields.filter(function(f){return f.key!=='date';})[0]||fields[0];
     if(fdef&&items.length){
-      const getv=function(it){const r=fdef.get?fdef.get(it):it[fdef.key];const n=parseFloat(r);return isNaN(n)?-Infinity:n;};
-      let best=items[0];items.forEach(function(it){if(getv(it)>getv(best))best=it;});
-      items=[best];
+      const getv=function(it){const r=fdef.get?fdef.get(it):it[fdef.key];const n=parseFloat(r);return isNaN(n)?null:n;};
+      // Some registros (e.g. weight) want the LOWEST value as the highlight, not the highest.
+      const wantMin=!!(reg&&reg.opts&&reg.opts.starMin)||(fdef&&fdef.min);
+      let best=null;
+      items.forEach(function(it){
+        const v=getv(it);if(v===null)return;
+        if(best===null){best=it;return;}
+        const bv=getv(best);
+        if(wantMin?(v<bv):(v>bv))best=it;
+      });
+      if(best)items=[best];
     }
   }
   return items;
@@ -3212,7 +3220,7 @@ function renderBodyBlock(){
     '</div>';
     h+=renderRegistros('weight','PESO',function(w){
       return '<div class="history-item-value">'+w.value+' kg</div>';
-    },{chartLabel:'Peso',chartKey:'value',chartColor:'#a7f3d0',
+    },{chartLabel:'Peso',chartKey:'value',chartColor:'#a7f3d0',starMin:true,
        searchFields:[{key:'value',label:'Peso',aliases:['kg','peso']},{key:'date',label:'Fecha',aliases:['fecha','día']}]});
   }
   if(store.measurements.length){
@@ -5378,7 +5386,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.56</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.57</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
