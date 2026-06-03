@@ -1823,6 +1823,12 @@ function vitDPerMinute(uvb){
 var VITD_HALFLIFE=15; // days
 var VITD_K=Math.log(2)/VITD_HALFLIFE; // decay constant per day
 var VITD_C=(1-Math.exp(-VITD_K))/100; // ng/ml added per IU (single dose), calibrated
+// Dietary/reserve floor: serum never falls below this (body stores + diet). Configurable.
+var VITD_FLOOR=12; // ng/ml minimum
+// The analytic baseline "ages": an old blood test no longer reflects today's status, so its
+// excess over the floor decays toward the floor (half-life ~120 days).
+var VITD_BASE_HALFLIFE=120; // days
+var VITD_BASE_K=Math.log(2)/VITD_BASE_HALFLIFE;
 
 // Sun-derived serum boost (ng/ml) at a given reference date, summing decayed contributions
 // of all sun sessions up to that date.
@@ -1841,6 +1847,21 @@ function vitDSunBoostAt(refDate){
   return boost;
 }
 
+// Effective baseline at a reference date: the analytic value's excess over the dietary floor
+// decays toward the floor as the test ages. Without sun, level tends to the floor, not to 0.
+function vitDEffectiveBaseAt(refDate){
+  const raw=parseFloat(store.settings.vitDBaseline||0);
+  const base=raw>0?raw:20; // default assumed baseline if no test entered
+  // How old is the test? Use its date if provided, else assume it's current.
+  let daysAgo=0;
+  const bd=store.settings.vitDBaselineDate;
+  if(bd){
+    const ref=refDate?new Date(refDate):new Date();
+    daysAgo=Math.max(0,(ref-new Date(bd+'T12:00:00'))/(1000*60*60*24));
+  }
+  return VITD_FLOOR+(base-VITD_FLOOR)*Math.exp(-VITD_BASE_K*daysAgo);
+}
+
 // Average daily sun IU over the last 30 days (kept for the accumulation cells display).
 function vitDAvgDaily30(){
   if(!Array.isArray(store.sun)||!store.sun.length)return 0;
@@ -1854,12 +1875,12 @@ function vitDAvgDaily30(){
   });
   return last30/30;
 }
-// Estimated serum level in ng/ml: analytic baseline (or ~20 default) + decayed sun boost.
+// Estimated serum 25(OH)D (ng/ml): aged baseline (tending to dietary floor) + decayed sun boost.
+// Never below the dietary floor; capped at a plausible maximum.
 function estimatedVitDNgml(){
-  const baseline=parseFloat(store.settings.vitDBaseline||0);
-  const baseNgml=baseline>0?baseline:20; // baseline stored directly in ng/ml
+  const effBase=vitDEffectiveBaseAt(new Date());
   const sunBoost=Math.min(60,vitDSunBoostAt(new Date()));
-  return Math.min(150,baseNgml+sunBoost);
+  return Math.min(150,Math.max(VITD_FLOOR,effBase+sunBoost));
 }
 // Status classification for a given ng/ml value.
 function vitDStatus(ngml){
@@ -2793,8 +2814,6 @@ function renderModalChart(){
 // Estimated serum 25(OH)D (ng/ml) over time: for each day in range, compute the level
 // from the trailing-30-day average sun production plus the analytic baseline.
 function computeVitDSerumSeries(filt,range,allRecords){
-  const baseline=parseFloat(store.settings.vitDBaseline||0);
-  const baseNgml=baseline>0?baseline:20; // baseline stored directly in ng/ml
   const all=(allRecords||[]).filter(function(x){return x.date;});
   if(!all.length)return{labels:[],data:[]};
   let startDate;
@@ -2808,7 +2827,8 @@ function computeVitDSerumSeries(filt,range,allRecords){
   const labels=[],data=[];
   for(let t=0;t<=totalDays;t+=step){
     const cur=new Date(startDate.getTime()+t*dayMs);
-    // Sum decayed contributions of every session up to 'cur' (exponential, half-life 15d)
+    // Aged baseline at this date + sum of decayed session contributions up to this date
+    const effBase=(typeof vitDEffectiveBaseAt==='function')?vitDEffectiveBaseAt(cur):20;
     let boost=0;
     all.forEach(function(x){
       const d=new Date(x.date+'T12:00:00');
@@ -2816,7 +2836,7 @@ function computeVitDSerumSeries(filt,range,allRecords){
       if(daysAgo<0)return;
       boost+=(parseFloat(x.vitd)||0)*VITD_C*Math.exp(-VITD_K*daysAgo);
     });
-    const ngml=Math.min(150,baseNgml+Math.min(60,boost));
+    const ngml=Math.min(150,Math.max(VITD_FLOOR,effBase+Math.min(60,boost)));
     labels.push(cur.toLocaleDateString('es-ES',{day:'2-digit',month:'short'}));
     data.push(parseFloat(ngml.toFixed(1)));
   }
@@ -4916,8 +4936,8 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
             (function(){
               // Serum estimate: analytic baseline (if entered) acts as the floor; otherwise
               // assume a typical untreated baseline of ~20 ng/ml. Add the recent-sun boost.
-              const baseNgml=baseline>0?baseline:20; // baseline now stored directly in ng/ml
-              const ngml=Math.min(150,baseNgml+sunBoostNgml);
+              const baseNgml=(typeof vitDEffectiveBaseAt==='function')?vitDEffectiveBaseAt(new Date()):(baseline>0?baseline:20);
+              const ngml=Math.min(150,Math.max(VITD_FLOOR,baseNgml+sunBoostNgml));
               const nmol=ngml*2.5;
               let status,statusColor;
               if(ngml<20){status='Deficiencia';statusColor='#f87171';}
@@ -4936,9 +4956,10 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
             })()+
             '<div class="vitd-baseline-row">'+
               '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (ng/ml)</label><input type="number" step="0.1" id="vitDBaselineInput" class="vitd-baseline-input" value="'+(baseline||'')+'" placeholder="20" onchange="updateVitDBaseline(this.value)"></div>'+
+              '<div class="input-group" style="flex:1"><label>FECHA ANÁLISIS</label><input type="date" id="vitDBaselineDate" class="vitd-baseline-input" value="'+(store.settings.vitDBaselineDate||'')+'" onchange="updateVitDBaselineDate(this.value)"></div>'+
               '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:34px">Reset</button>'+
             '</div>'+
-            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el aporte del sol. Cada sesión eleva el nivel y luego decae de forma natural (vida media ~15 días), igual que la vitamina D real en sangre: una sesión aislada sube poco, pero la exposición regular mantiene el nivel en equilibrio. El "APORTE SOL" es la suma de todas tus sesiones ya con su decaimiento. Introduce el 25(OH)D de tu análisis en ng/ml. Óptimo: 30-50 ng/ml.</p>'+
+            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel parte de tu analítica y suma el aporte del sol (cada sesión decae con vida media ~15 días). Si tu analítica es antigua, va perdiendo peso con el tiempo. Sin sol, el nivel desciende pero nunca por debajo de un suelo fisiológico (~'+VITD_FLOOR+' ng/ml) que aportan tus reservas corporales y la dieta. Indica la fecha del análisis para mayor precisión. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
@@ -5068,12 +5089,20 @@ function toggleHormoneLine(hKey){
 function updateVitDBaseline(val){
   const v=parseFloat(val);
   store.settings.vitDBaseline=isNaN(v)?0:v;
+  // If a value is entered without a date, assume the test is from today.
+  if(!store.settings.vitDBaselineDate&&!isNaN(v)&&v>0)store.settings.vitDBaselineDate=today();
+  saveSettings();
+  if(currentTab==='sol'||currentTab==='panel')render();
+}
+function updateVitDBaselineDate(val){
+  store.settings.vitDBaselineDate=val||'';
   saveSettings();
   if(currentTab==='sol'||currentTab==='panel')render();
 }
 function resetVitDBaseline(){
   if(!confirm('¿Reiniciar el valor base de Vit D a 0?'))return;
   store.settings.vitDBaseline=0;
+  store.settings.vitDBaselineDate='';
   saveSettings();
   render();
 }
@@ -5408,7 +5437,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.60</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.61</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
