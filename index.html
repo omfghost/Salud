@@ -4867,7 +4867,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           const running=sess&&!paused;
           // A single session's contribution to serum if sustained daily (~1 ng/ml per 100 IU/day).
           // Shown as a small "+X ng/ml" to avoid implying one session sets the absolute level.
-          const sessNgml=(vitdNow/100);
+          const sessNgml=(vitdNow*VITD_C);
           // Buttons: idle->play, running->pause, paused->resume+save
           let actionBtns;
           if(!sess){
@@ -4886,7 +4886,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
             (paused?'<div style="text-align:center;font-size:9.5px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-2px 0 6px;text-transform:uppercase">⏸ En pausa · reanuda o guarda</div>':'')+
             '<div class="vitd-sess-row">'+
               '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdValue">'+vitdNow+'</span><span class="vitd-sess-unit">IU sesión</span></div>'+
-              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdNgml">+'+sessNgml.toFixed(1)+'</span><span class="vitd-sess-unit">ng/ml si diario</span></div>'+
+              '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdNgml">+'+sessNgml.toFixed(2)+'</span><span class="vitd-sess-unit">ng/ml aporte</span></div>'+
               actionBtns+
             '</div>';
         })()+
@@ -4909,9 +4909,9 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           '</div>'+
           '<div class="collapsible'+(store.collapsed.vitdAccum?' collapsed':'')+'">'+
             '<div class="vitd-accum-grid">'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">+'+Math.min(40,totalDay/100).toFixed(1)+' ng/ml</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">30 DÍAS · media</div><div class="vitd-accum-val">'+Math.round(avgDaily)+'</div><div class="vitd-accum-unit">IU/día</div><div class="vitd-accum-ng">+'+Math.min(40,avgDaily/100).toFixed(1)+' ng/ml</div></div>'+
-              '<div class="vitd-accum-cell"><div class="vitd-accum-label">AÑO · media/día</div><div class="vitd-accum-val">'+Math.round(totalYear/365)+'</div><div class="vitd-accum-unit">IU/día</div><div class="vitd-accum-ng">+'+Math.min(40,(totalYear/365)/100).toFixed(1)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">HOY</div><div class="vitd-accum-val">'+Math.round(totalDay)+'</div><div class="vitd-accum-unit">IU</div><div class="vitd-accum-ng">+'+(totalDay*VITD_C).toFixed(2)+' ng/ml</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">APORTE SOL</div><div class="vitd-accum-val">+'+sunBoostNgml.toFixed(1)+'</div><div class="vitd-accum-unit">ng/ml</div><div class="vitd-accum-ng">acumulado</div></div>'+
+              '<div class="vitd-accum-cell"><div class="vitd-accum-label">30 DÍAS</div><div class="vitd-accum-val">'+Math.round(avgDaily)+'</div><div class="vitd-accum-unit">IU/día</div><div class="vitd-accum-ng">media</div></div>'+
             '</div>'+
             (function(){
               // Serum estimate: analytic baseline (if entered) acts as the floor; otherwise
@@ -4938,7 +4938,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
               '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (ng/ml)</label><input type="number" step="0.1" id="vitDBaselineInput" class="vitd-baseline-input" value="'+(baseline||'')+'" placeholder="20" onchange="updateVitDBaseline(this.value)"></div>'+
               '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:34px">Reset</button>'+
             '</div>'+
-            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el efecto del sol según tu media diaria de los últimos 30 días (~1 ng/ml por cada 100 IU/día). El nivel en sangre se equilibra y no se acumula sin límite. Introduce el 25(OH)D de tu análisis en ng/ml. Óptimo: 30-50 ng/ml.</p>'+
+            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel estimado parte de tu analítica (o ~20 ng/ml por defecto) y suma el aporte del sol. Cada sesión eleva el nivel y luego decae de forma natural (vida media ~15 días), igual que la vitamina D real en sangre: una sesión aislada sube poco, pero la exposición regular mantiene el nivel en equilibrio. El "APORTE SOL" es la suma de todas tus sesiones ya con su decaimiento. Introduce el 25(OH)D de tu análisis en ng/ml. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
@@ -5145,14 +5145,14 @@ function refreshSunTimerUI(){
   if(!sess){
     if(el)el.textContent='00:00:00';
     if(vd)vd.textContent='0';
-    if(ng)ng.textContent='+0.0';
+    if(ng)ng.textContent='+0.00';
     return;
   }
   const elapsed=Math.floor((sess.elapsedMs||0)/1000);
   if(el)el.textContent=fmtClock(elapsed);
   const v=Math.round(sess.vitd||0);
   if(vd)vd.textContent=v.toString();
-  if(ng)ng.textContent='+'+(v/100).toFixed(1);
+  if(ng)ng.textContent='+'+(v*VITD_C).toFixed(2);
 }
 
 // One tick: advance the session by real elapsed time using timestamps (robust to frozen intervals).
@@ -5408,7 +5408,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.59</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.60</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
