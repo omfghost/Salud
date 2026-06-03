@@ -780,6 +780,18 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .registros-toolbar{display:flex;gap:6px;align-items:center;margin:8px 0 6px}
 .registros-toolbar .registros-search{flex:1;min-width:0}
 .registros-toolbar .chart-icon-btn{flex-shrink:0;padding:6px 10px;font-size:13px}
+.reg-filter-btn{flex-shrink:0;padding:6px 9px;font-size:13px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;color:var(--text-muted);cursor:pointer;font-family:var(--sans);transition:all 0.15s}
+.reg-filter-btn.active{background:rgba(167,243,208,0.12);border-color:rgba(167,243,208,0.4);color:var(--accent)}
+.reg-star-btn{background:none;border:none;color:var(--text-dim);font-size:15px;cursor:pointer;padding:2px 4px;line-height:1;transition:all 0.15s}
+.reg-star-btn.active{color:#fde047;text-shadow:0 0 8px rgba(253,224,71,0.6)}
+.reg-filter-panel{background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;padding:9px 10px;margin-bottom:8px}
+.reg-filter-label{font-family:var(--sans);font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.reg-filter-fields{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.reg-filter-chip{padding:4px 10px;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);border-radius:8px;color:var(--text-muted);font-size:10.5px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all 0.15s}
+.reg-filter-chip.active{background:rgba(167,243,208,0.12);border-color:rgba(167,243,208,0.4);color:var(--accent)}
+.reg-filter-order{display:flex;flex-wrap:wrap;gap:5px}
+.reg-order-btn{padding:4px 9px;background:rgba(255,255,255,0.03);border:1px solid var(--border-strong);border-radius:8px;color:var(--text-muted);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all 0.15s}
+.reg-order-btn.active{background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa}
 
 /* History item action buttons (edit + delete) */
 .history-item-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
@@ -2904,22 +2916,28 @@ function renderRegistros(key,label,itemRenderer,opts){
   const arr=Array.isArray(store[key])?store[key]:[];
   if(!arr.length)return '';
   REG_RENDERERS[key]={renderer:itemRenderer,opts:opts,label:label};
-  // Registros are collapsed by default. They only open via tap or after a new entry,
-  // tracked in a session-only object (cleared on tab change / app minimize).
   const collapsed=!regOpenSession[key];
   const searchQ=(regSearch[key]||'');
   const total=filterRegItems(key,searchQ).length;
+  const fields=opts.searchFields||[];
+  const flt=regFilter[key]||{};
+  const maxOn=!!regMaxOnly[key];
+  const filterOpen=!!regFilterOpen[key];
   let h='<div class="registros-block" style="margin-top:10px">'+
     '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
-      '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
+      '<div style="display:flex;align-items:center;gap:4px">'+
+        (!collapsed&&fields.length?'<button class="reg-star-btn'+(maxOn?' active':'')+'" onclick="event.stopPropagation();toggleRegMax(\''+key+'\')" title="Mostrar solo el valor más alto">★</button>':'')+
+        '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
+      '</div>'+
     '</div>'+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-    // Search row + chart button INLINE
     '<div class="registros-toolbar">'+
-      '<input type="text" class="registros-search" id="regsearch_'+key+'" placeholder="🔍 Buscar (texto o fecha)..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
+      '<input type="text" class="registros-search'+(fields.length?' has-filter':'')+'" id="regsearch_'+key+'" placeholder="🔍 Buscar (p. ej. HRV 87)..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
+      (fields.length?'<button class="reg-filter-btn'+(flt.field||filterOpen?' active':'')+'" onclick="toggleRegFilter(\''+key+'\')" title="Filtrar y ordenar">⚙</button>':'')+
       (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openRegChart(\''+key+'\')">📈</button>':'')+
     '</div>'+
+    (fields.length&&filterOpen?renderRegFilterPanel(key):'')+
     '<div class="registros-list" id="reglist_'+key+'">'+
       buildRegItems(key,searchQ)+
     '</div>'+
@@ -2927,25 +2945,94 @@ function renderRegistros(key,label,itemRenderer,opts){
   return h;
 }
 
+function renderRegFilterPanel(key){
+  const reg=REG_RENDERERS[key];if(!reg)return '';
+  const fields=reg.opts.searchFields||[];
+  const flt=regFilter[key]||{};
+  let h='<div class="reg-filter-panel">'+
+    '<div class="reg-filter-label">Ordenar por</div>'+
+    '<div class="reg-filter-fields">'+
+      fields.map(function(f){
+        const active=flt.field===f.key;
+        return '<button class="reg-filter-chip'+(active?' active':'')+'" onclick="setRegFilterField(\''+key+'\',\''+f.key+'\')">'+(f.label||f.key)+'</button>';
+      }).join('')+
+    '</div>'+
+    '<div class="reg-filter-order">'+
+      '<button class="reg-order-btn'+(flt.order==='desc'?' active':'')+'" onclick="setRegFilterOrder(\''+key+'\',\'desc\')">↓ Mayor a menor</button>'+
+      '<button class="reg-order-btn'+(flt.order==='asc'?' active':'')+'" onclick="setRegFilterOrder(\''+key+'\',\'asc\')">↑ Menor a mayor</button>'+
+      (flt.field?'<button class="reg-order-btn" onclick="clearRegFilter(\''+key+'\')">✕ Quitar</button>':'')+
+    '</div>'+
+  '</div>';
+  return h;
+}
+
 function filterRegItems(key,searchQ){
   const arr=Array.isArray(store[key])?store[key]:[];
   let items=arr.slice().reverse();
+  const reg=REG_RENDERERS[key];
+  const fields=(reg&&reg.opts&&reg.opts.searchFields)?reg.opts.searchFields:[];
   const q=(searchQ||'').toLowerCase().trim();
   if(q){
-    items=items.filter(function(it){
-      try{
-        // match raw fields
-        const str=JSON.stringify(it).toLowerCase();
-        if(str.indexOf(q)!==-1)return true;
-        // match formatted date (e.g. "12 mar", "2024-03-12")
-        if(it.date){
-          const fd=fmtDate(it.date).toLowerCase();
-          if(fd.indexOf(q)!==-1)return true;
-          if(String(it.date).toLowerCase().indexOf(q)!==-1)return true;
+    // Try "field value" parsing, e.g. "hrv 87", "score 90", "peso 72.5"
+    let matchedField=null,matchedVal=null;
+    for(let i=0;i<fields.length;i++){
+      const f=fields[i];
+      const names=[f.key.toLowerCase(),(f.label||'').toLowerCase()].concat((f.aliases||[]).map(function(a){return a.toLowerCase();}));
+      for(let j=0;j<names.length;j++){
+        const nm=names[j];if(!nm)continue;
+        if(q.indexOf(nm)===0){
+          const rest=q.substring(nm.length).trim();
+          if(rest===''){matchedField=f;matchedVal=null;}
+          else{const num=parseFloat(rest.replace(',','.'));if(!isNaN(num)){matchedField=f;matchedVal=num;}}
+          break;
         }
-        return false;
-      }catch(e){return true;}
-    });
+      }
+      if(matchedField)break;
+    }
+    if(matchedField){
+      items=items.filter(function(it){
+        const raw=matchedField.get?matchedField.get(it):it[matchedField.key];
+        const v=parseFloat(raw);
+        if(matchedVal===null)return raw!==undefined&&raw!==null&&raw!=='';
+        if(isNaN(v))return false;
+        // round both for tolerant integer matching
+        return Math.round(v)===Math.round(matchedVal)||v===matchedVal;
+      });
+    }else{
+      // generic text/date match
+      items=items.filter(function(it){
+        try{
+          const str=JSON.stringify(it).toLowerCase();
+          if(str.indexOf(q)!==-1)return true;
+          if(it.date){
+            const fd=fmtDate(it.date).toLowerCase();
+            if(fd.indexOf(q)!==-1)return true;
+            if(String(it.date).toLowerCase().indexOf(q)!==-1)return true;
+          }
+          return false;
+        }catch(e){return true;}
+      });
+    }
+  }
+  // Apply field sort if a filter field+order is active
+  const flt=regFilter[key];
+  if(flt&&flt.field){
+    const fdef=fields.filter(function(f){return f.key===flt.field;})[0];
+    if(fdef){
+      const getv=function(it){const r=fdef.get?fdef.get(it):it[fdef.key];const n=parseFloat(r);return isNaN(n)?(fdef.key==='date'?new Date(it.date).getTime():-Infinity):n;};
+      items=items.slice().sort(function(a,b){return flt.order==='asc'?getv(a)-getv(b):getv(b)-getv(a);});
+    }
+  }
+  // Max-only: keep just the single highest value of the active (or filter) field
+  if(regMaxOnly[key]){
+    let fdef=null;
+    if(flt&&flt.field)fdef=fields.filter(function(f){return f.key===flt.field;})[0];
+    if(!fdef&&fields.length)fdef=fields.filter(function(f){return f.key!=='date';})[0]||fields[0];
+    if(fdef&&items.length){
+      const getv=function(it){const r=fdef.get?fdef.get(it):it[fdef.key];const n=parseFloat(r);return isNaN(n)?-Infinity:n;};
+      let best=items[0];items.forEach(function(it){if(getv(it)>getv(best))best=it;});
+      items=[best];
+    }
   }
   return items;
 }
@@ -2974,14 +3061,36 @@ function buildRegItems(key,searchQ){
 }
 
 const regSearch={};
+const regFilter={};   // key -> {field, order}
+const regMaxOnly={};  // key -> bool
+const regFilterOpen={}; // key -> bool (filter panel visibility)
 function setRegSearch(key,val){
   regSearch[key]=val;
-  // Update ONLY the list + count, preserving the input focus (no full render)
   const list=document.getElementById('reglist_'+key);
   if(list)list.innerHTML=buildRegItems(key,val);
   const cnt=document.getElementById('regcount_'+key);
   if(cnt)cnt.textContent='('+filterRegItems(key,val).length+')';
 }
+function refreshRegList(key){
+  const list=document.getElementById('reglist_'+key);
+  if(list)list.innerHTML=buildRegItems(key,regSearch[key]||'');
+  const cnt=document.getElementById('regcount_'+key);
+  if(cnt)cnt.textContent='('+filterRegItems(key,regSearch[key]||'').length+')';
+}
+function toggleRegFilter(key){regFilterOpen[key]=!regFilterOpen[key];render();}
+function setRegFilterField(key,field){
+  const cur=regFilter[key]||{};
+  if(cur.field===field){regFilter[key]={};}
+  else{regFilter[key]={field:field,order:cur.order||'desc'};}
+  render();
+}
+function setRegFilterOrder(key,order){
+  const cur=regFilter[key]||{};
+  regFilter[key]={field:cur.field,order:order};
+  render();
+}
+function clearRegFilter(key){regFilter[key]={};render();}
+function toggleRegMax(key){regMaxOnly[key]=!regMaxOnly[key];refreshRegList(key);}
 
 // Groups of mutually-exclusive (accordion) blocks per section.
 // When one opens, the others in its group collapse — EXCEPT registros sub-lists
@@ -3050,7 +3159,8 @@ function renderFastingBlock(){
       else if(dur<24)chip='<span class="fast-chip fast-chip-16">+16h</span>';
       else chip='<span class="fast-chip fast-chip-24">+24h</span>';
       return '<div class="history-item-value">'+f.start+' → '+f.end+' · <strong style="color:var(--accent)">'+fmtDuration(f.duration)+'</strong>'+chip+'</div>';
-    },{chartLabel:'Ayunos (h)',chartKey:'duration',chartColor:'#fbbf24'},'fasting');
+    },{chartLabel:'Ayunos (h)',chartKey:'duration',chartColor:'#fbbf24',
+       searchFields:[{key:'duration',label:'Duración',aliases:['ayuno','horas','h']},{key:'date',label:'Fecha',aliases:['fecha','día']}]},'fasting');
   }
   h+='</div></div>';
   return h;
@@ -3096,7 +3206,8 @@ function renderBodyBlock(){
     '</div>';
     h+=renderRegistros('weight','PESO',function(w){
       return '<div class="history-item-value">'+w.value+' kg</div>';
-    },{chartLabel:'Peso',chartKey:'value',chartColor:'#a7f3d0'});
+    },{chartLabel:'Peso',chartKey:'value',chartColor:'#a7f3d0',
+       searchFields:[{key:'value',label:'Peso',aliases:['kg','peso']},{key:'date',label:'Fecha',aliases:['fecha','día']}]});
   }
   if(store.measurements.length){
     h+=renderRegistros('measurements','MEDIDAS',function(m){
@@ -3108,7 +3219,8 @@ function renderBodyBlock(){
       if(m.hip)parts.push('Cadera '+m.hip);
       if(m.neck)parts.push('Cuello '+m.neck);
       return '<div style="font-size:11px;color:#bbb;line-height:1.4">'+parts.join(' · ')+'</div>'+(m.photo?'<div style="margin-top:4px"><img src="'+m.photo+'" class="meas-thumb" onclick="event.stopPropagation();openImageViewer(\''+m.photo+'\')"></div>':'');
-    },{chartLabel:'Cintura',chartKey:'waist'});
+    },{chartLabel:'Cintura',chartKey:'waist',
+       searchFields:[{key:'waist',label:'Cintura',aliases:['cintura']},{key:'chest',label:'Pecho',aliases:['pecho']},{key:'thigh',label:'Muslo',aliases:['muslo']},{key:'bicep',label:'Bícep',aliases:['bicep','bíceps']},{key:'hip',label:'Cadera',aliases:['cadera']},{key:'neck',label:'Cuello',aliases:['cuello']},{key:'date',label:'Fecha',aliases:['fecha','día']}]});
   }
   h+='</div></div>';
   return h;
@@ -3173,6 +3285,7 @@ function renderSleepBlock(){
       return '<div style="font-size:11.5px;color:#bbb">HRV '+s.hrv+' · '+fmtDuration(s.hours)+' · Score '+s.score+' · HR '+s.hr+'bpm</div>'+
         '<div style="display:inline-flex;align-items:center;gap:5px;margin-top:3px;cursor:pointer" onclick="event.stopPropagation();showSleepEvalById('+s.id+')"><span style="font-size:11px;font-weight:700;color:'+ev.color+'">'+ev.emoji+' '+ev.composite+'</span><span style="font-size:9px;color:'+ev.color+';text-transform:uppercase;letter-spacing:0.5px">'+ev.rating+'</span></div>';
     },{chartLabel:'HRV',chartKey:'hrv',chartColor:'#a7f3d0',
+       searchFields:[{key:'hrv',label:'HRV',aliases:['hrv','vfc']},{key:'hr',label:'HR noct.',aliases:['hr','pulso','fc']},{key:'score',label:'Puntuación',aliases:['score','puntuacion','puntos']},{key:'hours',label:'Duración',aliases:['horas','duracion','sueño','sueno']},{key:'_global',label:'Global',aliases:['global','valoracion'],get:function(it){var e=evalSleep(it);return e?e.composite:null;}},{key:'date',label:'Fecha',aliases:['fecha','día']}],
        chartMetrics:[
          {key:'hrv',label:'HRV',color:'#a7f3d0'},
          {key:'score',label:'Puntuación',color:'#60a5fa'},
@@ -3221,7 +3334,8 @@ function renderVO2Block(){
   if(store.vo2history.length){
     h+=renderRegistros('vo2history','VO2 MAX',function(v){
       return '<div class="history-item-value">'+v.value+' ml/kg/min</div>';
-    },{chartLabel:'VO2 Max',chartKey:'value',chartColor:'#60a5fa'});
+    },{chartLabel:'VO2 Max',chartKey:'value',chartColor:'#60a5fa',
+       searchFields:[{key:'value',label:'VO2',aliases:['vo2','vo2max']},{key:'date',label:'Fecha',aliases:['fecha','día']}]});
   }
   h+='</div></div>';
   return h;
@@ -3839,6 +3953,7 @@ function renderActividad(c){
         return '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
           '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?a.duration+'min':'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
       },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
+         searchFields:[{key:'duration',label:'Duración',aliases:['min','minutos','duracion']},{key:'hrAvg',label:'FC media',aliases:['fc','pulso','ppm']},{key:'hrMax',label:'FC máx',aliases:['fcmax','maxima']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
          chartMetrics:[
            {key:'id',label:'Nº entrenos',color:'#34d399',aggregate:'count',yLabel:'entrenos'},
            {key:'duration',label:'Minutos',color:'#60a5fa',aggregate:'sum',yLabel:'min'}
@@ -3865,7 +3980,7 @@ function renderActividad(c){
       '</div>'+
       (store.records.length?renderRegistros('records','MARCAS',function(r){
         return '<div style="font-size:12px"><strong>'+escapeHTML(r.name)+':</strong> <span style="color:var(--accent)">'+escapeHTML(r.value)+'</span>'+(r.video?' <span style="color:#60a5fa;font-size:10px">🎬</span>':'')+'</div>';
-      },{}):'')+
+      },{searchFields:[{key:'name',label:'Ejercicio',aliases:['nombre','ejercicio']},{key:'date',label:'Fecha',aliases:['fecha','día']}]}):'')+
     '</div>'+
   '</div>';
   actBlocks.records=h.slice(_bs);h=h.slice(0,_bs);
@@ -4202,7 +4317,8 @@ function renderMeditacion(c){
     h+='<div class="card" style="padding:12px">'+
       renderRegistros('meditation','SESIONES',function(m){
         return '<div style="font-size:11.5px">'+fmtTime(m.duration)+' · Inh '+m.inhale+'s / Exh '+m.exhale+'s</div>';
-      },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc'})+
+      },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc',
+         searchFields:[{key:'duration',label:'Duración',aliases:['duracion','tiempo','segundos','min']},{key:'date',label:'Fecha',aliases:['fecha','día']}]})+
     '</div>';
   }
 
@@ -4792,6 +4908,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
           return '<div style="font-size:11.5px">'+s.duration+' · UV '+s.uv+(s.vitd?' · <strong style="color:#fbbf24">'+parseFloat(s.vitd).toFixed(0)+' IU</strong>':'')+'</div>';
         },{chartLabel:'Nivel estimado',chartKey:'vitd',chartColor:'#fbbf24',chartYLabel:'ng/ml',
+           searchFields:[{key:'vitd',label:'Vit D (IU)',aliases:['vitd','iu','vitamina']},{key:'uv',label:'UV',aliases:['uv','indice']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
            chartMetrics:[
              {key:'vitd',label:'Total en cuerpo',color:'#fbbf24',yLabel:'ng/ml',computed:computeVitDSerumSeries},
              {key:'vitd',label:'Por día',color:'#fb923c',aggregate:'sum',yLabel:'IU/día'}
@@ -5255,7 +5372,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.51</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.52</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
