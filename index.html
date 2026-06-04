@@ -2924,10 +2924,13 @@ function moveActBlock(idx,dir){
 
 function blockHeader(id,icon,title,withHelp){
   const collapsed=store.collapsed[id]!==false;
-  // Map block id -> store key that holds dated records, to show a "logged today" dot.
-  const dataKeyMap={fasting:'fasting',sleep:'sleep',body:'measurements',weight:'weight',allergy:'allergy',vo2:'vo2history',sport:'activity',records:'records',meditation:'meditation',suntimer:'sun'};
+  // Map block id -> store key(s) that hold dated records, to show a "logged today" dot.
+  // 'body' covers both weight and measurements (entries can go to either store).
+  const dataKeyMap={fasting:'fasting',sleep:'sleep',body:['weight','measurements'],weight:'weight',allergy:'allergy',vo2:'vo2history',sport:'activity',records:'records',meditation:'meditation',suntimer:'sun'};
   const dk=dataKeyMap[id];
-  const dot=dk?todayDot(dk):'';
+  let dot='';
+  if(Array.isArray(dk)){dot=dk.some(function(k){return hasTodayEntry(k);})?'<span class="today-dot" title="Registrado hoy">●</span>':'';}
+  else if(dk){dot=todayDot(dk);}
   let h='<div class="card-title" onclick="toggleEstadoBlock(\''+id+'\')"><div class="card-title-text"><span>'+icon+' '+title+'</span>';
   if(withHelp){h+='<span class="help-icon" onclick="event.stopPropagation();showTerm(\''+withHelp+'\')">?</span>';}
   h+='</div>'+dot+'<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button></div>';
@@ -5437,7 +5440,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.61</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.62</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
