@@ -1599,12 +1599,33 @@ function fmtDuration(decH){
 function escapeHTML(s){if(!s)return '';return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 let charts={};
-function makeChart(canvasId,labels,data,label,color){
+function makeChart(canvasId,labels,data,label,color,dates){
   color=color||'#a7f3d0';
   if(charts[canvasId]){try{charts[canvasId].destroy();}catch(e){}}
   const ctx=document.getElementById(canvasId);if(!ctx)return;
+  // If real dates are provided, plot on a proportional (linear by-day) x-axis so gaps in
+  // time are represented to scale. Otherwise fall back to evenly-spaced category labels.
+  let useTime=Array.isArray(dates)&&dates.length===data.length&&dates.length>0;
+  let dataset,xScale;
+  if(useTime){
+    const dayMs=86400000;
+    const ts=dates.map(function(d){return new Date(d+'T12:00:00').getTime();});
+    const minT=Math.min.apply(null,ts);
+    const pts=data.map(function(v,i){return {x:(ts[i]-minT)/dayMs,y:v,_label:labels[i]};});
+    dataset={label:label,data:pts,borderColor:color,backgroundColor:color+'1a',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:7,pointHitRadius:18,borderWidth:1.8,pointBackgroundColor:color,pointBorderColor:'#000',pointBorderWidth:1};
+    const span=Math.max(1,(Math.max.apply(null,ts)-minT)/dayMs);
+    xScale={type:'linear',min:0,max:span,ticks:{color:'#444',font:{size:9},maxTicksLimit:7,callback:function(val){
+      // show the label of the nearest data point to this x (in days)
+      let best=null,bestD=1e9;
+      for(let i=0;i<pts.length;i++){const dd=Math.abs(pts[i].x-val);if(dd<bestD){bestD=dd;best=pts[i];}}
+      return best&&bestD<0.5?best._label:'';
+    }},grid:{color:'rgba(255,255,255,0.03)'}};
+  }else{
+    dataset={label:label,data:data,borderColor:color,backgroundColor:color+'1a',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:7,pointHitRadius:18,borderWidth:1.8,pointBackgroundColor:color,pointBorderColor:'#000',pointBorderWidth:1};
+    xScale={ticks:{color:'#444',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.03)'}};
+  }
   try{
-    charts[canvasId]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:label,data:data,borderColor:color,backgroundColor:color+'1a',tension:0.35,fill:true,pointRadius:2,pointHoverRadius:5,borderWidth:1.8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#000',borderColor:color,borderWidth:1,padding:7}},scales:{x:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+    charts[canvasId]=new Chart(ctx,{type:'line',data:{labels:useTime?undefined:labels,datasets:[dataset]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false,axis:'xy'},plugins:{legend:{display:false},tooltip:{backgroundColor:'#000',borderColor:color,borderWidth:1,padding:9,displayColors:false,callbacks:{title:function(items){if(!items.length)return '';const it=items[0];if(useTime&&it.raw&&it.raw._label)return it.raw._label;return it.label||'';},label:function(it){const v=useTime?it.raw.y:it.parsed.y;return label+': '+v;}}}},scales:{x:xScale,y:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}}}}});
   }catch(e){}
 }
 
@@ -2782,8 +2803,10 @@ function aggregateByBucket(data,range,mode,dataKey){
     if(byMonth){const p=k.split('-');return new Date(p[0],p[1]-1,1).toLocaleDateString('es-ES',{month:'short',year:'2-digit'});}
     return fmtDate(k);
   });
+  // Representative ISO date per bucket for proportional time axis
+  const dates=order.map(function(k){return byMonth?(k+'-01'):k;});
   const vals=order.map(function(k){return buckets[k];});
-  return {labels:labels,data:vals};
+  return {labels:labels,data:vals,dates:dates};
 }
 function renderModalChart(){
   if(!currentChartConfig)return;
@@ -2792,23 +2815,24 @@ function renderModalChart(){
   // sort chronologically by date
   src.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
   const filt=filterByRange(src,currentRange);
-  let labels,data;
+  let labels,data,dates;
   if(cfg.computed){
-    // Custom computed series: fn(filteredRecords, range, allRecords) -> {labels, data}
+    // Custom computed series: fn(filteredRecords, range, allRecords) -> {labels, data, dates?}
     const res=cfg.computed(filt,currentRange,src);
-    labels=res.labels;data=res.data;
+    labels=res.labels;data=res.data;dates=res.dates;
   }else if(cfg.aggregate){
     const agg=aggregateByBucket(filt,currentRange,cfg.aggregate,cfg.dataKey);
-    labels=agg.labels;data=agg.data;
+    labels=agg.labels;data=agg.data;dates=agg.dates;
   }else{
     labels=filt.map(function(x){return fmtDate(x.date);});
+    dates=filt.map(function(x){return String(x.date).substring(0,10);});
     data=filt.map(function(x){
       let v=parseFloat(x[cfg.dataKey]);
       if(cfg.transform)v=cfg.transform(v,x);
       return v;
     });
   }
-  makeChart('modalChart',labels,data,cfg.yLabel||cfg.dataKey,cfg.color);
+  makeChart('modalChart',labels,data,cfg.yLabel||cfg.dataKey,cfg.color,dates);
 }
 
 // Estimated serum 25(OH)D (ng/ml) over time: for each day in range, compute the level
@@ -2824,7 +2848,7 @@ function computeVitDSerumSeries(filt,range,allRecords){
   const totalDays=Math.max(1,Math.round((end-startDate)/dayMs));
   let step=1;
   if(totalDays>365)step=14; else if(totalDays>180)step=7; else if(totalDays>60)step=3;
-  const labels=[],data=[];
+  const labels=[],data=[],dates=[];
   for(let t=0;t<=totalDays;t+=step){
     const cur=new Date(startDate.getTime()+t*dayMs);
     // Aged baseline at this date + sum of decayed session contributions up to this date
@@ -2839,8 +2863,9 @@ function computeVitDSerumSeries(filt,range,allRecords){
     const ngml=Math.min(150,Math.max(VITD_FLOOR,effBase+Math.min(60,boost)));
     labels.push(cur.toLocaleDateString('es-ES',{day:'2-digit',month:'short'}));
     data.push(parseFloat(ngml.toFixed(1)));
+    dates.push(cur.toISOString().substring(0,10));
   }
-  return{labels:labels,data:data};
+  return{labels:labels,data:data,dates:dates};
 }
 
 // ============= ESTADO =============
@@ -2886,15 +2911,15 @@ function renderEstado(c){
     // Render inline charts if not collapsed
     if(store.weight.length&&!store.collapsed.weight){
       const filt=filterByRange(store.weight,'1m');
-      makeChart('weightChartInline',filt.map(function(w){return fmtDate(w.date);}),filt.map(function(w){return parseFloat(w.value);}),'Peso (kg)');
+      makeChart('weightChartInline',filt.map(function(w){return fmtDate(w.date);}),filt.map(function(w){return parseFloat(w.value);}),'Peso (kg)','#a7f3d0',filt.map(function(w){return String(w.date).substring(0,10);}));
     }
     if(store.fasting.length&&!store.collapsed.fasting){
       const filt=filterByRange(store.fasting,'1m');
-      makeChart('fastChartInline',filt.map(function(f){return fmtDate(f.date);}),filt.map(function(f){return parseFloat(f.duration);}),'Ayuno (h)','#fbbf24');
+      makeChart('fastChartInline',filt.map(function(f){return fmtDate(f.date);}),filt.map(function(f){return parseFloat(f.duration);}),'Ayuno (h)','#fbbf24',filt.map(function(f){return String(f.date).substring(0,10);}));
     }
     if(store.vo2history.length&&!store.collapsed.vo2){
       const filt=filterByRange(store.vo2history,'1m');
-      makeChart('vo2ChartInline',filt.map(function(v){return fmtDate(v.date);}),filt.map(function(v){return parseFloat(v.value);}),'VO2 Max','#60a5fa');
+      makeChart('vo2ChartInline',filt.map(function(v){return fmtDate(v.date);}),filt.map(function(v){return parseFloat(v.value);}),'VO2 Max','#60a5fa',filt.map(function(v){return String(v.date).substring(0,10);}));
     }
   },80);
 }
@@ -5440,7 +5465,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.62</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.63</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
