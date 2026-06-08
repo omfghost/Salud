@@ -883,6 +883,13 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .vitd-level-range{font-family:var(--sans);font-size:11px;font-weight:600;color:#fff;line-height:1.25}
 .vitd-level-range span{font-size:9px;color:#888;font-weight:400}
 .vitd-level-desc{font-family:var(--sans);font-size:10.5px;color:#aaa;line-height:1.35}
+.vitd-factors-title{font-family:var(--sans);font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin:18px 0 8px;padding-top:14px;border-top:1px solid var(--border)}
+.vitd-factors-intro{font-family:var(--sans);font-size:11.5px;color:#bbb;line-height:1.5;margin-bottom:12px}
+.vitd-factor{display:flex;gap:9px;align-items:flex-start;margin-bottom:10px;font-family:var(--sans);font-size:11px;color:#bbb;line-height:1.4}
+.vitd-factor b{color:#eee;font-size:11.5px}
+.vitd-factor-ic{font-size:16px;flex-shrink:0;line-height:1.3;width:20px;text-align:center}
+.vitd-formula-box{background:rgba(167,243,208,0.07);border:1px solid rgba(167,243,208,0.25);border-radius:9px;padding:9px 11px;font-family:var(--sans);font-size:10.5px;color:#cde;line-height:1.5;margin-top:6px}
+.vitd-formula-box b{color:var(--accent)}
 .vitd-blood-val{font-family:var(--sans);font-style:normal;font-size:18px;font-weight:600;color:#e0e0e0;line-height:1;letter-spacing:-0.5px}
 .vitd-blood-unit{font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;font-family:var(--sans)}
 
@@ -962,7 +969,21 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 <div class="vitd-level-row" style="border-left-color:#fbbf24"><div class="vitd-level-name" style="color:#fbbf24">Alto</div><div class="vitd-level-range">51–100 ng/ml<br><span>126–250 nmol/L</span></div><div class="vitd-level-desc">Por encima de lo necesario. Sin beneficio extra; vigilar si se suplementa.</div></div>
 <div class="vitd-level-row" style="border-left-color:#f87171"><div class="vitd-level-name" style="color:#f87171">Excesivo</div><div class="vitd-level-range">&gt; 100 ng/ml<br><span>&gt; 250 nmol/L</span></div><div class="vitd-level-desc">Riesgo de toxicidad (hipercalcemia). Solo por exceso de suplementos, nunca por sol.</div></div>
 </div>
-<div style="font-size:10.5px;color:#888;line-height:1.5;font-family:var(--serif);font-style:italic;margin-top:12px">Conversión: ng/ml × 2.5 = nmol/L. La exposición solar nunca causa toxicidad: la piel autorregula la producción. Valores de referencia según Endocrine Society. Consulta a tu médico para interpretar tu analítica.</div>
+<div class="vitd-factors-title">🧮 CÓMO SE CALCULA EL NIVEL</div>
+<div class="vitd-factors-intro">La estimación combina la producción de tu piel con la cinética real de la vitamina D en sangre. Estos son todos los factores que intervienen:</div>
+<div class="vitd-factor"><span class="vitd-factor-ic">☀️</span><div><b>Radiación UVB</b><br>Solo el UVB genera vitamina D. Se calcula según la altura del sol (hora, fecha y tu latitud); es máximo al mediodía solar y nulo al amanecer/atardecer.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🎨</span><div><b>Tipo de piel (Fitzpatrick I-VI)</b><br>La melanina filtra el UVB. Una piel muy clara (I) produce varias veces más rápido que una muy oscura (VI) con la misma exposición.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">👕</span><div><b>Ropa / piel expuesta</b><br>Solo la piel descubierta sintetiza. Cada prenda define un % de superficie corporal expuesta (regla de los 9): bañador 90%, pantalón corto 80%, camiseta+short 32%, manga corta 18%, manga larga 12%, cubierto 4%.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🎂</span><div><b>Edad</b><br>La capacidad de la piel para sintetizar vitamina D baja ~13% por década a partir de los 20 años (se agota el 7-dehidrocolesterol cutáneo).</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🧭</span><div><b>Geometría solar (×0,65)</b><br>El sol solo ilumina la cara del cuerpo que mira hacia él; la opuesta queda en sombra. De media, solo ~65% de la piel descubierta recibe sol efectivo (ya contando que te mueves y la luz difusa del cielo).</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">☁️</span><div><b>Clima / nubes</b><br>Las nubes y la lluvia reducen el UVB que llega al suelo. Si la detección automática está activa, se ajusta con el tiempo real de tu zona.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">⏱️</span><div><b>Duración de la sesión</b><br>Las UI producidas son la suma minuto a minuto del tiempo que estás al sol con todos los factores anteriores.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🩸</span><div><b>Decaimiento en sangre (vida media ~15 días)</b><br>La vitamina D no se acumula sin límite: cada sesión eleva el nivel y luego decae de forma exponencial. Una sesión aislada sube poco; la exposición regular mantiene el nivel en equilibrio.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">📉</span><div><b>Analítica que envejece</b><br>Tu valor base de analítica cuenta al 100% si es reciente, pero pierde peso con el tiempo (vida media ~120 días) porque deja de reflejar tu estado actual.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🛡️</span><div><b>Suelo fisiológico (~12 ng/ml)</b><br>Aunque pases meses sin sol, el nivel nunca cae a cero: tus reservas corporales (grasa, hígado) y la dieta mantienen un mínimo.</div></div>
+<div class="vitd-factor"><span class="vitd-factor-ic">🧬</span><div><b>Conversión a suero</b><br>Calibrado para que ~100 UI/día sostenidas eleven el nivel ~1 ng/ml en equilibrio, partiendo de tu base analítica (o ~20 ng/ml por defecto).</div></div>
+<div class="vitd-formula-box"><b>Fórmula:</b> nivel = suelo (12) + (analítica − suelo) × envejecimiento + aporte del sol (suma de sesiones ya decaídas)</div>
+<div style="font-size:10.5px;color:#888;line-height:1.5;font-family:var(--serif);font-style:italic;margin-top:12px">Conversión: ng/ml × 2.5 = nmol/L. La exposición solar nunca causa toxicidad: la piel autorregula la producción. Es una estimación educativa, no un diagnóstico; los valores de referencia siguen a la Endocrine Society. Consulta a tu médico para interpretar tu analítica.</div>
 </div>
 </div>
 
@@ -1327,6 +1348,26 @@ function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(sto
       save('sun',store.sun);
     }
     localStorage.setItem('h_vitdRecalc_v32','1');
+  }catch(e){}
+})();
+
+// One-time migration: apply the solar-geometry factor (0.65) to historical VitD, since the
+// production formula now accounts for only one body side being lit at a time (v17.64).
+(function(){
+  try{
+    if(localStorage.getItem('h_vitdGeometry_v64')==='1')return;
+    const GEOMETRY=0.65;
+    if(Array.isArray(store.sun)&&store.sun.length){
+      store.sun.forEach(function(s){
+        if(s.vitd!=null&&s.vitd!==''){
+          const nv=Math.round((parseFloat(s.vitd)||0)*GEOMETRY);
+          s.vitd=nv.toString();
+          s.value=nv;
+        }
+      });
+      save('sun',store.sun);
+    }
+    localStorage.setItem('h_vitdGeometry_v64','1');
   }catch(e){}
 })();
 function moveSolBlock(idx,dir){
@@ -1832,7 +1873,11 @@ function vitDPerMinute(uvb){
   let base=uvb<=6?uvb*55:6*55+(uvb-6)*22; // IU/min at full-body exposure, fair skin
   const skin=SKIN_TYPES[store.settings.skinType||'III'];
   const cloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
-  return base*skin.mult*cloth.exposure*vitDAgeFactor();
+  // Solar geometry factor: the sun lights only the side facing it; the opposite side is in
+  // shade. Accounting for movement/turning and diffuse+reflected sky UV, on average only
+  // ~65% of the bared skin receives effective radiation at any time (not the full surface).
+  const GEOMETRY=0.65;
+  return base*skin.mult*cloth.exposure*vitDAgeFactor()*GEOMETRY;
 }
 
 // --- Reusable serum 25(OH)D estimation (shared by Sol section and Panel widget) ---
@@ -5465,7 +5510,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.63</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.65</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5473,7 +5518,7 @@ function renderAjustes(c){
 
 function buildExportData(){
   return {
-    _meta:{app:'HEALTH',version:17,vitdFormula:'v32',exportedAt:new Date().toISOString()},
+    _meta:{app:'HEALTH',version:17,vitdFormula:'v64',exportedAt:new Date().toISOString()},
     sleep:store.sleep,activity:store.activity,weight:store.weight,allergy:store.allergy,
     vo2max:store.vo2max,vo2history:store.vo2history,fasting:store.fasting,measurements:store.measurements,
     meditation:store.meditation,programs:store.programs,sun:store.sun,wods:store.wods,records:store.records,
@@ -5649,9 +5694,11 @@ function importData(e){
           else localStorage.setItem('h_'+k,JSON.stringify(d[k]));
         }
       });
-      // If the imported sun records predate the v32 formula, convert their IU now.
-      if(importedFormula!=='v32'&&Array.isArray(store.sun)&&store.sun.length){
-        const FACTOR=55/25;
+      // Convert imported sun records to the current formula depending on their version.
+      // pre-v32: needs 2.2 (base) × 0.65 (geometry). v32: needs only 0.65 (geometry). v64: none.
+      if(importedFormula!=='v64'&&Array.isArray(store.sun)&&store.sun.length){
+        let FACTOR=0.65; // geometry only (from v32)
+        if(importedFormula!=='v32')FACTOR=(55/25)*0.65; // older: base + geometry
         store.sun.forEach(function(s){
           if(s.vitd!=null&&s.vitd!==''){
             const nv=Math.round((parseFloat(s.vitd)||0)*FACTOR);
@@ -5664,8 +5711,9 @@ function importData(e){
       }else{
         alert('✅ Datos importados — widgets, bloques y orden restaurados.');
       }
-      // Keep the device flag set so the startup migration won't double-convert.
+      // Keep device flags set so the startup migrations won't double-convert.
       localStorage.setItem('h_vitdRecalc_v32','1');
+      localStorage.setItem('h_vitdGeometry_v64','1');
       render();
     }catch(err){alert('❌ Archivo inválido');}
   };
