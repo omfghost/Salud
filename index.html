@@ -421,7 +421,7 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .day-modal-actions .btn{flex:1}
 .image-viewer{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
 .image-viewer.active{display:flex}
-.image-viewer img{max-width:100%;max-height:90vh;border-radius:10px}
+.image-viewer img{max-width:100%;max-height:90vh;border-radius:10px;transform-origin:center center;touch-action:none;will-change:transform;transition:transform 0.05s linear}
 .image-viewer-close{position:absolute;top:calc(20px + var(--safe-top));right:20px;background:rgba(255,255,255,0.08);border:none;width:38px;height:38px;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .panel-weekly-preview{display:flex;flex-wrap:nowrap;gap:3px;margin-top:6px;width:100%}
 .panel-weekly-preview .day-chip{flex:1 1 0;min-width:0}
@@ -522,6 +522,18 @@ input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width
 .med-input-cell{min-width:0;display:flex;flex-direction:column;justify-content:flex-start}
 .med-input-cell label{display:block;font-size:9px;color:var(--text-muted);margin-bottom:4px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-family:var(--sans);text-align:center;line-height:1}
 .med-num-input{display:flex;align-items:center;justify-content:center;gap:2px;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:7px 4px;width:100%;box-sizing:border-box;height:38px}
+.med-header-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-bottom:8px}
+.med-header-row .section-title-inline{margin-bottom:0}
+.med-save-preset-btn{flex-shrink:0;background:rgba(52,211,153,0.14);border:1px solid rgba(52,211,153,0.4);color:#34d399;font-family:var(--sans);font-size:11px;font-weight:700;padding:6px 11px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.med-save-preset-btn:active{background:rgba(52,211,153,0.25)}
+.med-wheel{background:transparent;border:none;color:#fff;font-family:var(--sans);font-size:17px;font-weight:600;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0 2px;letter-spacing:-0.5px;outline:none}
+.med-wheel option{background:#16171c;color:#fff}
+.meas-toggle-btn{width:100%;margin-top:8px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-strong);border-radius:9px;color:var(--text-muted);font-family:var(--sans);font-size:11px;font-weight:600;padding:8px;cursor:pointer;transition:all 0.15s}
+.meas-toggle-btn:active{background:rgba(255,255,255,0.06)}
+.fab-train{position:fixed;right:16px;bottom:84px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#10b981,#34d399);border:none;color:#04110b;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.45),0 0 0 1px rgba(52,211,153,0.3);z-index:50;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s}
+.fab-train:active{transform:scale(0.92);box-shadow:0 2px 10px rgba(16,185,129,0.5)}
+.panel-train-btn{background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.4);color:#34d399;font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0}
+.panel-train-btn:active{background:rgba(16,185,129,0.28)}
 .med-num-input input{width:32px;background:transparent;border:none;padding:0;text-align:center;font-size:14px;color:#fff;font-family:var(--sans);font-weight:500;-moz-appearance:textfield;height:auto}
 .med-num-input input::-webkit-outer-spin-button,.med-num-input input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .med-num-input input:focus{box-shadow:none;outline:none}
@@ -2629,6 +2641,7 @@ function renderPanel(c){
   pBlocks.weekly='<div class="panel-section-title">'+
     '<span>ENTRENAMIENTOS</span>'+
     '<div style="display:flex;align-items:center;gap:4px">'+
+      '<button class="panel-train-btn" onclick="quickAddTraining()" title="Registrar entrenamiento">🏋️</button>'+
       '<button class="panel-go-arrow" onclick="showTab(\'actividad\')" title="Ir a actividad">→</button>'+
       '<button class="collapse-btn" onclick="togglePanelSection(\'weeklyPanel\')">'+(weeklyCollapsed?'▼':'▲')+'</button>'+
     '</div>'+
@@ -3298,6 +3311,8 @@ function renderFastingBlock(){
 
 // WEIGHT
 // BODY (fused: peso + medidas + foto)
+var measFieldsOpen=false;
+function toggleMeasFields(){measFieldsOpen=!measFieldsOpen;render();}
 function renderBodyBlock(){
   const collapsed=store.collapsed.body!==false;
   let h='<div class="card" id="s-body">'+
@@ -3309,15 +3324,17 @@ function renderBodyBlock(){
         '<div class="input-group"><label>PESO (KG)</label><input type="number" id="bodyWeight" step="0.1" placeholder="75.5"></div>'+
         '<button class="add-btn" onclick="addBody()" title="Registrar">+</button>'+
       '</div>'+
-      // Measures grid
-      '<div class="grid-3" style="gap:5px;margin-top:8px">'+
+      // Toggle button to reveal the measurements grid (hidden by default)
+      '<button class="meas-toggle-btn" onclick="toggleMeasFields()">'+(measFieldsOpen?'▲ Ocultar medidas':'▼ Añadir medidas (cintura, pecho, muslo…)')+'</button>'+
+      // Measures grid (only when opened)
+      (measFieldsOpen?'<div class="grid-3" style="gap:5px;margin-top:8px">'+
         '<div class="input-group"><label>CINTURA</label><input type="number" id="mWaist" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>PECHO</label><input type="number" id="mChest" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>MUSLO</label><input type="number" id="mThigh" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>BÍCEP</label><input type="number" id="mBicep" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>CADERA</label><input type="number" id="mHip" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>CUELLO</label><input type="number" id="mNeck" step="0.1" placeholder="cm"></div>'+
-      '</div>'+
+      '</div>':'')+
       // Photo area (compact)
       '<div class="meas-photo-area" id="measPhotoArea" onclick="document.getElementById(\'measPhotoInput\').click()" style="margin-top:6px">'+
         '<div id="measPhotoPreview"></div>'+
@@ -3362,7 +3379,9 @@ function addBody(){
   const weightVal=document.getElementById('bodyWeight').value;
   if(!date)return alert('Selecciona fecha');
   if(weightVal&&dateExists('weight',date))return warnDuplicate('peso');
-  const hasMeasure=document.getElementById('mWaist').value||document.getElementById('mChest').value||document.getElementById('mThigh').value||document.getElementById('mBicep').value||document.getElementById('mHip').value||document.getElementById('mNeck').value||measPhotoData;
+  // Measure fields may be hidden (collapsed) → read safely.
+  const gv=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  const hasMeasure=gv('mWaist')||gv('mChest')||gv('mThigh')||gv('mBicep')||gv('mHip')||gv('mNeck')||measPhotoData;
   if(hasMeasure&&dateExists('measurements',date))return warnDuplicate('medidas');
   let saved=false;
   if(weightVal){
@@ -3371,12 +3390,12 @@ function addBody(){
     saved=true;
   }
   const m={id:Date.now()+1,date:date,
-    waist:document.getElementById('mWaist').value,
-    chest:document.getElementById('mChest').value,
-    thigh:document.getElementById('mThigh').value,
-    bicep:document.getElementById('mBicep').value,
-    hip:document.getElementById('mHip').value,
-    neck:document.getElementById('mNeck').value,
+    waist:gv('mWaist'),
+    chest:gv('mChest'),
+    thigh:gv('mThigh'),
+    bicep:gv('mBicep'),
+    hip:gv('mHip'),
+    neck:gv('mNeck'),
     photo:measPhotoData||null};
   if(m.waist||m.chest||m.thigh||m.bicep||m.hip||m.neck||m.photo){
     store.measurements.push(m);
@@ -3397,16 +3416,16 @@ function renderSleepBlock(){
       '<button class="collapse-btn">'+(collapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // Row 1: fecha + sueño (h:m)
+      // Row 1: fecha + puntuación + sueño (h:m)
       '<div class="sleep-row1">'+
         '<div class="input-group"><label>FECHA</label><input type="date" id="sleepDate" value="'+today()+'"></div>'+
+        '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
         '<div class="input-group"><label>SUEÑO (H:M)</label><input type="time" id="sleepHoursTime" value="07:30"></div>'+
       '</div>'+
-      // Row 2: hrv + puntuación + hr nocturno + (+) — three equal boxes
+      // Row 2: HR nocturno + HRV + (+)
       '<div class="sleep-row2">'+
-        '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
         '<div class="input-group"><label>HR NOCT.</label><input type="number" id="sleepHR" placeholder="52"></div>'+
-        '<div class="input-group"><label>PUNTUACIÓN</label><input type="number" id="sleepScore" min="0" max="100" placeholder="85"></div>'+
+        '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
       '</div>';
   if(store.sleep.length){
@@ -3990,7 +4009,7 @@ function renderActividad(c){
   // ENTRENAMIENTOS (form + history fused)
   _bs=h.length;
   h+='<div class="card">'+
-    '<div class="card-title" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ REGISTRAR ENTRENAMIENTO</span></div>'+todayDot('activity')+'<button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="card-title" id="sportBlockTitle" onclick="toggleEstadoBlock(\'sport\')"><div class="card-title-text"><span>🏋️ REGISTRAR ENTRENAMIENTO</span></div>'+todayDot('activity')+'<button class="collapse-btn">'+(sportCollapsed?'▼':'▲')+'</button></div>'+
     '<div class="collapsible'+(sportCollapsed?' collapsed':'')+'">'+
       (actType==='crossfit'
         ?'<div class="sport-form-grid" style="margin-bottom:6px">'+
@@ -4149,7 +4168,21 @@ function renderActividad(c){
     if(actBlocks[id])h+=actBlocks[id];
   });
 
+  // Floating quick-add button (bottom-right) to jump to "Registrar entrenamiento"
+  h+='<button class="fab-train" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">🏋️</button>';
+
   c.innerHTML=h;
+}
+// Open the training-registration block and scroll to it.
+function quickAddTraining(){
+  store.collapsed.sport=false; // ensure expanded
+  saveCollapsed();
+  if(currentTab!=='actividad'){showTab('actividad');}
+  else render();
+  setTimeout(function(){
+    const el=document.getElementById('sportBlockTitle');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },150);
 }
 
 function setActType(t){actType=t;render();}
@@ -4316,6 +4349,7 @@ function handleDayImage(e){
 function clearDayImage(){editingImageData=null;refreshDayImagePreview();document.getElementById('dayImageInput').value='';}
 function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;store.weeklyPlan[editingDayId]={text:text,image:editingImageData};saveWeekly();closeDayEditor();render();}
 var imageViewerOrigin=null;
+var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
 function openImageViewer(srcOrDayId,origin){
   let src=srcOrDayId;
   if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&store.weeklyPlan[srcOrDayId]){
@@ -4323,15 +4357,62 @@ function openImageViewer(srcOrDayId,origin){
   }
   if(!src){alert('Sin imagen para mostrar');return;}
   imageViewerOrigin=origin||null;
-  document.getElementById('imageViewerImg').src=src;
-  // Show both back buttons (Panel + Actividad)
+  const img=document.getElementById('imageViewerImg');
+  img.src=src;
+  // reset zoom
+  _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
+  applyImgZoom();
+  attachImgZoom(img);
   const actions=document.getElementById('imageViewerActions');
   if(actions)actions.style.display='flex';
   document.getElementById('imageViewer').classList.add('active');
 }
+function applyImgZoom(){
+  const img=document.getElementById('imageViewerImg');
+  if(img)img.style.transform='translate('+_imgZoom.x+'px,'+_imgZoom.y+'px) scale('+_imgZoom.scale+')';
+}
+function attachImgZoom(img){
+  if(img._zoomAttached)return;
+  img._zoomAttached=true;
+  const dist=function(t){const dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY;return Math.sqrt(dx*dx+dy*dy);};
+  img.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){_imgZoom.pinching=true;_imgZoom.startDist=dist(e.touches);_imgZoom.startScale=_imgZoom.scale;e.preventDefault();}
+    else if(e.touches.length===1&&_imgZoom.scale>1){_imgZoom.dragging=true;_imgZoom.lastX=e.touches[0].clientX;_imgZoom.lastY=e.touches[0].clientY;}
+  },{passive:false});
+  img.addEventListener('touchmove',function(e){
+    if(_imgZoom.pinching&&e.touches.length===2){
+      const d=dist(e.touches);
+      _imgZoom.scale=Math.max(1,Math.min(5,_imgZoom.startScale*(d/_imgZoom.startDist)));
+      if(_imgZoom.scale<=1){_imgZoom.x=0;_imgZoom.y=0;}
+      applyImgZoom();e.preventDefault();
+    }else if(_imgZoom.dragging&&e.touches.length===1&&_imgZoom.scale>1){
+      _imgZoom.x+=e.touches[0].clientX-_imgZoom.lastX;
+      _imgZoom.y+=e.touches[0].clientY-_imgZoom.lastY;
+      _imgZoom.lastX=e.touches[0].clientX;_imgZoom.lastY=e.touches[0].clientY;
+      applyImgZoom();e.preventDefault();
+    }
+  },{passive:false});
+  img.addEventListener('touchend',function(e){
+    if(e.touches.length===0){_imgZoom.pinching=false;_imgZoom.dragging=false;}
+    else if(e.touches.length===1){_imgZoom.pinching=false;}
+  });
+  // Double-tap toggles 1x / 2.5x
+  let lastTap=0;
+  img.addEventListener('click',function(e){
+    const now=Date.now();
+    if(now-lastTap<320){
+      if(_imgZoom.scale>1){_imgZoom.scale=1;_imgZoom.x=0;_imgZoom.y=0;}
+      else{_imgZoom.scale=2.5;}
+      applyImgZoom();e.stopPropagation();
+    }
+    lastTap=now;
+  });
+}
 function closeImageViewer(){
   document.getElementById('imageViewer').classList.remove('active');
   imageViewerOrigin=null;
+  _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
+  const img=document.getElementById('imageViewerImg');if(img)img.style.transform='';
 }
 function imageViewerGoTo(target){
   closeImageViewer();
@@ -4343,7 +4424,20 @@ function imageViewerGoTo(target){
 let medState='idle';
 let medTimer=null;
 let medTimeLeft=0;
-let medConfig={total:300,inhale:4,exhale:6,countdown:3};
+let medConfig=(function(){
+  try{var p=JSON.parse(localStorage.getItem('h_medPreset')||'null');if(p&&p.total)return{total:p.total,inhale:p.inhale,exhale:p.exhale,countdown:p.countdown!=null?p.countdown:3};}catch(e){}
+  return {total:300,inhale:4,exhale:6,countdown:3};
+})();
+// Build <option> list for the wheel-style time pickers.
+function medWheelOpts(min,max,sel){
+  var o='';for(var i=min;i<=max;i++){o+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+(i<10?'0'+i:i)+'</option>';}return o;
+}
+// Save the current meditation config as the default shown each time you open the tab.
+function saveMedPreset(){
+  updateMedConfig();
+  try{localStorage.setItem('h_medPreset',JSON.stringify({total:medConfig.total,inhale:medConfig.inhale,exhale:medConfig.exhale,countdown:medConfig.countdown}));}catch(e){}
+  var b=event&&event.target;if(b){var t=b.textContent;b.textContent='✓ Guardado';setTimeout(function(){b.textContent=t;},1500);}
+}
 let medCycleTime=0;       // elapsed seconds within meditation
 let medCountdownVal=0;
 let medOrbState='hold';   // 'hold' | 'inhale' | 'exhale'
@@ -4354,7 +4448,7 @@ function renderMeditacion(c){
   const mins=Math.floor(medConfig.total/60);
   const secs=medConfig.total%60;
   const inExhale=medOrbState==='exhale';
-  let h='<div class="section-title-inline">MEDITACIÓN <span class="section-subtitle-inline">Respiración guiada</span></div>'+
+  let h='<div class="med-header-row"><div class="section-title-inline">MEDITACIÓN <span class="section-subtitle-inline">Respiración guiada</span></div><button class="med-save-preset-btn" onclick="saveMedPreset()" title="Guardar esta configuración como predeterminada">💾 Guardar</button></div>'+
     '<div class="card card-glow" style="padding:12px;position:relative;overflow:visible">'+
       // Audio controls column on the LEFT of orb (toggles + type switchers)
       '<div class="med-audio-controls">'+
@@ -4367,8 +4461,8 @@ function renderMeditacion(c){
         '<button class="med-actrl-btn" onclick="cycleBell()" title="Cambiar campana">🎵<span class="med-actrl-tag">'+(BELL_TYPES[store.settings.bellType||0].short)+'</span></button>'+
       '</div>'+
       // Full-width volume bar (shown when a volume toggle is open) — long & easy to drag
-      (musicVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🎵</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'" oninput="setMusicVolume(this.value)"><span class="med-vol-num" id="musicVolNum">'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'</span></div>':'')+
-      (bellVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🔔</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'" oninput="setBellVolume(this.value)"><span class="med-vol-num" id="bellVolNum">'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'</span></div>':'')+
+      (musicVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🎵</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'" onpointerdown="unlockAudio()" ontouchstart="unlockAudio()" oninput="setMusicVolume(this.value)" onchange="setMusicVolume(this.value)"><span class="med-vol-num" id="musicVolNum">'+Math.round((store.settings.musicVolume!=null?store.settings.musicVolume:0.5)*100)+'</span></div>':'')+
+      (bellVolOpen?'<div class="med-vol-bar"><span class="med-vol-icon">🔔</span><input type="range" class="med-vol-slider" min="0" max="100" value="'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'" onpointerdown="unlockAudio()" ontouchstart="unlockAudio()" oninput="setBellVolume(this.value)" onchange="setBellVolume(this.value)"><span class="med-vol-num" id="bellVolNum">'+Math.round((store.settings.bellVolume!=null?store.settings.bellVolume:0.4)*100)+'</span></div>':'')+
       '<div class="med-screen">'+
         (hasTodayEntry('meditation')?'<span class="med-today-dot" title="Meditación registrada hoy">●</span>':'')+
         '<div class="breath-orb-container" onclick="toggleMed()" style="cursor:pointer">'+
@@ -4388,27 +4482,27 @@ function renderMeditacion(c){
         '<div class="timer-phase '+(inExhale?'active-exhale':(medState==='running'?'active':''))+'" id="medPhase">'+(medPhaseLabel||(medState==='running'?'COMENZANDO...':'LISTO PARA COMENZAR'))+'</div>'+
       '</div>'+
 
-      // 4 columns, all equal height - duración (min:seg), inhalar, exhalar, preparación
+      // 4 columns with wheel-style <select> pickers (native scroll wheel on mobile)
       '<div class="med-input-row">'+
         '<div class="med-input-cell">'+
           '<label>DURACIÓN</label>'+
           '<div class="med-time-input">'+
-            '<input type="number" id="medMins" value="'+mins+'" min="0" max="60" onchange="updateMedConfig()">'+
+            '<select id="medMins" class="med-wheel" onchange="updateMedConfig()">'+medWheelOpts(0,60,mins)+'</select>'+
             '<span>:</span>'+
-            '<input type="number" id="medSecs" value="'+secs+'" min="0" max="59" onchange="updateMedConfig()">'+
+            '<select id="medSecs" class="med-wheel" onchange="updateMedConfig()">'+medWheelOpts(0,59,secs)+'</select>'+
           '</div>'+
         '</div>'+
         '<div class="med-input-cell">'+
           '<label>INHALAR</label>'+
-          '<div class="med-num-input"><input type="number" id="medInhale" value="'+medConfig.inhale+'" min="1" max="30" onchange="updateMedConfig()"><span>s</span></div>'+
+          '<div class="med-num-input"><select id="medInhale" class="med-wheel" onchange="updateMedConfig()">'+medWheelOpts(1,30,medConfig.inhale)+'</select><span>s</span></div>'+
         '</div>'+
         '<div class="med-input-cell">'+
           '<label>EXHALAR</label>'+
-          '<div class="med-num-input"><input type="number" id="medExhale" value="'+medConfig.exhale+'" min="1" max="30" onchange="updateMedConfig()"><span>s</span></div>'+
+          '<div class="med-num-input"><select id="medExhale" class="med-wheel" onchange="updateMedConfig()">'+medWheelOpts(1,30,medConfig.exhale)+'</select><span>s</span></div>'+
         '</div>'+
         '<div class="med-input-cell">'+
           '<label>PREP.</label>'+
-          '<div class="med-num-input"><input type="number" id="medCountdown" value="'+medConfig.countdown+'" min="0" max="10" onchange="updateMedConfig()"><span>s</span></div>'+
+          '<div class="med-num-input"><select id="medCountdown" class="med-wheel" onchange="updateMedConfig()">'+medWheelOpts(0,10,medConfig.countdown)+'</select><span>s</span></div>'+
         '</div>'+
       '</div>'+
 
@@ -4705,27 +4799,30 @@ function setMusicVolume(v){
   }else{
     // Music not playing → short audible preview at this level (debounced)
     if(_musicPreviewTimer)clearTimeout(_musicPreviewTimer);
-    _musicPreviewTimer=setTimeout(function(){playMusicPreview(val);},200);
+    _musicPreviewTimer=setTimeout(function(){playMusicPreview(val);},180);
   }
 }
 function playMusicPreview(val){
-  const ctx=getAudioCtx();if(!ctx)return;
-  try{
-    // stop any previous preview
-    if(_musicPreviewNodes){try{_musicPreviewNodes.osc.stop();}catch(e){}_musicPreviewNodes=null;}
-    const now=ctx.currentTime;
-    const track=(typeof MUSIC_TRACKS!=='undefined')?MUSIC_TRACKS[store.settings.musicTrack||0]:{freqs:[110,164.81,220]};
-    const g=ctx.createGain();
-    g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.0001,now);
-    g.gain.linearRampToValueAtTime(val*MUSIC_VOL_CEIL,now+0.05);
-    g.gain.setValueAtTime(val*MUSIC_VOL_CEIL,now+0.7);
-    g.gain.exponentialRampToValueAtTime(0.0001,now+1.1);
-    const o=ctx.createOscillator();
-    o.type='sine';o.frequency.value=track.freqs[0];
-    o.connect(g);o.start(now);o.stop(now+1.2);
-    _musicPreviewNodes={osc:o};
-  }catch(e){}
+  // Ensure the AudioContext is RUNNING before scheduling (iOS resumes asynchronously).
+  ensureAudioRunning(function(ctx){
+    if(!ctx)return;
+    try{
+      if(_musicPreviewNodes){try{_musicPreviewNodes.osc.stop();}catch(e){}_musicPreviewNodes=null;}
+      const now=ctx.currentTime;
+      const track=(typeof MUSIC_TRACKS!=='undefined')?MUSIC_TRACKS[store.settings.musicTrack||0]:{freqs:[110,164.81,220]};
+      const g=ctx.createGain();
+      g.connect(ctx.destination);
+      const peak=Math.max(0.02,val*MUSIC_VOL_CEIL); // floor so very low values are still audible-ish
+      g.gain.setValueAtTime(0.0001,now);
+      g.gain.linearRampToValueAtTime(peak,now+0.05);
+      g.gain.setValueAtTime(peak,now+0.7);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+1.1);
+      const o=ctx.createOscillator();
+      o.type='sine';o.frequency.value=track.freqs[0];
+      o.connect(g);o.start(now);o.stop(now+1.2);
+      _musicPreviewNodes={osc:o};
+    }catch(e){}
+  });
 }
 var _bellPreviewTimer=null;
 function setBellVolume(v){
@@ -4735,7 +4832,21 @@ function setBellVolume(v){
   var n=document.getElementById('bellVolNum');if(n)n.textContent=parseInt(v);
   // Audible feedback: play a sample bell at the new volume (debounced)
   if(_bellPreviewTimer)clearTimeout(_bellPreviewTimer);
-  _bellPreviewTimer=setTimeout(function(){playBell(val);},140);
+  _bellPreviewTimer=setTimeout(function(){playBellSafe(val);},150);
+}
+// Resume the AudioContext and run the callback only once it's actually running.
+function ensureAudioRunning(cb){
+  try{
+    if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+    if(audioCtx.state==='running'){cb(audioCtx);return;}
+    const p=audioCtx.resume();
+    if(p&&p.then){p.then(function(){cb(audioCtx);}).catch(function(){cb(audioCtx);});}
+    else{cb(audioCtx);}
+  }catch(e){cb(null);}
+}
+// Bell preview that waits for the context to be running first.
+function playBellSafe(vol){
+  ensureAudioRunning(function(ctx){if(ctx)playBell(vol);});
 }
 function cycleMusic(){const cur=store.settings.musicTrack||0;store.settings.musicTrack=(cur+1)%MUSIC_TRACKS.length;saveSettings();if(store.settings.music&&medState==='running'){stopBgMusic();startBgMusic();}render();}
 function cycleBell(){const cur=store.settings.bellType||0;store.settings.bellType=(cur+1)%BELL_TYPES.length;saveSettings();playBell(store.settings.bellVolume!=null?store.settings.bellVolume:0.4);render();}
@@ -5205,6 +5316,8 @@ function toggleAutoLoc(el){
   store.settings.autoLocation=!store.settings.autoLocation;
   el.classList.toggle('active');
   saveSettings();
+  // Manual choice resets the weekly consent timer (respected for a week).
+  try{localStorage.setItem('h_geoConsentAsk',String(Date.now()));}catch(e){}
   if(store.settings.autoLocation&&navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(pos){
       store.settings.lat=pos.coords.latitude;
@@ -5431,13 +5544,13 @@ function renderAjustes(c){
         '<div class="env-divider"></div>'+
         '<div class="sub-section-label" style="margin-top:2px">⏱️ EXPORTACIÓN AUTOMÁTICA</div>'+
         '<div class="auto-export-tabs">'+
-          ['off','daily','weekly'].map(function(mode){
-            const labels={off:'Desactivada',daily:'Diaria',weekly:'Semanal'};
+          ['off','weekly'].map(function(mode){
+            const labels={off:'Desactivada',weekly:'Semanal'};
             const active=(store.settings.autoExport||'off')===mode;
             return '<button class="auto-export-tab '+(active?'active':'')+'" onclick="setAutoExport(\''+mode+'\')">'+labels[mode]+'</button>';
           }).join('')+
         '</div>'+
-        (store.settings.autoExport&&store.settings.autoExport!=='off'?'<div style="font-size:10px;color:var(--accent);text-align:center;margin-top:5px;font-family:var(--sans)">✓ Te recordará exportar '+(store.settings.autoExport==='daily'?'cada día':'cada semana')+' al abrir la app. Archivo: <b>health-backup.json</b></div>':'')+
+        (store.settings.autoExport&&store.settings.autoExport!=='off'?'<div style="font-size:10px;color:var(--accent);text-align:center;margin-top:5px;font-family:var(--sans)">✓ Te recordará exportar cada semana al abrir la app. Archivo: <b>health-backup.json</b></div>':'')+
         '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.45;font-family:var(--serif);font-style:italic">En iPhone, al exportar elige <b>"Guardar en Archivos"</b> → carpeta deseada (p. ej. iCloud Drive/HEALTH o En mi iPhone/HEALTH). Guarda siempre en la misma carpeta con el mismo nombre para sobrescribir el anterior. Safari no puede escribir en una ruta fija automáticamente por seguridad de iOS.</p>'+
         // Clear data
         '<div class="env-divider"></div>'+
@@ -5510,7 +5623,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.65</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.66</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5761,8 +5874,30 @@ function deleteAll(){
 // ============= INIT =============
 window.addEventListener('error',function(e){console.warn('captured:',e.message);return true;});
 
-if(navigator.geolocation&&store.settings.autoLocation){
-  // Only request fresh location if we don't have a recent cached one (within 12h)
+// Weekly geolocation consent: ask at most once a week. If the user accepts, geolocation
+// stays enabled and is used automatically until the next weekly prompt or a manual change.
+(function(){
+  if(!navigator.geolocation)return;
+  const WEEK=7*24*3600*1000;
+  const lastAsk=parseInt(localStorage.getItem('h_geoConsentAsk')||'0');
+  const now=Date.now();
+  // If a manual/explicit choice was made less than a week ago, respect it silently.
+  if(now-lastAsk<WEEK){
+    if(store.settings.autoLocation)refreshGeoSilent();
+    return;
+  }
+  // Time to (re)ask.
+  setTimeout(function(){
+    const ok=confirm('📍 ¿Usar tu ubicación para calcular el sol y el clima automáticamente?\n\nSe mantendrá activa durante una semana; después volveré a preguntar. Puedes cambiarlo cuando quieras en Sol → Entorno.');
+    store.settings.autoLocation=!!ok;
+    saveSettings();
+    localStorage.setItem('h_geoConsentAsk',String(now));
+    if(ok)refreshGeoSilent();
+    if(currentTab==='sol'||currentTab==='panel')render();
+  },1800);
+})();
+function refreshGeoSilent(){
+  if(!navigator.geolocation||!store.settings.autoLocation)return;
   const lastGeo=parseInt(localStorage.getItem('h_lastGeoTime')||'0');
   const geoAge=Date.now()-lastGeo;
   const hasCached=store.settings.lat&&store.settings.lng;
@@ -5784,6 +5919,14 @@ if(store.settings.autoWeather){
   setTimeout(function(){detectWeather();},1200);
 }
 
+// Backup reminder is weekly by default (never daily). Migrate any old 'daily' setting.
+(function(){
+  try{
+    if(store.settings.autoExport==='daily')store.settings.autoExport='weekly';
+    if(store.settings.autoExport===undefined||store.settings.autoExport===null)store.settings.autoExport='weekly';
+    saveSettings();
+  }catch(e){}
+})();
 checkAutoExport();
 
 // Auto weather: refresh on load, on foreground, and periodically (throttled to 30 min)
