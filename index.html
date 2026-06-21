@@ -250,6 +250,11 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .nav-btn{flex:1 1 0;min-width:0;padding:10px 0;background:transparent;border:none;color:#666;font-size:10.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all 0.25s;text-align:center;letter-spacing:0.3px;font-family:var(--sans);position:relative;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nav-btn.active{background:transparent;color:var(--accent);font-weight:700;text-shadow:0 0 12px rgba(167,243,208,0.7),0 0 24px rgba(134,239,172,0.4);box-shadow:none}
 .nav-btn.active::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:18px;height:2px;border-radius:2px;background:var(--grad-primary);box-shadow:0 0 8px rgba(134,239,172,0.6)}
+/* Icons-only nav mode (toggle in Ajustes) */
+.nav-inner.nav-icons-only .nav-btn{padding:8px 0}
+.nav-btn-icon{font-size:22px;line-height:1;display:block;filter:grayscale(0.15)}
+.nav-btn.active .nav-btn-icon{filter:none;transform:translateY(-1px)}
+.nav-inner.nav-icons-only .nav-btn.active::after{bottom:0}
 
 /* MODAL */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;align-items:flex-end;justify-content:center;backdrop-filter:blur(12px);padding:0}
@@ -503,6 +508,25 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .light-hint{font-size:9.5px;color:var(--text-dim);font-style:italic;font-family:var(--serif);line-height:1.4;margin-top:4px}
 .radio-cell-icon{font-size:14px;margin-bottom:3px;display:block}
 
+/* === Compact skin/clothing/age block (inside VitD card) === */
+.skinage-compact .radio-cell{padding:5px 4px;font-size:9.5px;line-height:1.2}
+.skinage-compact .radio-cell-desc{margin-top:1px;font-size:8px;line-height:1.15}
+/* Clothing icon now sits inline, left of the % — saves vertical space */
+.skinage-compact .clothing-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.skinage-compact .clothing-cell .clothing-name{line-height:1.1}
+.skinage-compact .clothing-cell .clothing-row{display:flex;align-items:center;justify-content:center;gap:4px}
+.skinage-compact .clothing-cell .radio-cell-icon{display:inline;margin:0;font-size:12px}
+.skinage-compact .clothing-cell .clothing-pct{font-size:8.5px;color:#999;font-style:italic;text-transform:none;font-weight:400}
+.skinage-compact .clothing-cell.active .clothing-pct{color:#d1fae5}
+.skinage-compact .sub-section-label{margin:5px 0 3px}
+.skinage-compact .env-divider{margin:6px 0 4px}
+/* Age row: label + small ruleta-style stepper aligned to the right of the EDAD title */
+.skinage-compact .age-row{display:flex;align-items:center;gap:8px;margin-top:2px}
+.age-input-sm{width:62px;height:30px;background:var(--bg-soft);border:1px solid rgba(251,191,36,0.25);border-radius:9px;color:#fbbf24;font-family:var(--sans);font-size:16px;font-weight:600;text-align:center;box-sizing:border-box;-moz-appearance:textfield}
+.age-input-sm::-webkit-outer-spin-button,.age-input-sm::-webkit-inner-spin-button{opacity:1;height:26px}
+.age-label-inline{display:flex;align-items:center;gap:6px;margin-left:auto}
+.age-label-inline .age-input-sm{margin:0}
+
 /* ====== STRICT input sizing: never overflow card ====== */
 .input-group input,.input-group select,.input-group textarea{box-sizing:border-box;width:100%;max-width:100%;display:block}
 input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width:100%;min-width:0;font-size:13px;-webkit-appearance:none;appearance:none;padding:10px 10px}
@@ -530,7 +554,7 @@ input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width
 .med-wheel option{background:#16171c;color:#fff}
 .meas-toggle-btn{width:100%;margin-top:8px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-strong);border-radius:9px;color:var(--text-muted);font-family:var(--sans);font-size:11px;font-weight:600;padding:8px;cursor:pointer;transition:all 0.15s}
 .meas-toggle-btn:active{background:rgba(255,255,255,0.06)}
-.fab-train{position:fixed;right:16px;bottom:84px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#10b981,#34d399);border:none;color:#04110b;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.45),0 0 0 1px rgba(52,211,153,0.3);z-index:50;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s}
+.fab-train{position:fixed;right:16px;bottom:96px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#10b981,#34d399);border:none;color:#04110b;font-size:30px;font-weight:300;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.45),0 0 0 1px rgba(52,211,153,0.3);z-index:50;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;line-height:1;padding-bottom:2px}
 .fab-train:active{transform:scale(0.92);box-shadow:0 2px 10px rgba(16,185,129,0.5)}
 .panel-train-btn{background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.4);color:#34d399;font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0}
 .panel-train-btn:active{background:rgba(16,185,129,0.28)}
@@ -942,13 +966,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 </div>
 <div class="content" id="content"></div>
 <div class="nav-bottom">
-<div class="nav-inner">
-<button class="nav-btn active" data-tab="panel" onclick="showTab('panel',this)">Panel</button>
-<button class="nav-btn" data-tab="estado" onclick="showTab('estado',this)">Estado</button>
-<button class="nav-btn" data-tab="actividad" onclick="showTab('actividad',this)">Activ.</button>
-<button class="nav-btn" data-tab="meditacion" onclick="showTab('meditacion',this)">Medit.</button>
-<button class="nav-btn" data-tab="sol" onclick="showTab('sol',this)">Sol</button>
-</div>
+<div class="nav-inner" id="navInner"></div>
 </div>
 </div>
 
@@ -1178,7 +1196,7 @@ if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
 // Weather defaults to automatic
 if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
 // Sun + settings blocks collapsed by default (graph always visible)
-['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setloc','setsports','setsummary','setabout','setglossary','vitdAccum','vitdEstim','medprog'].forEach(function(k){
+['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog'].forEach(function(k){
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
@@ -1557,6 +1575,13 @@ function playChimeLow(volume){
     });
   }catch(e){}
 }
+// Bell/chime master level from the user's slider (0..1). Default 0.4 if unset.
+// All in-meditation sounds multiply their relative loudness by this so the slider works live.
+function bellVol(){
+  var v=(store.settings.bellVolume!=null?store.settings.bellVolume:0.4);
+  if(isNaN(v))v=0.4;
+  return Math.max(0,Math.min(1,v));
+}
 function startBgMusic(){
   stopBgMusic();
   const ctx=getAudioCtx();if(!ctx)return;
@@ -1802,13 +1827,33 @@ function updateHeaderQuote(forceNew){
   hq.innerHTML='<div class="header-quote-text">"'+escapeHTML(q.text)+'"</div><div class="header-quote-author">— '+escapeHTML(q.author)+'</div>';
 }
 
+// Bottom-nav tabs (label + emoji icon). Display mode set by store.settings.navStyle.
+var NAV_TABS=[
+  {id:'panel',label:'Panel',icon:'🏠'},
+  {id:'estado',label:'Estado',icon:'❤️'},
+  {id:'actividad',label:'Activ.',icon:'🏋️'},
+  {id:'meditacion',label:'Medit.',icon:'🧘'},
+  {id:'sol',label:'Sol',icon:'☀️'}
+];
+function renderNav(){
+  var inner=document.getElementById('navInner');
+  if(!inner)return;
+  var iconsOnly=(store.settings.navStyle==='icons');
+  inner.className='nav-inner'+(iconsOnly?' nav-icons-only':'');
+  inner.innerHTML=NAV_TABS.map(function(t){
+    var active=(currentTab===t.id)?' active':'';
+    var content=iconsOnly
+      ? '<span class="nav-btn-icon">'+t.icon+'</span>'
+      : t.label;
+    return '<button class="nav-btn'+active+'" data-tab="'+t.id+'" onclick="showTab(\''+t.id+'\',this)" title="'+t.label+'">'+content+'</button>';
+  }).join('');
+}
+
 function showTab(tab,btn){
   currentTab=tab;
   reorderMode=false;
   if(typeof collapseAllRegistros==='function')collapseAllRegistros();
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  if(btn)btn.classList.add('active');
-  else{const b=document.querySelector('[data-tab="'+tab+'"]');if(b)b.classList.add('active');}
+  renderNav();
   const ha=document.getElementById('headerActions');
   ha.innerHTML='';
   // Quote shows in the header on ALL sections now
@@ -4169,7 +4214,7 @@ function renderActividad(c){
   });
 
   // Floating quick-add button (bottom-right) to jump to "Registrar entrenamiento"
-  h+='<button class="fab-train" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">🏋️</button>';
+  h+='<button class="fab-train" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">+</button>';
 
   c.innerHTML=h;
 }
@@ -4595,7 +4640,7 @@ function startCountdown(){
   const phase=document.getElementById('medPhase');
   if(phase){phase.textContent=medPhaseLabel;phase.classList.remove('active','active-exhale');}
   updateMedControls();
-  playChime(0.3);
+  playChime(0.3*bellVol());
   medTimer=setInterval(function(){
     medCountdownVal--;
     if(medCountdownVal<=0){
@@ -4604,7 +4649,7 @@ function startCountdown(){
       startMeditation();
     }else{
       if(num){num.textContent=medCountdownVal;num.style.animation='none';void num.offsetWidth;num.style.animation='countPulse 1s ease';}
-      playChime(0.25);
+      playChime(0.25*bellVol());
     }
   },1000);
 }
@@ -4631,7 +4676,7 @@ function startMeditation(){
   medCycleTime=0;
   medOrbState='inhale';
   if(store.settings.music)startBgMusic();
-  playBell(0.45);
+  playBell(0.45*bellVol());
   const orb=document.getElementById('breathOrb');
   if(orb){orb.classList.remove('hold','exhale','exhale-color');void orb.offsetWidth;orb.classList.add('inhale');}
   medPhaseLabel='INHALA ('+medConfig.inhale+'S)';
@@ -4654,14 +4699,14 @@ function medTick(){
     if(orb){orb.classList.remove('exhale','hold','exhale-color');void orb.offsetWidth;orb.classList.add('inhale');}
     medPhaseLabel='INHALA ('+medConfig.inhale+'S)';
     if(phaseEl){phaseEl.textContent=medPhaseLabel;phaseEl.classList.remove('active-exhale');phaseEl.classList.add('active');}
-    if(store.settings.transitionSound)playChime(0.3);
+    if(store.settings.transitionSound)playChime(0.3*bellVol());
   }else if(inCycle===medConfig.inhale+1){
     // Transition to exhale
     medOrbState='exhale';
     if(orb){orb.classList.remove('inhale','hold');void orb.offsetWidth;orb.classList.add('exhale','exhale-color');}
     medPhaseLabel='EXHALA ('+medConfig.exhale+'S)';
     if(phaseEl){phaseEl.textContent=medPhaseLabel;phaseEl.classList.remove('active');phaseEl.classList.add('active-exhale');}
-    if(store.settings.transitionSound)playChimeLow(0.3);
+    if(store.settings.transitionSound)playChimeLow(0.3*bellVol());
   }
   const td=document.getElementById('medTimer');
   if(td)td.textContent=fmtTime(medTimeLeft);
@@ -4753,7 +4798,7 @@ function endMeditationEarly(){
   if(done>=10){ // only save if at least ~10s were practised
     store.meditation.push({id:Date.now(),date:today(),duration:done,inhale:medConfig.inhale,exhale:medConfig.exhale,value:done,partial:true});
     save('meditation',store.meditation);
-    playBell(0.4);
+    playBell(0.4*bellVol());
   }
   medState='idle';medTimeLeft=medConfig.total;medPhaseLabel='';
   render();
@@ -4763,8 +4808,8 @@ function finishMeditation(){
   releaseWakeLock();
   clearInterval(medTimer);
   stopBgMusic();
-  playBell(0.5);
-  setTimeout(function(){playBell(0.3);},900);
+  playBell(0.5*bellVol());
+  setTimeout(function(){playBell(0.3*bellVol());},900);
   medState='idle';
   medPhaseLabel='✨ SESIÓN COMPLETA';
   const phase=document.getElementById('medPhase');
@@ -4895,7 +4940,8 @@ function saveSunSession(obj){
 function skinClothingInner(){
   const curCloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
   const ageFactor=Math.round(vitDAgeFactor()*100);
-  return '<div class="sub-section-label">🎨 TIPO DE PIEL</div>'+
+  return '<div class="skinage-compact">'+
+    '<div class="sub-section-label">🎨 TIPO DE PIEL</div>'+
     '<div class="radio-grid" style="margin-top:4px">'+
       Object.entries(SKIN_TYPES).map(function(e){
         const k=e[0],s=e[1];
@@ -4909,16 +4955,18 @@ function skinClothingInner(){
       Object.entries(CLOTHING_LEVELS).map(function(e){
         const k=e[0],l=e[1];
         const active=(store.settings.clothing||'shorts')===k;
-        return '<div class="radio-cell '+(active?'active':'')+'" onclick="setClothing(\''+k+'\')"><span class="radio-cell-icon">'+l.icon+'</span>'+l.name+'<div class="radio-cell-desc" style="margin-top:1px">'+l.skinPct+'%</div></div>';
+        return '<div class="radio-cell clothing-cell '+(active?'active':'')+'" onclick="setClothing(\''+k+'\')"><span class="clothing-name">'+l.name+'</span><span class="clothing-row"><span class="radio-cell-icon">'+l.icon+'</span><span class="clothing-pct">'+l.skinPct+'%</span></span></div>';
       }).join('')+
     '</div>'+
     '<div class="env-divider"></div>'+
-    '<div class="sub-section-label">🎂 EDAD <span id="ageSynthLabel" style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;margin-left:auto">síntesis al '+ageFactor+'%</span></div>'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">'+
-      '<input type="number" min="1" max="120" value="'+(store.settings.age||35)+'" onchange="commitAge(this.value)" oninput="setAge(this.value)" class="age-input" placeholder="35">'+
-      '<span style="font-size:11px;color:#999;font-family:var(--sans)">años</span>'+
+    '<div class="sub-section-label">🎂 EDAD '+
+      '<span class="age-label-inline">'+
+        '<span id="ageSynthLabel" style="color:#999;font-weight:400;text-transform:none;letter-spacing:0">síntesis al '+ageFactor+'%</span>'+
+        '<input type="number" min="1" max="100" value="'+(store.settings.age||35)+'" onchange="commitAge(this.value)" oninput="setAge(this.value)" class="age-input-sm" placeholder="35">'+
+      '</span>'+
     '</div>'+
-    '<div style="font-size:9px;color:#888;font-style:italic;font-family:var(--serif);margin-top:4px;line-height:1.4">La síntesis de vitamina D disminuye ~13% por década a partir de los 20 años (depleción de 7-dehidrocolesterol cutáneo).</div>';
+    '<div style="font-size:9px;color:#888;font-style:italic;font-family:var(--serif);margin-top:4px;line-height:1.4">La síntesis de vitamina D disminuye ~13% por década a partir de los 20 años (depleción de 7-dehidrocolesterol cutáneo).</div>'+
+  '</div>';
 }
 
 function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
@@ -5098,7 +5146,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         // Piel, ropa y edad — factors that drive the calculation (placed below the timer)
         '<div class="vitd-accum-card">'+
           '<div class="vitd-accum-header" onclick="toggleEstadoBlockSimple(\'skinclothing\')">'+
-            '<span class="vitd-accum-title">🎨 Piel, ropa y edad</span>'+
+            '<span class="vitd-accum-title">🧑 Piel, ropa y edad</span>'+
             '<button class="collapse-btn">'+(store.collapsed.skinclothing?'▼':'▲')+'</button>'+
           '</div>'+
           '<div class="collapsible'+(store.collapsed.skinclothing?' collapsed':'')+'">'+
@@ -5138,12 +5186,20 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
                 '</div>'+
               '</div>';
             })()+
-            '<div class="vitd-baseline-row">'+
-              '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (ng/ml)</label><input type="number" step="0.1" id="vitDBaselineInput" class="vitd-baseline-input" value="'+(baseline||'')+'" placeholder="20" onchange="updateVitDBaseline(this.value)"></div>'+
-              '<div class="input-group" style="flex:1"><label>FECHA ANÁLISIS</label><input type="date" id="vitDBaselineDate" class="vitd-baseline-input" value="'+(store.settings.vitDBaselineDate||'')+'" onchange="updateVitDBaselineDate(this.value)"></div>'+
-              '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:34px">Reset</button>'+
+            '<div class="vitd-baseline-toggle" style="margin-top:8px">'+
+              '<div class="vitd-accum-header" onclick="toggleEstadoBlockSimple(\'vitdBaseline\')" style="padding:2px 0">'+
+                '<span class="vitd-accum-title" style="font-size:9.5px">🩸 Valor base de analítica <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;font-style:italic">(opcional)</span></span>'+
+                '<button class="collapse-btn">'+(store.collapsed.vitdBaseline?'▼':'▲')+'</button>'+
+              '</div>'+
+              '<div class="collapsible'+(store.collapsed.vitdBaseline?' collapsed':'')+'">'+
+                '<div class="vitd-baseline-row">'+
+                  '<div class="input-group" style="flex:1"><label>VALOR BASE ANALÍTICA (ng/ml)</label><input type="number" step="0.1" id="vitDBaselineInput" class="vitd-baseline-input" value="'+(baseline||'')+'" placeholder="20" onchange="updateVitDBaseline(this.value)"></div>'+
+                  '<div class="input-group" style="flex:1"><label>FECHA ANÁLISIS</label><input type="date" id="vitDBaselineDate" class="vitd-baseline-input" value="'+(store.settings.vitDBaselineDate||'')+'" onchange="updateVitDBaselineDate(this.value)"></div>'+
+                  '<button class="btn-mini-clear" onclick="resetVitDBaseline()" style="background:rgba(255,255,255,0.04);border-color:var(--border);color:var(--text-muted);align-self:flex-end;height:34px">Reset</button>'+
+                '</div>'+
+                '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel parte de tu analítica y suma el aporte del sol (cada sesión decae con vida media ~15 días). Si tu analítica es antigua, va perdiendo peso con el tiempo. Sin sol, el nivel desciende pero nunca por debajo de un suelo fisiológico (~'+VITD_FLOOR+' ng/ml) que aportan tus reservas corporales y la dieta. Indica la fecha del análisis para mayor precisión. Óptimo: 30-50 ng/ml.</p>'+
+              '</div>'+
             '</div>'+
-            '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.4;font-family:var(--serif);font-style:italic">El nivel parte de tu analítica y suma el aporte del sol (cada sesión decae con vida media ~15 días). Si tu analítica es antigua, va perdiendo peso con el tiempo. Sin sol, el nivel desciende pero nunca por debajo de un suelo fisiológico (~'+VITD_FLOOR+' ng/ml) que aportan tus reservas corporales y la dieta. Indica la fecha del análisis para mayor precisión. Óptimo: 30-50 ng/ml.</p>'+
           '</div>'+
         '</div>'+
         (store.sun.length?'<div class="vitd-expo-wrap">'+renderRegistros('sun','EXPOSICIONES',function(s){
@@ -5298,6 +5354,12 @@ function toggleAutoWeather(el){
   else render();
 }
 function setSkinType(t){store.settings.skinType=t;saveSettings();render();}
+function setNavStyle(style){
+  store.settings.navStyle=style;
+  saveSettings();
+  renderNav();
+  render();
+}
 function setClothing(c){store.settings.clothing=c;saveSettings();render();}
 function setAge(a){
   const n=parseInt(a);
@@ -5621,9 +5683,20 @@ function renderAjustes(c){
       '</div>'+
     '</div>'+
     '<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'setappearance\')"><div class="card-title-text"><span>🎨 APARIENCIA</span></div><button class="collapse-btn">'+(store.collapsed.setappearance?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(store.collapsed.setappearance?' collapsed':'')+'">'+
+        '<div class="sub-section-label" style="margin-top:2px">📱 BARRA DE NAVEGACIÓN</div>'+
+        '<div style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;font-family:var(--sans);line-height:1.5">Elige cómo se muestran los botones de la barra inferior.</div>'+
+        '<div class="radio-grid" style="grid-template-columns:1fr 1fr">'+
+          '<div class="radio-cell '+((store.settings.navStyle||'text')==='text'?'active':'')+'" onclick="setNavStyle(\'text\')">TEXTO<div class="radio-cell-desc">Panel · Estado…</div></div>'+
+          '<div class="radio-cell '+(store.settings.navStyle==='icons'?'active':'')+'" onclick="setNavStyle(\'icons\')"><span class="radio-cell-icon" style="font-size:17px">🏠</span>ICONOS<div class="radio-cell-desc">Más visual</div></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.66</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.67</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5958,6 +6031,7 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 
+renderNav();
 showTab('panel');
 </script>
 </body>
