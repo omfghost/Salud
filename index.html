@@ -407,6 +407,53 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 
 /* WEEKLY PLAN - 2 days per row */
 .weekly-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px;width:100%}
+
+/* === Weekly calendar strip (one-line day chips) === */
+.wday-strip{display:flex;gap:4px;margin-top:8px;width:100%}
+.wday-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 0 3px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);position:relative}
+.wday-chip:active{transform:scale(0.96)}
+.wday-chip-name{font-size:8.5px;font-weight:700;letter-spacing:0.4px;color:var(--text-muted);text-transform:uppercase;line-height:1.2}
+.wday-chip-num{font-size:14px;font-weight:700;color:#ddd;line-height:1.15}
+.wday-chip-dot{font-size:8px;height:9px;line-height:9px;color:var(--accent)}
+.wday-chip.today{border-color:rgba(167,243,208,0.4)}
+.wday-chip.today .wday-chip-name{color:var(--accent)}
+.wday-chip.sel{background:rgba(167,243,208,0.12);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.wday-chip.sel .wday-chip-num{color:#fff}
+.wday-chip.sel .wday-chip-name{color:var(--accent)}
+.wday-chip.done .wday-chip-dot{color:#34d399}
+.wday-chip.done .wday-chip-num{color:#34d399}
+
+/* Selected-day viewer */
+.wday-viewer{margin-top:10px;background:rgba(0,0,0,0.22);border:1px solid var(--border);border-radius:12px;padding:10px;width:100%;box-sizing:border-box}
+.wday-view-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.wday-view-date{font-family:var(--sans);font-size:11px;font-weight:600;color:#bbb;flex:1;min-width:120px}
+.wday-view-date::first-letter{text-transform:uppercase}
+.wday-view-date.is-today{color:var(--accent)}
+.wday-view-actions{display:flex;gap:6px;flex-shrink:0}
+.wday-view-btn{font-family:var(--sans);font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:8px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.03);color:#ccc;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.wday-view-btn:active{transform:scale(0.95)}
+.wday-view-btn.add{color:var(--accent);border-color:rgba(167,243,208,0.3)}
+.wday-view-btn.done.active{background:rgba(52,211,153,0.16);border-color:#34d399;color:#34d399}
+.wday-view-body{width:100%}
+.wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
+.wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
+.wday-view-empty b{color:var(--accent);font-style:normal;font-family:var(--sans)}
+.wday-view-img{position:relative;width:100%;border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:pointer;margin-bottom:6px}
+.wday-view-img img{width:100%;display:block;max-height:240px;object-fit:cover}
+.wday-view-zoom{position:absolute;bottom:6px;right:6px;width:26px;height:26px;border-radius:7px;background:rgba(0,0,0,0.6);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.wday-empty-note,.wday-view-empty-note{font-family:var(--serif);font-style:italic;font-size:11.5px;color:#777;margin-top:8px;text-align:center;padding:8px}
+
+/* Quick-fill modal rows */
+.qf-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.qf-row:last-of-type{border-bottom:none}
+.qf-day{flex-shrink:0;width:74px;font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--accent);text-transform:capitalize;line-height:1.25}
+.qf-text{flex:1;min-width:0;background:var(--bg-soft,rgba(255,255,255,0.03));border:1px solid var(--border);border-radius:8px;color:#ddd;font-family:var(--sans);font-size:12px;padding:7px 9px;resize:vertical;min-height:34px;box-sizing:border-box}
+.qf-text:focus{outline:none;border-color:rgba(167,243,208,0.4)}
+.qf-photo-btn{flex-shrink:0;width:38px;height:34px;border-radius:8px;border:1px dashed var(--border-strong);background:rgba(255,255,255,0.03);color:var(--text-muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qf-photo-btn:active{background:rgba(255,255,255,0.08)}
+.qf-thumb{flex-shrink:0;position:relative;width:46px;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer}
+.qf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.qf-thumb-x{position:absolute;top:1px;right:1px;width:16px;height:16px;border-radius:50%;border:none;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
 .day-row{display:flex;align-items:center;gap:8px;padding:9px 10px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:11px;transition:all 0.18s;cursor:pointer;width:100%;box-sizing:border-box;min-width:0;overflow:hidden}
 .day-row:active{background:rgba(167,243,208,0.04);border-color:rgba(167,243,208,0.2)}
 .day-row.disabled-day{opacity:0.4;background:rgba(255,255,255,0.01)}
@@ -556,7 +603,7 @@ input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width
 .meas-toggle-btn:active{background:rgba(255,255,255,0.06)}
 .fab-train{position:fixed;right:16px;bottom:96px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#10b981,#34d399);border:none;color:#04110b;font-size:30px;font-weight:300;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.45),0 0 0 1px rgba(52,211,153,0.3);z-index:50;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;line-height:1;padding-bottom:2px}
 .fab-train:active{transform:scale(0.92);box-shadow:0 2px 10px rgba(16,185,129,0.5)}
-.panel-train-btn{background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.4);color:#34d399;font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;padding:0}
+.panel-train-btn{background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.4);color:#34d399;font-size:13px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-weight:700;line-height:1;white-space:nowrap;flex-shrink:0;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
 .panel-train-btn:active{background:rgba(16,185,129,0.28)}
 .med-num-input input{width:32px;background:transparent;border:none;padding:0;text-align:center;font-size:14px;color:#fff;font-family:var(--sans);font-weight:500;-moz-appearance:textfield;height:auto}
 .med-num-input input::-webkit-outer-spin-button,.med-num-input input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -691,6 +738,9 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .weekly-head-actions{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
 .weekly-head-btn{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 7px;color:var(--text-muted);font-size:11px;cursor:pointer;transition:all 0.15s;line-height:1;flex-shrink:0}
 .weekly-head-btn:active{background:rgba(255,255,255,0.1)}
+.weekly-head-btn-extra{font-family:var(--sans);font-weight:700;letter-spacing:0.3px;color:#fbbf24;border-color:rgba(251,191,36,0.3)}
+.weekly-head-btn-extra.has{background:rgba(251,191,36,0.12)}
+.weekly-head-btn-extra.done{color:#34d399;border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.12)}
 .weekly-head-sync{display:flex;align-items:center;gap:4px;font-family:var(--sans);font-size:9.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px}
 .weekly-head-sync .toggle{transform:scale(0.82)}
 .weekly-cal-toggle .toggle{width:36px;height:20px}
@@ -1053,6 +1103,20 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 </div>
 </div>
 
+<div class="modal" id="modal-quickFill">
+<div class="modal-content">
+<div class="modal-handle"></div>
+<div class="modal-header"><div class="modal-title">Carga rápida semanal</div><button class="modal-close" onclick="closeQuickFill()">×</button></div>
+<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;font-family:var(--sans);line-height:1.5">Rellena el texto o adjunta una foto a varios días de una vez. Pulsa <b>Guardar todo</b> al terminar.</div>
+<div id="quickFillList"></div>
+<input type="file" id="qfImageInput" accept="image/*" style="display:none" onchange="handleQfImage(event)">
+<div class="day-modal-actions">
+<button class="btn btn-secondary" onclick="closeQuickFill()">Cancelar</button>
+<button class="btn btn-primary" onclick="saveQuickFill()">Guardar todo</button>
+</div>
+</div>
+</div>
+
 <div class="modal" id="modal-dayEditor">
 <div class="modal-content">
 <div class="modal-handle"></div>
@@ -1200,7 +1264,7 @@ if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
-function save(key,val){store[key]=val;try{localStorage.setItem('h_'+key,JSON.stringify(val));}catch(e){console.warn('save err',e);}}
+function save(key,val){store[key]=val;try{localStorage.setItem('h_'+key,JSON.stringify(val));}catch(e){console.warn('save err',e);}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 
 // ============ VIDEO STORAGE (IndexedDB) ============
 // Videos can be large (iPhone clips >1min), which overflows localStorage's ~5MB quota.
@@ -1255,12 +1319,12 @@ function deleteVideoBlob(ref){
     });
   });
 }
-function saveSettings(){try{localStorage.setItem('h_settings',JSON.stringify(store.settings));}catch(e){}}
-function saveWidgets(){try{localStorage.setItem('h_widgets',JSON.stringify(store.widgets));}catch(e){}}
-function saveCollapsed(){try{localStorage.setItem('h_collapsed',JSON.stringify(store.collapsed));localStorage.setItem('h_panelCollapsed',JSON.stringify(store.panelCollapsed));}catch(e){}}
-function saveWeekly(){try{localStorage.setItem('h_weeklyPlan',JSON.stringify(store.weeklyPlan));}catch(e){}}
-function saveActiveDays(){try{localStorage.setItem('h_activeDays',JSON.stringify(store.activeDays));}catch(e){}}
-function saveEstadoOrder(){try{localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));}catch(e){}}
+function saveSettings(){try{localStorage.setItem('h_settings',JSON.stringify(store.settings));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveWidgets(){try{localStorage.setItem('h_widgets',JSON.stringify(store.widgets));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveCollapsed(){try{localStorage.setItem('h_collapsed',JSON.stringify(store.collapsed));localStorage.setItem('h_panelCollapsed',JSON.stringify(store.panelCollapsed));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveWeekly(){try{localStorage.setItem('h_weeklyPlan',JSON.stringify(store.weeklyPlan));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveActiveDays(){try{localStorage.setItem('h_activeDays',JSON.stringify(store.activeDays));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveEstadoOrder(){try{localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 
 // Migrate old estadoOrder: convert weight+measurements -> body, add sleep
 (function migrateWidgets(){
@@ -1306,8 +1370,8 @@ function saveEstadoOrder(){try{localStorage.setItem('h_estadoOrder',JSON.stringi
   ['sport','records','wods'].forEach(function(id){store.collapsed[id]=true;});
   saveCollapsed();
 })();
-function saveSportParams(){try{localStorage.setItem('h_sportParams',JSON.stringify(store.sportParams));}catch(e){}}
-function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(store.solOrder));}catch(e){}}
+function saveSportParams(){try{localStorage.setItem('h_sportParams',JSON.stringify(store.sportParams));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveSolOrder(){try{localStorage.setItem('h_solOrder',JSON.stringify(store.solOrder));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 
 // Migrate old solOrder: fuse sunweather+sunloc → environment, skintype+clothing → skinclothing
 (function migrateSolOrder(){
@@ -1664,6 +1728,38 @@ function todayDot(key){
   return hasTodayEntry(key)?'<span class="today-dot" title="Registrado hoy">●</span>':'';
 }
 function fmtDate(d){return new Date(d).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});}
+
+// === Weekly calendar helpers (Mon-first) ===
+// Map JS getDay() (0=Sun..6=Sat) to our Mon-first dayId order.
+var WEEKDAY_IDS=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+function todayDayId(){
+  var js=new Date().getDay();          // 0=Sun..6=Sat
+  var idx=(js===0)?6:js-1;             // Mon-first index 0..6
+  return WEEKDAY_IDS[idx];
+}
+// Returns the Date object for the Monday of the current week.
+function mondayOfThisWeek(){
+  var d=new Date();
+  d.setHours(0,0,0,0);
+  var js=d.getDay();
+  var diff=(js===0)?-6:1-js;           // shift back to Monday
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+// Returns the calendar Date for a given weekday id within the current week.
+function dateForWeekday(dayId){
+  var idx=WEEKDAY_IDS.indexOf(dayId);
+  if(idx<0)return null;
+  var mon=mondayOfThisWeek();
+  mon.setDate(mon.getDate()+idx);
+  return mon;
+}
+// Currently selected weekday in the weekly plan (defaults to today).
+var selectedWeekDay=todayDayId();
+function selectWeekDay(dayId){
+  selectedWeekDay=dayId;
+  render();
+}
 function filterByRange(data,range){if(range==='all')return data;const days={'1w':7,'2w':14,'1m':30,'2m':60,'6m':180,'1y':365}[range]||30;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);return data.filter(function(d){return new Date(d.date)>=cutoff;});}
 function avg(arr,key){if(!arr.length)return 0;const vals=arr.map(function(d){return parseFloat(d[key]||0);}).filter(function(v){return !isNaN(v);});if(!vals.length)return 0;return(vals.reduce(function(s,v){return s+v;},0)/vals.length).toFixed(1);}
 function fmtHour(h){h=((h%24)+24)%24;const hours=Math.floor(h);const mins=Math.round((h-Math.floor(h))*60);return (hours<10?'0':'')+hours+':'+(mins<10?'0':'')+mins;}
@@ -2686,7 +2782,7 @@ function renderPanel(c){
   pBlocks.weekly='<div class="panel-section-title">'+
     '<span>ENTRENAMIENTOS</span>'+
     '<div style="display:flex;align-items:center;gap:4px">'+
-      '<button class="panel-train-btn" onclick="quickAddTraining()" title="Registrar entrenamiento">🏋️</button>'+
+      '<button class="panel-train-btn" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">+</button>'+
       '<button class="panel-go-arrow" onclick="showTab(\'actividad\')" title="Ir a actividad">→</button>'+
       '<button class="collapse-btn" onclick="togglePanelSection(\'weeklyPanel\')">'+(weeklyCollapsed?'▼':'▲')+'</button>'+
     '</div>'+
@@ -2770,7 +2866,7 @@ function renderPanel(c){
 let widgetReorderMode=false;
 let panelReorderMode=false;
 function togglePanelReorder(){panelReorderMode=!panelReorderMode;render();}
-function savePanelOrder(){try{localStorage.setItem('h_panelOrder',JSON.stringify(store.panelOrder));}catch(e){}}
+function savePanelOrder(){try{localStorage.setItem('h_panelOrder',JSON.stringify(store.panelOrder));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function movePanelBlock(idx,dir){
   const ni=idx+dir;
   if(ni<0||ni>=store.panelOrder.length)return;
@@ -3038,7 +3134,7 @@ function moveEstadoBlock(idx,dir){
   render();
 }
 let actReorderMode=false;
-function saveActivityOrder(){try{localStorage.setItem('h_activityOrder',JSON.stringify(store.activityOrder));}catch(e){}}
+function saveActivityOrder(){try{localStorage.setItem('h_activityOrder',JSON.stringify(store.activityOrder));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function toggleActReorder(){actReorderMode=!actReorderMode;render();}
 function moveActBlock(idx,dir){
   const newIdx=idx+dir;
@@ -3999,54 +4095,86 @@ function renderActividad(c){
   const actBlocks={};
   let _bs;
 
-  // WEEKLY PLAN
+  // WEEKLY PLAN — compact calendar-style strip + selected-day viewer
   _bs=h.length;
-  // Day list including the special "extra" day at the end (after sunday)
-  const WEEKLY_DAYS=DAY_NAMES.concat([{id:'extra',name:'T. Extra',short:'T+',isExtra:true}]);
+  const todayId=todayDayId();
+  // Active weekday chips (T. Extra is handled separately, below the strip)
+  const activeWeekdays=DAY_NAMES.filter(function(d){return store.activeDays[d.id]!==false;});
+  // Make sure the selected day is valid (still active); otherwise fall back to today or first active.
+  if(activeWeekdays.length&&!activeWeekdays.some(function(d){return d.id===selectedWeekDay;})){
+    selectedWeekDay=activeWeekdays.some(function(d){return d.id===todayId;})?todayId:activeWeekdays[0].id;
+  }
+  const SHORT_DAY={monday:'L',tuesday:'M',wednesday:'X',thursday:'J',friday:'V',saturday:'S',sunday:'D'};
+
+  // Build the day-chips strip
+  let chips=activeWeekdays.map(function(d){
+    const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
+    const completed=data.done===true;
+    const has=!!((data.text&&data.text.trim())||data.image);
+    const isToday=d.id===todayId;
+    const isSel=d.id===selectedWeekDay;
+    const dt=dateForWeekday(d.id);
+    const dayNum=dt?dt.getDate():'';
+    return '<button class="wday-chip'+(isSel?' sel':'')+(isToday?' today':'')+(completed?' done':'')+'" onclick="selectWeekDay(\''+d.id+'\')">'+
+      '<span class="wday-chip-name">'+SHORT_DAY[d.id]+'</span>'+
+      '<span class="wday-chip-num">'+dayNum+'</span>'+
+      '<span class="wday-chip-dot">'+(completed?'✓':(has?'•':''))+'</span>'+
+    '</button>';
+  }).join('');
+
+  // Selected-day viewer panel
+  let viewer='';
+  if(activeWeekdays.length){
+    const sd=DAY_NAMES.find(function(d){return d.id===selectedWeekDay;})||activeWeekdays[0];
+    const sdData=store.weeklyPlan[sd.id]||{text:'',image:null,done:false};
+    const sdCompleted=sdData.done===true;
+    const sdHasText=!!(sdData.text&&sdData.text.trim());
+    const sdHasImage=!!sdData.image;
+    const sdDate=dateForWeekday(sd.id);
+    const sdDateLabel=sdDate?sdDate.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}):sd.name;
+    let body;
+    if(sdHasImage){
+      body='<div class="wday-view-img" onclick="openImageViewer(\''+sd.id+'\',\'actividad\')"><img src="'+sdData.image+'"><span class="wday-view-zoom">⤢</span></div>'+
+        (sdHasText?'<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>':'');
+    }else if(sdHasText){
+      body='<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>';
+    }else{
+      body='<div class="wday-view-empty" onclick="openDayEditor(\''+sd.id+'\')">Sin entrenamiento. Pulsa <b>+ Añadir</b> para cargar foto o texto.</div>';
+    }
+    viewer='<div class="wday-viewer">'+
+      '<div class="wday-view-head">'+
+        '<span class="wday-view-date'+(sd.id===todayId?' is-today':'')+'">'+sdDateLabel+(sd.id===todayId?' · HOY':'')+'</span>'+
+        '<div class="wday-view-actions">'+
+          '<button class="wday-view-btn add" onclick="openDayEditor(\''+sd.id+'\')" title="Añadir o editar">＋ '+(sdHasText||sdHasImage?'Editar':'Añadir')+'</button>'+
+          '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado">'+(sdCompleted?'✓ Hecho':'○ Marcar')+'</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="wday-view-body">'+body+'</div>'+
+    '</div>';
+  }
+
+  // T. Extra state — now shown as a button in the header (T+), not as a bottom box.
+  const exData=store.weeklyPlan.extra||{text:'',image:null,done:false};
+  const exCompleted=exData.done===true;
+  const exHasText=!!(exData.text&&exData.text.trim());
+  const exHasImage=!!exData.image;
+
   h+='<div class="card">'+
     '<div class="card-title weekly-card-title" onclick="toggleEstadoBlock(\'weekly\')">'+
       '<div class="card-title-text"><span>📅 '+(weeklyCollapsed?'PROGRAMACIÓN SEMANAL':'SEMANA')+'</span></div>'+
-      // When expanded, show action buttons in the header (matching the collapse arrow style)
       (!weeklyCollapsed?
         '<div class="weekly-head-actions" onclick="event.stopPropagation()">'+
+          (store.activeDays.extra!==false?'<button class="weekly-head-btn weekly-head-btn-extra'+(exHasText||exHasImage?' has':'')+(exCompleted?' done':'')+'" onclick="openDayEditor(\'extra\')" title="Entrenamiento extra (T. Extra)">T+</button>':'')+
+          '<button class="weekly-head-btn" onclick="openQuickFill()" title="Carga rápida (foto/texto para varios días)">📥</button>'+
           '<button class="weekly-head-btn" onclick="openModal(\'manageDays\');setTimeout(renderManageDays,30)" title="Configurar días">⚙</button>'+
           '<button class="weekly-head-btn" onclick="clearAllWeeklyDays()" title="Limpiar todos los días">🧹</button>'+
-          '<div class="weekly-head-sync" title="Sincronizar con calendario">'+
-            '<span>Sincr.</span>'+
-            '<div class="toggle '+(store.weeklyPlan.calendarSync?'active':'')+'" onclick="toggleCalendarSync(this)"><div class="toggle-handle"></div></div>'+
-          '</div>'+
         '</div>'
       :'')+
       '<button class="collapse-btn" onclick="event.stopPropagation();toggleEstadoBlock(\'weekly\')">'+(weeklyCollapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(weeklyCollapsed?' collapsed':'')+'">'+
-      '<div class="weekly-plan-grid">'+
-        WEEKLY_DAYS.filter(function(d){return store.activeDays[d.id]!==false;}).map(function(d){
-          const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
-          const completed=data.done===true;
-          const hasText=!!(data.text&&data.text.trim());
-          const hasImage=!!data.image;
-          let content;
-          if(hasImage){
-            content='<div class="day-row-center day-row-img-center" onclick="event.stopPropagation();openImageViewer(\''+d.id+'\',\'actividad\')">'+
-              '<div class="day-thumb-centered"><img src="'+data.image+'"></div>'+
-            '</div>'+
-            (hasText?'<button class="day-clear-text-btn" onclick="event.stopPropagation();clearDayText(\''+d.id+'\')" title="Borrar texto">✕</button>':'');
-          }else{
-            content='<div class="day-row-center" onclick="openDayEditor(\''+d.id+'\')">'+
-              (hasText
-                ?'<span class="day-row-text">'+escapeHTML(data.text.substring(0,30))+(data.text.length>30?'…':'')+'</span>'
-                :'<span class="day-row-text empty">+ Añadir entrenamiento</span>')+
-            '</div>'+
-            (hasText?'<button class="day-clear-text-btn" onclick="event.stopPropagation();clearDayText(\''+d.id+'\')" title="Borrar texto">✕</button>':'');
-          }
-          return '<div class="day-row '+(completed?'day-done':'')+(d.isExtra?' day-row-extra':'')+'">'+
-            '<div class="day-label'+(d.isExtra?' day-label-extra':'')+'" onclick="openDayEditor(\''+d.id+'\')">'+d.short+'</div>'+
-            content+
-            '<button class="day-complete-btn '+(completed?'active':'')+'" onclick="event.stopPropagation();toggleDayDone(\''+d.id+'\')" title="'+(completed?'Completado':'Marcar como completado')+'">'+(completed?'✓':'○')+'</button>'+
-          '</div>';
-        }).join('')+
-      '</div>'+
+      (activeWeekdays.length?'<div class="wday-strip">'+chips+'</div>':'<div class="wday-empty-note">No hay días activos. Usa ⚙ para configurarlos.</div>')+
+      viewer+
     '</div>'+
   '</div>';
   actBlocks.weekly=h.slice(_bs);h=h.slice(0,_bs);
@@ -4392,7 +4520,85 @@ function handleDayImage(e){
   reader.readAsDataURL(file);
 }
 function clearDayImage(){editingImageData=null;refreshDayImagePreview();document.getElementById('dayImageInput').value='';}
-function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;store.weeklyPlan[editingDayId]={text:text,image:editingImageData};saveWeekly();closeDayEditor();render();}
+function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;const prev=store.weeklyPlan[editingDayId]||{};store.weeklyPlan[editingDayId]={text:text,image:editingImageData,done:prev.done===true};saveWeekly();closeDayEditor();render();}
+
+// === Quick fill: edit text/photo for several days at once ===
+var quickFillBuf={};   // {dayId:{text,image}} staged edits, applied on save
+function quickFillDays(){
+  // Active weekdays + T. Extra (if active)
+  var list=DAY_NAMES.filter(function(d){return store.activeDays[d.id]!==false;}).slice();
+  if(store.activeDays.extra!==false)list.push({id:'extra',name:'T. Extra',short:'T+'});
+  return list;
+}
+function openQuickFill(){
+  quickFillBuf={};
+  quickFillDays().forEach(function(d){
+    var data=store.weeklyPlan[d.id]||{text:'',image:null};
+    quickFillBuf[d.id]={text:data.text||'',image:data.image||null};
+  });
+  renderQuickFill();
+  document.getElementById('modal-quickFill').classList.add('active');
+}
+function closeQuickFill(){document.getElementById('modal-quickFill').classList.remove('active');quickFillBuf={};}
+function renderQuickFill(){
+  var box=document.getElementById('quickFillList');
+  if(!box)return;
+  box.innerHTML=quickFillDays().map(function(d){
+    var buf=quickFillBuf[d.id]||{text:'',image:null};
+    var dt=(d.id==='extra')?null:dateForWeekday(d.id);
+    var label=(d.id==='extra')?'T. Extra':(d.name+(dt?' '+dt.getDate():''));
+    var thumb=buf.image
+      ? '<div class="qf-thumb" onclick="openImageViewer(quickFillBuf[\''+d.id+'\'].image,\'quickfill\')"><img src="'+buf.image+'"><button class="qf-thumb-x" onclick="event.stopPropagation();qfClearImage(\''+d.id+'\')" title="Quitar foto">✕</button></div>'
+      : '<button class="qf-photo-btn" onclick="qfPickImage(\''+d.id+'\')" title="Adjuntar foto">📷</button>';
+    return '<div class="qf-row">'+
+      '<div class="qf-day">'+label+'</div>'+
+      '<textarea class="qf-text" data-day="'+d.id+'" rows="1" placeholder="Entrenamiento..." oninput="qfSyncText(this)">'+escapeHTML(buf.text)+'</textarea>'+
+      thumb+
+    '</div>';
+  }).join('');
+}
+function qfSyncText(el){
+  var id=el.getAttribute('data-day');
+  if(quickFillBuf[id])quickFillBuf[id].text=el.value;
+}
+var _qfTargetDay=null;
+function qfPickImage(dayId){
+  _qfTargetDay=dayId;
+  var inp=document.getElementById('qfImageInput');
+  inp.value='';
+  inp.click();
+}
+function handleQfImage(e){
+  var file=e.target.files[0];if(!file||!_qfTargetDay)return;
+  var dayId=_qfTargetDay;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var maxDim=1024,w=img.width,h=img.height;
+      if(w>h&&w>maxDim){h=h*(maxDim/w);w=maxDim;}
+      else if(h>maxDim){w=w*(maxDim/h);h=maxDim;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      if(quickFillBuf[dayId])quickFillBuf[dayId].image=canvas.toDataURL('image/jpeg',0.82);
+      renderQuickFill();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function qfClearImage(dayId){if(quickFillBuf[dayId])quickFillBuf[dayId].image=null;renderQuickFill();}
+function saveQuickFill(){
+  Object.keys(quickFillBuf).forEach(function(id){
+    var prev=store.weeklyPlan[id]||{};
+    var buf=quickFillBuf[id];
+    store.weeklyPlan[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
+  });
+  saveWeekly();
+  closeQuickFill();
+  render();
+}
 var imageViewerOrigin=null;
 var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
 function openImageViewer(srcOrDayId,origin){
@@ -5602,6 +5808,36 @@ function renderAjustes(c){
           '<input type="text" id="gdriveClientIdInput" placeholder="Tu Client ID de Google (...apps.googleusercontent.com)" style="font-size:11px;margin-bottom:6px">'+
           '<button class="btn btn-primary" onclick="saveGdriveConfig()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa">☁️ Conectar Google Drive</button>'
         )+
+        // Firebase real-time cloud sync
+        '<div class="env-divider"></div>'+
+        '<div class="sub-section-label" style="margin-top:2px">🔥 SINCRONIZACIÓN EN LA NUBE</div>'+
+        (function(){
+          const cfg=fbGetConfig();
+          if(!cfg){
+            return '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Guarda tus datos online y sincronízalos al instante entre dispositivos (gratis con Firebase de Google). <span class="fast-time-set-btn" onclick="showFirebaseHelp()">Ver cómo →</span></p>'+
+              '<textarea id="fbConfigInput" placeholder=\'Pega aquí tu firebaseConfig { apiKey: "...", projectId: "..." }\' style="width:100%;box-sizing:border-box;font-size:11px;font-family:monospace;min-height:90px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:#ddd;padding:8px;margin-bottom:6px;resize:vertical"></textarea>'+
+              '<button class="btn btn-primary" onclick="fbSaveConfig()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c">🔥 Conectar Firebase</button>';
+          }
+          // Config present
+          let html='';
+          if(FB.user){
+            const who=FB.user.email||FB.user.displayName||'cuenta';
+            html+='<div style="font-size:11px;color:var(--accent);margin:2px 0 6px;font-family:var(--sans)">✓ Sesión iniciada como <b>'+escapeHTML(who)+'</b></div>'+
+              '<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">Conectado · sincronización activa</div>'+
+              '<button class="btn btn-primary" onclick="fbPushNow()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c;margin-bottom:6px">☁️ Forzar guardado ahora</button>'+
+              '<button class="btn btn-secondary" onclick="fbSignOut()" style="font-size:11px;padding:6px;margin-bottom:6px">Cerrar sesión</button>';
+          }else{
+            html+='<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">Configurado · inicia sesión para sincronizar</div>'+
+              '<button class="btn btn-primary" onclick="fbLoginGoogle()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa;margin-bottom:6px">Iniciar sesión con Google</button>'+
+              '<div style="font-size:10px;color:var(--text-dim);text-align:center;margin:2px 0 6px;font-family:var(--sans)">— o con email —</div>'+
+              '<input type="email" id="fbEmail" placeholder="Email" autocomplete="username" style="font-size:12px;margin-bottom:5px">'+
+              '<input type="password" id="fbPass" placeholder="Contraseña" autocomplete="current-password" style="font-size:12px;margin-bottom:6px">'+
+              '<button class="btn btn-primary" onclick="fbLoginEmail()" style="margin-bottom:6px">Entrar / Crear cuenta</button>';
+          }
+          html+='<button class="btn btn-secondary" onclick="fbClearConfig()" style="font-size:11px;padding:6px;color:var(--text-dim)">Desconectar nube</button>'+
+            '<p style="font-size:9px;color:var(--text-dim);margin-top:6px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan en tu propio proyecto de Firebase, vinculados a tu cuenta. Cada cambio se sube al instante y se recibe en tiempo real en tus otros dispositivos.</p>';
+          return html;
+        })()+
         // Scheduled auto-export
         '<div class="env-divider"></div>'+
         '<div class="sub-section-label" style="margin-top:2px">⏱️ EXPORTACIÓN AUTOMÁTICA</div>'+
@@ -5696,10 +5932,192 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Todos los datos se guardan localmente. 100% privado, sin servidores, funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 17.67</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 18</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
+}
+
+// ============================================================
+//  FIREBASE CLOUD SYNC (Firestore) — optional, free, real-time
+// ============================================================
+// Data model: users/{uid}/backup/main  holds the full buildExportData() JSON.
+// Up-sync is debounced ~1.2s after each save(); down-sync is live via onSnapshot.
+var FB={app:null,auth:null,db:null,ready:false,user:null,unsub:null,
+        saveTimer:null,applyingRemote:false,lastPushedAt:0,status:'off',mods:null};
+
+function fbGetConfig(){
+  try{return JSON.parse(localStorage.getItem('h_fbConfig')||'null');}catch(e){return null;}
+}
+function fbSetStatus(s,msg){
+  FB.status=s;
+  const el=document.getElementById('fbStatusLine');
+  if(el){
+    const map={off:'',connecting:'Conectando…',ready:'Conectado · sincronización activa',
+               syncing:'Sincronizando…',synced:'✓ Sincronizado',error:(msg||'Error'),
+               nouser:'Configurado · inicia sesión para sincronizar'};
+    el.textContent=map[s]||'';
+    el.style.color=(s==='error')?'#f87171':(s==='synced'||s==='ready')?'var(--accent)':'var(--text-muted)';
+  }
+}
+// Dynamically load the Firebase modular SDK (browser ESM) once.
+function fbLoadSDK(){
+  if(FB.mods)return Promise.resolve(FB.mods);
+  return Promise.all([
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')
+  ]).then(function(m){
+    FB.mods={app:m[0],auth:m[1],fs:m[2]};
+    return FB.mods;
+  });
+}
+// Initialise Firebase from the saved config; wires up auth-state listener.
+function fbInit(){
+  const cfg=fbGetConfig();
+  if(!cfg){fbSetStatus('off');return Promise.resolve(false);}
+  fbSetStatus('connecting');
+  return fbLoadSDK().then(function(m){
+    if(!FB.app){
+      FB.app=m.app.initializeApp(cfg);
+      FB.auth=m.auth.getAuth(FB.app);
+      FB.db=m.fs.getFirestore(FB.app);
+      // Keep local cache so it works offline too.
+      try{m.fs.enableIndexedDbPersistence(FB.db);}catch(e){}
+    }
+    FB.ready=true;
+    m.auth.onAuthStateChanged(FB.auth,function(user){
+      FB.user=user;
+      if(user){
+        fbSetStatus('ready');
+        fbStartRealtime();
+      }else{
+        fbStopRealtime();
+        fbSetStatus('nouser');
+      }
+      if(currentTab==='ajustes')render();
+    });
+    return true;
+  }).catch(function(err){
+    console.warn('fbInit',err);
+    fbSetStatus('error','No se pudo iniciar Firebase. Revisa la configuración.');
+    return false;
+  });
+}
+// Save the pasted config, then initialise.
+function fbSaveConfig(){
+  const el=document.getElementById('fbConfigInput');
+  if(!el)return;
+  let raw=(el.value||'').trim();
+  if(!raw){alert('Pega la configuración de Firebase (el objeto firebaseConfig).');return;}
+  // Accept either pure JSON or the JS snippet "const firebaseConfig = { ... };"
+  let cfg=null;
+  try{
+    const m=raw.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('no object');
+    let objText=m[0];
+    // Convert JS object (unquoted keys / single quotes) to strict JSON.
+    objText=objText.replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g,'$1"$2":').replace(/'/g,'"').replace(/,(\s*})/g,'$1');
+    cfg=JSON.parse(objText);
+  }catch(e){alert('No pude leer la configuración. Copia el bloque firebaseConfig completo, con las llaves { }.');return;}
+  if(!cfg.apiKey||!cfg.projectId){alert('La configuración no parece válida (falta apiKey o projectId).');return;}
+  localStorage.setItem('h_fbConfig',JSON.stringify(cfg));
+  FB.app=null;FB.ready=false; // force re-init
+  fbInit().then(function(ok){if(ok){render();}});
+}
+function fbClearConfig(){
+  if(!confirm('¿Desconectar la sincronización en la nube? Tus datos locales se mantienen.'))return;
+  fbSignOut(true);
+  localStorage.removeItem('h_fbConfig');
+  FB.app=null;FB.ready=false;FB.user=null;
+  fbSetStatus('off');
+  render();
+}
+// --- Auth ---
+function fbLoginGoogle(){
+  fbEnsureInit().then(function(){
+    const m=FB.mods.auth;
+    const provider=new m.GoogleAuthProvider();
+    m.signInWithPopup(FB.auth,provider).catch(function(err){
+      if(err&&/popup/i.test(err.code||'')){
+        // Some in-app/iOS browsers block popups → fall back to redirect.
+        m.signInWithRedirect(FB.auth,provider);
+      }else{
+        alert('No se pudo iniciar sesión con Google: '+(err.message||err.code||err));
+      }
+    });
+  });
+}
+function fbLoginEmail(){
+  const e=document.getElementById('fbEmail'),p=document.getElementById('fbPass');
+  if(!e||!p)return;
+  const email=(e.value||'').trim(),pass=(p.value||'').trim();
+  if(!email||!pass){alert('Escribe tu email y contraseña.');return;}
+  fbEnsureInit().then(function(){
+    const m=FB.mods.auth;
+    m.signInWithEmailAndPassword(FB.auth,email,pass).catch(function(err){
+      // If the account doesn't exist yet, offer to create it.
+      if(/user-not-found|invalid-credential/i.test(err.code||'')){
+        if(confirm('No existe una cuenta con ese email (o la contraseña no coincide). ¿Crear una cuenta nueva con estos datos?')){
+          m.createUserWithEmailAndPassword(FB.auth,email,pass).catch(function(e2){
+            alert('No se pudo crear la cuenta: '+(e2.message||e2.code||e2));
+          });
+        }
+      }else{
+        alert('No se pudo iniciar sesión: '+(err.message||err.code||err));
+      }
+    });
+  });
+}
+function fbSignOut(silent){
+  if(FB.auth&&FB.mods){FB.mods.auth.signOut(FB.auth).catch(function(){});}
+  fbStopRealtime();
+  if(!silent)render();
+}
+function fbEnsureInit(){
+  if(FB.ready&&FB.mods)return Promise.resolve(true);
+  return fbInit();
+}
+// --- Realtime down-sync ---
+function fbDocRef(){
+  if(!FB.user)return null;
+  const fs=FB.mods.fs;
+  return fs.doc(FB.db,'users',FB.user.uid,'backup','main');
+}
+function fbStartRealtime(){
+  fbStopRealtime();
+  const ref=fbDocRef();if(!ref)return;
+  const fs=FB.mods.fs;
+  FB.unsub=fs.onSnapshot(ref,function(snap){
+    if(!snap.exists())return;
+    const d=snap.data();
+    if(!d||!d.data)return;
+    // Ignore the echo of our own just-pushed write.
+    if(d.updatedAt&&Math.abs(d.updatedAt-FB.lastPushedAt)<1500)return;
+    FB.applyingRemote=true;
+    try{
+      applyImportedData(d.data);
+      render();
+      fbSetStatus('synced');
+    }finally{FB.applyingRemote=false;}
+  },function(err){console.warn('snapshot',err);fbSetStatus('error','Error de sincronización');});
+}
+function fbStopRealtime(){if(FB.unsub){try{FB.unsub();}catch(e){}FB.unsub=null;}}
+// --- Up-sync (debounced) ---
+function fbScheduleSync(){
+  if(!FB.user||!FB.ready||FB.applyingRemote)return;
+  fbSetStatus('syncing');
+  clearTimeout(FB.saveTimer);
+  FB.saveTimer=setTimeout(fbPushNow,1200);
+}
+function fbPushNow(){
+  const ref=fbDocRef();if(!ref)return;
+  const fs=FB.mods.fs;
+  const ts=Date.now();
+  FB.lastPushedAt=ts;
+  fs.setDoc(ref,{data:buildExportData(),updatedAt:ts}).then(function(){
+    fbSetStatus('synced');
+  }).catch(function(err){console.warn('push',err);fbSetStatus('error','No se pudo guardar en la nube');});
 }
 
 function buildExportData(){
@@ -5735,6 +6153,9 @@ let _gdriveToken=null,_gdriveTokenExp=0,_gisLoaded=false,_gisClient=null;
 
 function showDriveHelp(){
   alert('Cómo conectar Google Drive:\n\n1. Entra en console.cloud.google.com y crea un proyecto (gratis).\n2. En "APIs y servicios" → "Biblioteca", activa "Google Drive API".\n3. En "Credenciales", crea un "ID de cliente de OAuth 2.0" de tipo "Aplicación web".\n4. En "Orígenes autorizados de JavaScript" añade la dirección donde abres la app (p. ej. https://tuusuario.github.io).\n5. Copia el "ID de cliente" (termina en .apps.googleusercontent.com) y pégalo aquí.\n\nTus datos se guardan en TU Drive; la app solo accede a los archivos que ella misma crea.');
+}
+function showFirebaseHelp(){
+  alert('Cómo activar la sincronización en la nube (gratis, ~5 min):\n\n1. Entra en console.firebase.google.com con tu cuenta de Google.\n2. "Añadir proyecto" → ponle un nombre (p. ej. health-personal).\n3. Menú "Compilación" → "Firestore Database" → "Crear base de datos" (modo producción).\n4. En Firestore → pestaña "Reglas", pega:\n\n   rules_version = \'2\';\n   service cloud.firestore {\n     match /databases/{database}/documents {\n       match /users/{uid}/{doc=**} {\n         allow read, write: if request.auth != null && request.auth.uid == uid;\n       }\n     }\n   }\n\n5. Menú "Compilación" → "Authentication" → "Comenzar" → activa "Google" y "Correo electrónico/contraseña".\n6. Rueda dentada (⚙) → "Configuración del proyecto" → baja a "Tus apps" → icono Web </>. Registra una app.\n7. Te dará un bloque "const firebaseConfig = { ... }". Cópialo ENTERO y pégalo aquí.\n\nTus datos quedan en TU proyecto, bajo tu cuenta. Nadie más puede leerlos.');
 }
 
 function saveGdriveConfig(){
@@ -5853,6 +6274,32 @@ function exportToDrive(silent){
   });
 }
 
+// Apply a parsed data object into the store + localStorage. Reused by file import AND cloud sync.
+// Returns the imported VitD formula tag (or null) so callers can run migrations if needed.
+function applyImportedData(d){
+  const importedFormula=(d._meta&&d._meta.vitdFormula)?d._meta.vitdFormula:null;
+  Object.keys(d).forEach(function(k){
+    if(k==='_meta')return;
+    if(d[k]!==undefined){
+      store[k]=d[k];
+      if(k==='vo2max')localStorage.setItem('h_vo2max',d[k]);
+      else if(k==='settings')saveSettings();
+      else if(k==='widgets')saveWidgets();
+      else if(k==='weeklyPlan')saveWeekly();
+      else if(k==='activeDays')saveActiveDays();
+      else if(k==='estadoOrder')saveEstadoOrder();
+      else if(k==='solOrder')saveSolOrder();
+      else if(k==='activityOrder')saveActivityOrder();
+      else if(k==='panelOrder')savePanelOrder();
+      else if(k==='lightLog')save('lightLog',d[k]);
+      else if(k==='sportParams')saveSportParams();
+      else if(k==='collapsed'||k==='panelCollapsed')saveCollapsed();
+      else localStorage.setItem('h_'+k,JSON.stringify(d[k]));
+    }
+  });
+  return importedFormula;
+}
+
 function importData(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -5860,26 +6307,7 @@ function importData(e){
     try{
       const d=JSON.parse(ev.target.result);
       // Detect whether the imported data already uses the v32 VitD formula.
-      const importedFormula=(d._meta&&d._meta.vitdFormula)?d._meta.vitdFormula:null;
-      Object.keys(d).forEach(function(k){
-        if(k==='_meta')return;
-        if(d[k]!==undefined){
-          store[k]=d[k];
-          if(k==='vo2max')localStorage.setItem('h_vo2max',d[k]);
-          else if(k==='settings')saveSettings();
-          else if(k==='widgets')saveWidgets();
-          else if(k==='weeklyPlan')saveWeekly();
-          else if(k==='activeDays')saveActiveDays();
-          else if(k==='estadoOrder')saveEstadoOrder();
-          else if(k==='solOrder')saveSolOrder();
-          else if(k==='activityOrder')saveActivityOrder();
-          else if(k==='panelOrder')savePanelOrder();
-          else if(k==='lightLog')save('lightLog',d[k]);
-          else if(k==='sportParams')saveSportParams();
-          else if(k==='collapsed'||k==='panelCollapsed')saveCollapsed();
-          else localStorage.setItem('h_'+k,JSON.stringify(d[k]));
-        }
-      });
+      const importedFormula=applyImportedData(d);
       // Convert imported sun records to the current formula depending on their version.
       // pre-v32: needs 2.2 (base) × 0.65 (geometry). v32: needs only 0.65 (geometry). v64: none.
       if(importedFormula!=='v64'&&Array.isArray(store.sun)&&store.sun.length){
@@ -6033,6 +6461,8 @@ document.addEventListener('visibilitychange',function(){
 
 renderNav();
 showTab('panel');
+// If cloud sync was configured before, restore the session and start syncing.
+if(fbGetConfig()){fbInit();}
 </script>
 </body>
 </html>
