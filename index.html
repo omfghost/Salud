@@ -1264,7 +1264,19 @@ if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
-function save(key,val){store[key]=val;try{localStorage.setItem('h_'+key,JSON.stringify(val));}catch(e){console.warn('save err',e);}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function save(key,val){store[key]=val;try{localStorage.setItem('h_'+key,JSON.stringify(val));}catch(e){console.warn('save err',e);notifyStorageError(e);}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+
+// Warn the user (once per session) if a save fails because storage is full.
+var _storageWarned=false;
+function notifyStorageError(e){
+  var isQuota=e&&(e.name==='QuotaExceededError'||e.code===22||e.code===1014||/quota/i.test(e.name||'')||/quota/i.test(e.message||''));
+  if(isQuota&&!_storageWarned){
+    _storageWarned=true;
+    setTimeout(function(){
+      alert('⚠️ No se pudo guardar: el almacenamiento del dispositivo está lleno.\n\nLas fotos antiguas son lo que más ocupa. Ve a Ajustes → Datos para liberar espacio, o exporta una copia y borra registros con foto que ya no necesites.\n\n(Las fotos nuevas ahora se guardan en un almacén con mucha más capacidad, así que esto debería dejar de ocurrir.)');
+    },100);
+  }
+}
 
 // ============ VIDEO STORAGE (IndexedDB) ============
 // Videos can be large (iPhone clips >1min), which overflows localStorage's ~5MB quota.
@@ -1319,10 +1331,90 @@ function deleteVideoBlob(ref){
     });
   });
 }
+
+// ============ PHOTO STORAGE (IndexedDB) ============
+// Training/measurement photos are large (~200-400 KB each in base64) and quickly
+// overflow localStorage's ~5MB quota — which silently dropped saves. We now keep the
+// photo bytes in IndexedDB and store only a reference id ("img:...") in the record.
+let _photoDB=null;
+function openPhotoDB(){
+  return new Promise(function(resolve,reject){
+    if(_photoDB){resolve(_photoDB);return;}
+    try{
+      const req=indexedDB.open('health_photos',1);
+      req.onupgradeneeded=function(e){
+        const db=e.target.result;
+        if(!db.objectStoreNames.contains('photos'))db.createObjectStore('photos');
+      };
+      req.onsuccess=function(e){_photoDB=e.target.result;resolve(_photoDB);};
+      req.onerror=function(){reject(req.error);};
+    }catch(e){reject(e);}
+  });
+}
+// Stores a dataURL (base64) string under a new id and returns that id.
+function savePhotoData(dataUrl){
+  return openPhotoDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      const id='img:'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+      const tx=db.transaction('photos','readwrite');
+      tx.objectStore('photos').put(dataUrl,id);
+      tx.oncomplete=function(){resolve(id);};
+      tx.onerror=function(){reject(tx.error);};
+    });
+  });
+}
+// Resolves an image reference to a usable src.
+// Handles new "img:" refs, legacy base64 strings, and http(s)/blob URLs.
+function getPhotoData(ref){
+  if(!ref)return Promise.resolve(null);
+  if(typeof ref!=='string')return Promise.resolve(null);
+  if(ref.indexOf('img:')!==0)return Promise.resolve(ref); // legacy base64 or URL
+  return openPhotoDB().then(function(db){
+    return new Promise(function(resolve){
+      const tx=db.transaction('photos','readonly');
+      const rq=tx.objectStore('photos').get(ref);
+      rq.onsuccess=function(){resolve(rq.result||null);};
+      rq.onerror=function(){resolve(null);};
+    });
+  });
+}
+function deletePhotoData(ref){
+  if(!ref||typeof ref!=='string'||ref.indexOf('img:')!==0)return Promise.resolve();
+  return openPhotoDB().then(function(db){
+    return new Promise(function(resolve){
+      const tx=db.transaction('photos','readwrite');
+      tx.objectStore('photos').delete(ref);
+      tx.oncomplete=function(){resolve();};
+      tx.onerror=function(){resolve();};
+    });
+  });
+}
+// Synchronous cache of resolved photos so render() can show them without async.
+// Filled on demand by ensurePhotoCached().
+var _photoCache={};
+function ensurePhotoCached(ref){
+  if(!ref||ref.indexOf('img:')!==0)return;          // nothing to resolve
+  if(_photoCache[ref]!==undefined)return;            // already cached (or pending)
+  _photoCache[ref]=null;                             // mark pending to avoid duplicate loads
+  getPhotoData(ref).then(function(data){
+    _photoCache[ref]=data||null;
+    // Re-render so the freshly-loaded image appears.
+    if(typeof render==='function')render();
+  });
+}
+// Returns a directly-usable src for a ref (cached value, or the ref itself if legacy).
+function photoSrc(ref){
+  if(!ref)return '';
+  if(ref.indexOf('img:')!==0)return ref;             // legacy base64 / URL
+  if(_photoCache[ref])return _photoCache[ref];
+  ensurePhotoCached(ref);
+  return '';                                          // not ready yet; render() will refresh
+}
+
 function saveSettings(){try{localStorage.setItem('h_settings',JSON.stringify(store.settings));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function saveWidgets(){try{localStorage.setItem('h_widgets',JSON.stringify(store.widgets));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function saveCollapsed(){try{localStorage.setItem('h_collapsed',JSON.stringify(store.collapsed));localStorage.setItem('h_panelCollapsed',JSON.stringify(store.panelCollapsed));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
-function saveWeekly(){try{localStorage.setItem('h_weeklyPlan',JSON.stringify(store.weeklyPlan));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
+function saveWeekly(){try{localStorage.setItem('h_weeklyPlan',JSON.stringify(store.weeklyPlan));}catch(e){console.warn('saveWeekly err',e);notifyStorageError(e);}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function saveActiveDays(){try{localStorage.setItem('h_activeDays',JSON.stringify(store.activeDays));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 function saveEstadoOrder(){try{localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));}catch(e){}if(typeof fbScheduleSync==='function')fbScheduleSync();}
 
@@ -1803,7 +1895,19 @@ function makeChart(canvasId,labels,data,label,color,dates){
   }catch(e){}
 }
 
-function delItem(type,id){if(!confirm('¿Eliminar este registro?'))return;store[type]=store[type].filter(function(x){return x.id!==id;});save(type,store[type]);render();}
+function delItem(type,id){
+  if(!confirm('¿Eliminar este registro?'))return;
+  // Free any attached photo/video from IndexedDB so it doesn't linger on the device.
+  const rec=(store[type]||[]).find(function(x){return x.id===id;});
+  if(rec){
+    if(rec.photo)deletePhotoData(rec.photo);
+    if(rec.image)deletePhotoData(rec.image);
+    if(rec.video)deleteVideoBlob(rec.video);
+  }
+  store[type]=store[type].filter(function(x){return x.id!==id;});
+  save(type,store[type]);
+  render();
+}
 
 // Check if a record with the same date already exists (to block duplicates).
 // excludeId lets editing keep its own date.
@@ -1884,7 +1988,13 @@ function saveEditRecord(){
       if(el)item[f.k]=el.value;
     }
   });
-  if(type==='records')item.video=editVideoData||null;
+  if(type==='records'){
+    // If the video changed (replaced or removed), delete the old blob from IndexedDB.
+    const oldVideo=item.video;
+    const newVideo=editVideoData||null;
+    if(oldVideo&&oldVideo!==newVideo)deleteVideoBlob(oldVideo);
+    item.video=newVideo;
+  }
   // recompute fasting duration if needed
   if(type==='fasting'&&item.start&&item.end){
     const sp=item.start.split(':').map(Number),ep=item.end.split(':').map(Number);
@@ -3506,7 +3616,7 @@ function renderBodyBlock(){
       if(m.bicep)parts.push('Bícep '+m.bicep);
       if(m.hip)parts.push('Cadera '+m.hip);
       if(m.neck)parts.push('Cuello '+m.neck);
-      return '<div style="font-size:11px;color:#bbb;line-height:1.4">'+parts.join(' · ')+'</div>'+(m.photo?'<div style="margin-top:4px"><img src="'+m.photo+'" class="meas-thumb" onclick="event.stopPropagation();openImageViewer(\''+m.photo+'\')"></div>':'');
+      return '<div style="font-size:11px;color:#bbb;line-height:1.4">'+parts.join(' · ')+'</div>'+(m.photo?(function(){var ps=photoSrc(m.photo);return '<div style="margin-top:4px">'+(ps?'<img src="'+ps+'" class="meas-thumb" onclick="event.stopPropagation();openImageViewer(\''+m.photo+'\')">':'<div class="meas-thumb" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#777">…</div>')+'</div>';})():'');
     },{chartLabel:'Cintura',chartKey:'waist',
        searchFields:[{key:'waist',label:'Cintura',aliases:['cintura']},{key:'chest',label:'Pecho',aliases:['pecho']},{key:'thigh',label:'Muslo',aliases:['muslo']},{key:'bicep',label:'Bícep',aliases:['bicep','bíceps']},{key:'hip',label:'Cadera',aliases:['cadera']},{key:'neck',label:'Cuello',aliases:['cuello']},{key:'date',label:'Fecha',aliases:['fecha','día']}]});
   }
@@ -3694,11 +3804,15 @@ function handleMeasPhoto(e){
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');
       ctx.drawImage(img,0,0,w,h);
-      measPhotoData=canvas.toDataURL('image/jpeg',0.78);
-      const prev=document.getElementById('measPhotoPreview');
-      const ph=document.getElementById('measPhotoPlaceholder');
-      if(prev)prev.innerHTML='<img src="'+measPhotoData+'" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto">';
-      if(ph)ph.style.display='none';
+      const dataUrl=canvas.toDataURL('image/jpeg',0.78);
+      savePhotoData(dataUrl).then(function(ref){
+        measPhotoData=ref;
+        _photoCache[ref]=dataUrl;
+        const prev=document.getElementById('measPhotoPreview');
+        const ph=document.getElementById('measPhotoPlaceholder');
+        if(prev)prev.innerHTML='<img src="'+dataUrl+'" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto">';
+        if(ph)ph.style.display='none';
+      }).catch(function(err){console.warn('savePhotoData',err);alert('No se pudo guardar la foto. Inténtalo de nuevo.');});
     };
     img.src=ev.target.result;
   };
@@ -4134,7 +4248,8 @@ function renderActividad(c){
     const sdDateLabel=sdDate?sdDate.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}):sd.name;
     let body;
     if(sdHasImage){
-      body='<div class="wday-view-img" onclick="openImageViewer(\''+sd.id+'\',\'actividad\')"><img src="'+sdData.image+'"><span class="wday-view-zoom">⤢</span></div>'+
+      const sdImgSrc=photoSrc(sdData.image);
+      body='<div class="wday-view-img" onclick="openImageViewer(\''+sd.id+'\',\'actividad\')">'+(sdImgSrc?'<img src="'+sdImgSrc+'">':'<div style="padding:30px;text-align:center;color:var(--text-muted);font-size:11px">Cargando foto…</div>')+'<span class="wday-view-zoom">⤢</span></div>'+
         (sdHasText?'<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>':'');
     }else if(sdHasText){
       body='<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>';
@@ -4448,6 +4563,11 @@ function clearDayText(dayId){
 
 function clearAllWeeklyDays(){
   if(!confirm('¿Limpiar todos los días? Se borrarán textos, imágenes y marcas de completado.'))return;
+  // Remove every attached photo from IndexedDB too.
+  DAY_NAMES.concat([{id:'extra'}]).forEach(function(d){
+    var rec=store.weeklyPlan[d.id];
+    if(rec&&rec.image)deletePhotoData(rec.image);
+  });
   DAY_NAMES.forEach(function(d){store.weeklyPlan[d.id]={text:'',image:null,done:false};});
   store.weeklyPlan.extra={text:'',image:null,done:false};
   saveWeekly();
@@ -4486,6 +4606,7 @@ function openDayEditor(dayId){
   }
   const data=store.weeklyPlan[dayId]||{text:'',image:null};
   editingImageData=data.image;
+  if(editingImageData)ensurePhotoCached(editingImageData);
   document.getElementById('dayEditorTitle').textContent=dayName;
   document.getElementById('dayEditorText').value=data.text||'';
   refreshDayImagePreview();
@@ -4495,7 +4616,9 @@ function closeDayEditor(){document.getElementById('modal-dayEditor').classList.r
 function refreshDayImagePreview(){
   const prev=document.getElementById('dayImagePreview');
   const ph=document.getElementById('dayImagePlaceholder');
-  if(editingImageData){prev.innerHTML='<img src="'+editingImageData+'" class="day-modal-image" onclick="event.stopPropagation();openImageViewer(\''+editingImageData+'\')">';ph.style.display='none';}
+  const src=photoSrc(editingImageData);
+  if(editingImageData&&src){prev.innerHTML='<img src="'+src+'" class="day-modal-image" onclick="event.stopPropagation();openImageViewer(\''+editingImageData+'\')">';ph.style.display='none';}
+  else if(editingImageData&&!src){prev.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px">Cargando foto…</div>';ph.style.display='none';}
   else{prev.innerHTML='';ph.style.display='block';}
 }
 function handleDayImage(e){
@@ -4512,15 +4635,31 @@ function handleDayImage(e){
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');
       ctx.drawImage(img,0,0,w,h);
-      editingImageData=canvas.toDataURL('image/jpeg',0.82);
-      refreshDayImagePreview();
+      const dataUrl=canvas.toDataURL('image/jpeg',0.82);
+      // Store the photo bytes in IndexedDB; keep only a reference id in the record.
+      savePhotoData(dataUrl).then(function(ref){
+        editingImageData=ref;
+        _photoCache[ref]=dataUrl;        // cache so the preview shows instantly
+        refreshDayImagePreview();
+      }).catch(function(err){
+        console.warn('savePhotoData',err);
+        alert('No se pudo guardar la foto. Inténtalo de nuevo.');
+      });
     };
     img.src=ev.target.result;
   };
   reader.readAsDataURL(file);
 }
-function clearDayImage(){editingImageData=null;refreshDayImagePreview();document.getElementById('dayImageInput').value='';}
-function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;const prev=store.weeklyPlan[editingDayId]||{};store.weeklyPlan[editingDayId]={text:text,image:editingImageData,done:prev.done===true};saveWeekly();closeDayEditor();render();}
+function clearDayImage(){
+  if(editingImageData)deletePhotoData(editingImageData);
+  editingImageData=null;
+  refreshDayImagePreview();
+  document.getElementById('dayImageInput').value='';
+}
+function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;const prev=store.weeklyPlan[editingDayId]||{};
+  // If the photo was replaced with a different one, delete the previous from IndexedDB.
+  if(prev.image&&prev.image!==editingImageData)deletePhotoData(prev.image);
+  store.weeklyPlan[editingDayId]={text:text,image:editingImageData,done:prev.done===true};saveWeekly();closeDayEditor();render();}
 
 // === Quick fill: edit text/photo for several days at once ===
 var quickFillBuf={};   // {dayId:{text,image}} staged edits, applied on save
@@ -4547,8 +4686,9 @@ function renderQuickFill(){
     var buf=quickFillBuf[d.id]||{text:'',image:null};
     var dt=(d.id==='extra')?null:dateForWeekday(d.id);
     var label=(d.id==='extra')?'T. Extra':(d.name+(dt?' '+dt.getDate():''));
+    var imgSrc=buf.image?photoSrc(buf.image):'';
     var thumb=buf.image
-      ? '<div class="qf-thumb" onclick="openImageViewer(quickFillBuf[\''+d.id+'\'].image,\'quickfill\')"><img src="'+buf.image+'"><button class="qf-thumb-x" onclick="event.stopPropagation();qfClearImage(\''+d.id+'\')" title="Quitar foto">✕</button></div>'
+      ? '<div class="qf-thumb" onclick="openImageViewer(quickFillBuf[\''+d.id+'\'].image,\'quickfill\')">'+(imgSrc?'<img src="'+imgSrc+'">':'<div style="font-size:8px;color:#777;display:flex;align-items:center;justify-content:center;height:100%">…</div>')+'<button class="qf-thumb-x" onclick="event.stopPropagation();qfClearImage(\''+d.id+'\')" title="Quitar foto">✕</button></div>'
       : '<button class="qf-photo-btn" onclick="qfPickImage(\''+d.id+'\')" title="Adjuntar foto">📷</button>';
     return '<div class="qf-row">'+
       '<div class="qf-day">'+label+'</div>'+
@@ -4581,8 +4721,15 @@ function handleQfImage(e){
       else if(h>maxDim){w=w*(maxDim/h);h=maxDim;}
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      if(quickFillBuf[dayId])quickFillBuf[dayId].image=canvas.toDataURL('image/jpeg',0.82);
-      renderQuickFill();
+      var dataUrl=canvas.toDataURL('image/jpeg',0.82);
+      savePhotoData(dataUrl).then(function(ref){
+        if(quickFillBuf[dayId])quickFillBuf[dayId].image=ref;
+        _photoCache[ref]=dataUrl;     // cache for instant thumbnail
+        renderQuickFill();
+      }).catch(function(err){
+        console.warn('savePhotoData',err);
+        alert('No se pudo guardar la foto. Inténtalo de nuevo.');
+      });
     };
     img.src=ev.target.result;
   };
@@ -4593,6 +4740,8 @@ function saveQuickFill(){
   Object.keys(quickFillBuf).forEach(function(id){
     var prev=store.weeklyPlan[id]||{};
     var buf=quickFillBuf[id];
+    // If this day's photo changed (replaced or removed), free the old one from IndexedDB.
+    if(prev.image&&prev.image!==buf.image)deletePhotoData(prev.image);
     store.weeklyPlan[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
   });
   saveWeekly();
@@ -4602,21 +4751,30 @@ function saveQuickFill(){
 var imageViewerOrigin=null;
 var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
 function openImageViewer(srcOrDayId,origin){
-  let src=srcOrDayId;
-  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&store.weeklyPlan[srcOrDayId]){
-    src=store.weeklyPlan[srcOrDayId].image||'';
+  let ref=srcOrDayId;
+  // If a weekday/extra id was passed, pull its stored image reference.
+  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&srcOrDayId.indexOf('img:')!==0&&store.weeklyPlan[srcOrDayId]){
+    ref=store.weeklyPlan[srcOrDayId].image||'';
   }
-  if(!src){alert('Sin imagen para mostrar');return;}
+  if(!ref){alert('Sin imagen para mostrar');return;}
   imageViewerOrigin=origin||null;
   const img=document.getElementById('imageViewerImg');
-  img.src=src;
-  // reset zoom
-  _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
-  applyImgZoom();
-  attachImgZoom(img);
-  const actions=document.getElementById('imageViewerActions');
-  if(actions)actions.style.display='flex';
-  document.getElementById('imageViewer').classList.add('active');
+  // Resolve the reference (IndexedDB "img:" id, or legacy base64/URL) to a real src.
+  const showSrc=function(src){
+    if(!src){alert('No se encontró la foto');return;}
+    img.src=src;
+    _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
+    applyImgZoom();
+    attachImgZoom(img);
+    const actions=document.getElementById('imageViewerActions');
+    if(actions)actions.style.display='flex';
+    document.getElementById('imageViewer').classList.add('active');
+  };
+  if(typeof ref==='string'&&ref.indexOf('img:')===0){
+    getPhotoData(ref).then(showSrc);
+  }else{
+    showSrc(ref);
+  }
 }
 function applyImgZoom(){
   const img=document.getElementById('imageViewerImg');
@@ -5808,34 +5966,35 @@ function renderAjustes(c){
           '<input type="text" id="gdriveClientIdInput" placeholder="Tu Client ID de Google (...apps.googleusercontent.com)" style="font-size:11px;margin-bottom:6px">'+
           '<button class="btn btn-primary" onclick="saveGdriveConfig()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa">☁️ Conectar Google Drive</button>'
         )+
-        // Firebase real-time cloud sync
+        // Firebase real-time cloud sync (config embedded)
         '<div class="env-divider"></div>'+
         '<div class="sub-section-label" style="margin-top:2px">🔥 SINCRONIZACIÓN EN LA NUBE</div>'+
         (function(){
-          const cfg=fbGetConfig();
-          if(!cfg){
-            return '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Guarda tus datos online y sincronízalos al instante entre dispositivos (gratis con Firebase de Google). <span class="fast-time-set-btn" onclick="showFirebaseHelp()">Ver cómo →</span></p>'+
-              '<textarea id="fbConfigInput" placeholder=\'Pega aquí tu firebaseConfig { apiKey: "...", projectId: "..." }\' style="width:100%;box-sizing:border-box;font-size:11px;font-family:monospace;min-height:90px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:#ddd;padding:8px;margin-bottom:6px;resize:vertical"></textarea>'+
-              '<button class="btn btn-primary" onclick="fbSaveConfig()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c">🔥 Conectar Firebase</button>';
-          }
-          // Config present
+          const syncOn=fbSyncEnabled();
           let html='';
+          // Master on/off switch — preserves login when off.
+          html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:8px">'+
+            '<div><div style="font-family:var(--sans);font-size:12px;font-weight:600;color:#ddd">Sincronización automática</div>'+
+            '<div style="font-family:var(--sans);font-size:9.5px;color:var(--text-muted);margin-top:1px">Guarda cada cambio en la nube al instante</div></div>'+
+            '<div class="toggle '+(syncOn?'active':'')+'" onclick="fbSetSyncEnabled('+(syncOn?'false':'true')+')"><div class="toggle-handle"></div></div>'+
+          '</div>';
           if(FB.user){
             const who=FB.user.email||FB.user.displayName||'cuenta';
-            html+='<div style="font-size:11px;color:var(--accent);margin:2px 0 6px;font-family:var(--sans)">✓ Sesión iniciada como <b>'+escapeHTML(who)+'</b></div>'+
-              '<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">Conectado · sincronización activa</div>'+
-              '<button class="btn btn-primary" onclick="fbPushNow()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c;margin-bottom:6px">☁️ Forzar guardado ahora</button>'+
-              '<button class="btn btn-secondary" onclick="fbSignOut()" style="font-size:11px;padding:6px;margin-bottom:6px">Cerrar sesión</button>';
+            html+='<div style="font-size:11px;color:var(--accent);margin:2px 0 4px;font-family:var(--sans)">✓ Sesión iniciada como <b>'+escapeHTML(who)+'</b></div>'+
+              '<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">'+(syncOn?'Conectado · sincronización activa':'Sincronización en pausa')+'</div>';
+            if(syncOn){
+              html+='<button class="btn btn-primary" onclick="fbPushNow()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c;margin-bottom:6px">☁️ Forzar guardado ahora</button>';
+            }
+            html+='<button class="btn btn-secondary" onclick="fbSignOut()" style="font-size:11px;padding:6px;margin-bottom:6px">Cerrar sesión</button>';
           }else{
-            html+='<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">Configurado · inicia sesión para sincronizar</div>'+
+            html+='<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">Inicia sesión para sincronizar</div>'+
               '<button class="btn btn-primary" onclick="fbLoginGoogle()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa;margin-bottom:6px">Iniciar sesión con Google</button>'+
               '<div style="font-size:10px;color:var(--text-dim);text-align:center;margin:2px 0 6px;font-family:var(--sans)">— o con email —</div>'+
               '<input type="email" id="fbEmail" placeholder="Email" autocomplete="username" style="font-size:12px;margin-bottom:5px">'+
               '<input type="password" id="fbPass" placeholder="Contraseña" autocomplete="current-password" style="font-size:12px;margin-bottom:6px">'+
               '<button class="btn btn-primary" onclick="fbLoginEmail()" style="margin-bottom:6px">Entrar / Crear cuenta</button>';
           }
-          html+='<button class="btn btn-secondary" onclick="fbClearConfig()" style="font-size:11px;padding:6px;color:var(--text-dim)">Desconectar nube</button>'+
-            '<p style="font-size:9px;color:var(--text-dim);margin-top:6px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan en tu propio proyecto de Firebase, vinculados a tu cuenta. Cada cambio se sube al instante y se recibe en tiempo real en tus otros dispositivos.</p>';
+          html+='<p style="font-size:9px;color:var(--text-dim);margin-top:4px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan en tu proyecto de Firebase, vinculados a tu cuenta. Cada cambio se sube al instante y se recibe en tiempo real en tus otros dispositivos. Las fotos y vídeos se guardan en cada dispositivo (no ocupan la nube).</p>';
           return html;
         })()+
         // Scheduled auto-export
@@ -5932,7 +6091,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 18</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 19</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -5943,11 +6102,44 @@ function renderAjustes(c){
 // ============================================================
 // Data model: users/{uid}/backup/main  holds the full buildExportData() JSON.
 // Up-sync is debounced ~1.2s after each save(); down-sync is live via onSnapshot.
+
+// Embedded Firebase project config (personal app — baked in so it survives updates).
+var FB_EMBEDDED_CONFIG={
+  apiKey:"AIzaSyC73s24U_6T4DSr9Tsdjzgw_e5tU2xaAgI",
+  authDomain:"health-app-76951.firebaseapp.com",
+  projectId:"health-app-76951",
+  storageBucket:"health-app-76951.firebasestorage.app",
+  messagingSenderId:"809241774636",
+  appId:"1:809241774636:web:7d49d01830deec186f9f89",
+  measurementId:"G-SC2L3H0V7X"
+};
+
 var FB={app:null,auth:null,db:null,ready:false,user:null,unsub:null,
         saveTimer:null,applyingRemote:false,lastPushedAt:0,status:'off',mods:null};
 
+// Returns the active config: a user-pasted one (if present) overrides the embedded default.
 function fbGetConfig(){
-  try{return JSON.parse(localStorage.getItem('h_fbConfig')||'null');}catch(e){return null;}
+  try{
+    var saved=JSON.parse(localStorage.getItem('h_fbConfig')||'null');
+    if(saved&&saved.apiKey&&saved.projectId)return saved;
+  }catch(e){}
+  return FB_EMBEDDED_CONFIG;
+}
+// Cloud sync on/off switch. Defaults to ON (since the config is embedded and ready).
+function fbSyncEnabled(){
+  return localStorage.getItem('h_fbSyncEnabled')!=='0';
+}
+function fbSetSyncEnabled(on){
+  localStorage.setItem('h_fbSyncEnabled',on?'1':'0');
+  if(on){
+    fbInit().then(function(){render();});
+  }else{
+    // Turn off live sync but DO NOT sign out — login is preserved.
+    fbStopRealtime();
+    clearTimeout(FB.saveTimer);
+    fbSetStatus('paused');
+    render();
+  }
 }
 function fbSetStatus(s,msg){
   FB.status=s;
@@ -5955,7 +6147,8 @@ function fbSetStatus(s,msg){
   if(el){
     const map={off:'',connecting:'Conectando…',ready:'Conectado · sincronización activa',
                syncing:'Sincronizando…',synced:'✓ Sincronizado',error:(msg||'Error'),
-               nouser:'Configurado · inicia sesión para sincronizar'};
+               paused:'Sincronización en pausa',
+               nouser:'Inicia sesión para sincronizar'};
     el.textContent=map[s]||'';
     el.style.color=(s==='error')?'#f87171':(s==='synced'||s==='ready')?'var(--accent)':'var(--text-muted)';
   }
@@ -5989,8 +6182,12 @@ function fbInit(){
     m.auth.onAuthStateChanged(FB.auth,function(user){
       FB.user=user;
       if(user){
-        fbSetStatus('ready');
-        fbStartRealtime();
+        if(fbSyncEnabled()){
+          fbSetStatus('ready');
+          fbStartRealtime();
+        }else{
+          fbSetStatus('paused');
+        }
       }else{
         fbStopRealtime();
         fbSetStatus('nouser');
@@ -6105,6 +6302,7 @@ function fbStartRealtime(){
 function fbStopRealtime(){if(FB.unsub){try{FB.unsub();}catch(e){}FB.unsub=null;}}
 // --- Up-sync (debounced) ---
 function fbScheduleSync(){
+  if(!fbSyncEnabled())return;
   if(!FB.user||!FB.ready||FB.applyingRemote)return;
   fbSetStatus('syncing');
   clearTimeout(FB.saveTimer);
@@ -6120,9 +6318,12 @@ function fbPushNow(){
   }).catch(function(err){console.warn('push',err);fbSetStatus('error','No se pudo guardar en la nube');});
 }
 
+// forCloud=true strips nothing structurally but marks that photo refs are device-local.
+// Photos live in IndexedDB per-device; only their reference ids travel. The receiving
+// device keeps its own local photo bytes (see applyImportedData's photo-preservation).
 function buildExportData(){
   return {
-    _meta:{app:'HEALTH',version:17,vitdFormula:'v64',exportedAt:new Date().toISOString()},
+    _meta:{app:'HEALTH',version:18,vitdFormula:'v64',exportedAt:new Date().toISOString()},
     sleep:store.sleep,activity:store.activity,weight:store.weight,allergy:store.allergy,
     vo2max:store.vo2max,vo2history:store.vo2history,fasting:store.fasting,measurements:store.measurements,
     meditation:store.meditation,programs:store.programs,sun:store.sun,wods:store.wods,records:store.records,
@@ -6278,9 +6479,34 @@ function exportToDrive(silent){
 // Returns the imported VitD formula tag (or null) so callers can run migrations if needed.
 function applyImportedData(d){
   const importedFormula=(d._meta&&d._meta.vitdFormula)?d._meta.vitdFormula:null;
+  // Preserve device-local photos: if incoming data references an "img:" id we don't
+  // have locally, keep whatever photo this device already had for that day/measurement.
+  const localWeekly=store.weeklyPlan||{};
+  const localMeas=Array.isArray(store.measurements)?store.measurements:[];
   Object.keys(d).forEach(function(k){
     if(k==='_meta')return;
     if(d[k]!==undefined){
+      // --- photo preservation for weeklyPlan ---
+      if(k==='weeklyPlan'&&d[k]&&typeof d[k]==='object'){
+        Object.keys(d[k]).forEach(function(dayId){
+          var inc=d[k][dayId];
+          if(inc&&typeof inc==='object'&&'image'in inc){
+            var incImg=inc.image;
+            var locImg=localWeekly[dayId]&&localWeekly[dayId].image;
+            // If incoming has no image but we had one locally, keep ours.
+            if(!incImg&&locImg){inc.image=locImg;}
+          }
+        });
+      }
+      // --- photo preservation for measurements (match by id) ---
+      if(k==='measurements'&&Array.isArray(d[k])){
+        d[k].forEach(function(inc){
+          if(inc&&!inc.photo){
+            var loc=localMeas.find(function(x){return x.id===inc.id;});
+            if(loc&&loc.photo)inc.photo=loc.photo;
+          }
+        });
+      }
       store[k]=d[k];
       if(k==='vo2max')localStorage.setItem('h_vo2max',d[k]);
       else if(k==='settings')saveSettings();
@@ -6459,10 +6685,43 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 
+// One-time migration: move any legacy base64 photos (stored inline in localStorage)
+// into IndexedDB, replacing them with "img:" references. Frees up the ~5MB quota.
+function migrateLegacyPhotos(){
+  if(localStorage.getItem('h_photoMigration_v1')==='1')return Promise.resolve();
+  var tasks=[];
+  var changedWeekly=false,changedMeas=false;
+  // weeklyPlan day images
+  if(store.weeklyPlan&&typeof store.weeklyPlan==='object'){
+    Object.keys(store.weeklyPlan).forEach(function(dayId){
+      var rec=store.weeklyPlan[dayId];
+      if(rec&&typeof rec==='object'&&typeof rec.image==='string'&&rec.image.indexOf('data:')===0){
+        tasks.push(savePhotoData(rec.image).then(function(ref){rec.image=ref;changedWeekly=true;}).catch(function(){}));
+      }
+    });
+  }
+  // measurement photos
+  if(Array.isArray(store.measurements)){
+    store.measurements.forEach(function(m){
+      if(m&&typeof m.photo==='string'&&m.photo.indexOf('data:')===0){
+        tasks.push(savePhotoData(m.photo).then(function(ref){m.photo=ref;changedMeas=true;}).catch(function(){}));
+      }
+    });
+  }
+  return Promise.all(tasks).then(function(){
+    if(changedWeekly)saveWeekly();
+    if(changedMeas)save('measurements',store.measurements);
+    localStorage.setItem('h_photoMigration_v1','1');
+    if(changedWeekly||changedMeas){if(typeof render==='function')render();}
+  }).catch(function(){});
+}
+
 renderNav();
 showTab('panel');
-// If cloud sync was configured before, restore the session and start syncing.
-if(fbGetConfig()){fbInit();}
+// Move old inline photos to IndexedDB (frees localStorage), then init cloud sync.
+migrateLegacyPhotos();
+// Firebase config is embedded; initialise so the session/sync restores automatically.
+fbInit();
 </script>
 </body>
 </html>
