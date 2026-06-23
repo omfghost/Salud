@@ -150,6 +150,12 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .sport-form-grid .input-group{margin-bottom:0}
 .sport-form-grid .input-group label{font-size:8.5px;letter-spacing:0.2px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sport-form-grid .input-group input,.sport-form-grid .input-group select{font-size:13px;padding:7px 8px}
+/* Compact MM:SS time wheel for the training form (matches app time wheels) */
+.sport-time-wheel{display:flex;align-items:center;justify-content:center;gap:1px;background:rgba(0,0,0,0.32);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 4px;height:32px;box-sizing:border-box}
+.sport-time-wheel select{background:transparent!important;border:none!important;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0!important;outline:none;min-width:0;width:auto;flex:0 1 auto}
+.sport-time-wheel select::-ms-expand{display:none}
+.sport-time-wheel option{background:#16171c;color:#fff}
+.sport-time-wheel .stw-colon{color:var(--text-dim);font-size:13px;font-weight:600;padding:0 1px}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%}
 .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%}
 
@@ -433,17 +439,11 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .wday-view-btn{font-family:var(--sans);font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:8px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.03);color:#ccc;cursor:pointer;transition:all 0.15s;white-space:nowrap}
 .wday-view-btn:active{transform:scale(0.95)}
 .wday-view-btn.add{color:var(--accent);border-color:rgba(167,243,208,0.3)}
-/* Hero "Marcar" button — the primary action of the weekly viewer */
-.wday-done-hero{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.3px;padding:13px 16px;border-radius:13px;border:1.5px solid #34d399;background:linear-gradient(135deg,rgba(52,211,153,0.18),rgba(16,185,129,0.10));color:#6ee7b7;cursor:pointer;transition:all 0.18s ease;box-shadow:0 2px 14px rgba(52,211,153,0.12);position:relative;overflow:hidden}
-.wday-done-hero:active{transform:scale(0.975)}
-.wday-done-hero .wday-done-ic{font-size:17px;line-height:1;display:flex;align-items:center}
-.wday-done-hero .wday-done-sub{font-size:10px;font-weight:500;opacity:0.75;letter-spacing:0.2px}
-.wday-done-hero.active{background:linear-gradient(135deg,rgba(52,211,153,0.30),rgba(16,185,129,0.18));color:#fff;box-shadow:0 3px 20px rgba(52,211,153,0.28)}
-.wday-done-hero.active .wday-done-sub{opacity:0.85}
-.wday-done-hero.busy{pointer-events:none;opacity:0.92}
-.wday-done-spin{width:15px;height:15px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:wdaySpin 0.7s linear infinite;display:inline-block}
+.wday-view-btn.done.active{background:rgba(52,211,153,0.16);border-color:#34d399;color:#34d399}
+.wday-view-btn.busy{pointer-events:none;opacity:0.85}
+.wday-done-spin{width:11px;height:11px;border:2px solid rgba(255,255,255,0.25);border-top-color:#34d399;border-radius:50%;animation:wdaySpin 0.7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes wdaySpin{to{transform:rotate(360deg)}}
-.wday-ai-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;color:#c084fc;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.3);border-radius:6px;padding:2px 6px;margin-left:4px;letter-spacing:0.2px}
+.wday-ai-badge{display:inline-flex;align-items:center;gap:2px;font-size:8.5px;font-weight:700;color:#c084fc;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.35);border-radius:5px;padding:1px 4px;margin-left:5px;letter-spacing:0.2px;vertical-align:middle}
 .wday-view-body{width:100%}
 .wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
 .wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
@@ -2320,7 +2320,7 @@ const WIDGET_DEFS={
   fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
   meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s',date:m.date};}},
-  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(a.duration+'min');if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(fmtActivityDuration(a.duration));if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
@@ -4266,26 +4266,17 @@ function renderActividad(c){
     }else{
       body='<div class="wday-view-empty" onclick="openDayEditor(\''+sd.id+'\')">Sin entrenamiento. Pulsa <b>+ Añadir</b> para cargar foto o texto.</div>';
     }
-    var doneSubLabel;
-    if(sdCompleted){doneSubLabel='Toca para desmarcar';}
-    else if(sdHasImage){doneSubLabel='Precarga el registro leyendo la foto';}
-    else if(sdHasText){doneSubLabel='Precarga el registro con el texto';}
-    else{doneSubLabel='Sin datos · solo marca como hecho';}
     viewer='<div class="wday-viewer">'+
       '<div class="wday-view-head">'+
         '<span class="wday-view-date'+(sd.id===todayId?' is-today':'')+'">'+sdDateLabel+(sd.id===todayId?' · HOY':'')+'</span>'+
         '<div class="wday-view-actions">'+
           '<button class="wday-view-btn add" onclick="openDayEditor(\''+sd.id+'\')" title="Añadir o editar">＋ '+(sdHasText||sdHasImage?'Editar':'Añadir')+'</button>'+
+          '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" id="wdayDoneHero" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado y precargar registro">'+(sdCompleted?'✓ Hecho':'○ Marcar')+
+            (!sdCompleted&&sdHasImage?'<span class="wday-ai-badge">✨ IA</span>':'')+
+          '</button>'+
         '</div>'+
       '</div>'+
       '<div class="wday-view-body">'+body+'</div>'+
-      '<button class="wday-done-hero'+(sdCompleted?' active':'')+'" id="wdayDoneHero" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado y precargar registro">'+
-        '<span class="wday-done-ic">'+(sdCompleted?'✓':'○')+'</span>'+
-        '<span>'+(sdCompleted?'Entrenamiento hecho':'Marcar como hecho')+
-          (!sdCompleted&&sdHasImage?'<span class="wday-ai-badge">✨ IA</span>':'')+
-          '<div class="wday-done-sub">'+doneSubLabel+'</div>'+
-        '</span>'+
-      '</button>'+
     '</div>';
   }
 
@@ -4336,8 +4327,8 @@ function renderActividad(c){
           '</div>')+'';
   if(actType==='crossfit'){
     h+='<div class="sport-form-grid sport-form-grid-4">'+
-      '<div class="input-group"><label>DURACIÓN</label><input type="number" id="actDuration" placeholder="45"></div>'+
-      '<div class="input-group"><label>TIEMPO/REPS</label><input type="text" id="actResult" placeholder="8:42"></div>'+
+      '<div class="input-group"><label>TIEMPO</label>'+timeWheelHTML('actDur')+'</div>'+
+      '<div class="input-group"><label>REPETICIONES</label><input type="text" id="actResult" placeholder="100 reps"></div>'+
       '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="155"></div>'+
       '<div class="input-group"><label>FC MÁX</label><input type="number" id="actHRmax" placeholder="185"></div>'+
     '</div>';
@@ -4409,7 +4400,7 @@ function renderActividad(c){
         const sport=store.sports.find(function(s){return s.id===a.type;});
         const col=sportColor(a.type);
         return '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
-          '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?a.duration+'min':'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
+          '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?fmtActivityDuration(a.duration):'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
       },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
          searchFields:[{key:'duration',label:'Duración',aliases:['min','minutos','duracion']},{key:'hrAvg',label:'FC media',aliases:['fc','pulso','ppm']},{key:'hrMax',label:'FC máx',aliases:['fcmax','maxima']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
          chartMetrics:[
@@ -4549,28 +4540,27 @@ function firstNumber(text){
 // Construye el buffer de precarga a partir del texto del día (heurístico, sin red).
 function buildPrefillFromText(text){
   var sportId=guessSportId(text)||(store.sports[0]||{}).id||'crossfit';
-  var pre={sportId:sportId,subtype:'',runType:'continua',duration:'',result:'',distance:'',hrAvg:'',hrMax:'',notes:''};
-  // Nota: guardamos el texto original como notas para no perder contexto.
-  pre.notes=text.replace(/\s+/g,' ').trim().slice(0,120);
+  // Igual que la IA: solo deporte, tipo, tiempo y repeticiones. Sin notas ni FC.
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',reps:'',aiOnly:true};
   if(sportId==='crossfit'){
     pre.subtype=guessCrossfitSubtype(text);
-    // Si hay un patrón "NN min" lo usamos como duración.
-    var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);
-    if(md)pre.duration=md[1];
+    // Tiempo: primero "MM:SS", si no, "NN min".
+    var mc=text.match(/(\d{1,3})\s*:\s*(\d{1,2})/);
+    if(mc){pre.time=normalizeTimeStr(mc[0]);}
+    else{var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);if(md)pre.time=md[1];}
+    // Repeticiones: patrón "NN reps" o "NN repeticiones".
+    var mr=text.match(/(\d{1,4})\s*(reps?|repeticiones)/i);
+    if(mr)pre.reps=mr[1];
   }else if(sportId==='carrera'){
     if(/series|x\s*\d{2,4}\s*m/i.test(text))pre.runType='series';
-    var mk=text.match(/(\d{1,3}(?:[.,]\d)?)\s*k(?:m|ms)?\b/i);
-    if(mk)pre.distance=mk[1].replace(',','.');
     var mt=text.match(/(\d{1,3})\s*(min|')/i);
-    if(mt)pre.duration=mt[1];
+    if(mt)pre.time=mt[1];
   }else if(sportId==='piscina'){
-    var mpd=text.match(/(\d{3,5})\s*m\b/i);          // metros (3-5 dígitos)
-    if(mpd)pre.distance=mpd[1];
     var mpt=text.match(/(\d{1,3})\s*(min|minutos|')/i);
-    if(mpt)pre.duration=mpt[1];
+    if(mpt)pre.time=mpt[1];
   }else{
-    var mn=firstNumber(text);
-    if(mn)pre.duration=mn;
+    var mn=text.match(/(\d{1,3})\s*(min|minutos|')/i);
+    if(mn)pre.time=mn[1];
   }
   return pre;
 }
@@ -4579,23 +4569,32 @@ function buildPrefillFromText(text){
 function buildPrefillFromAI(obj,fallbackText){
   var rawSport=(obj.deporte||obj.sport||'').toString();
   var sportId=guessSportId(rawSport)||guessSportId(fallbackText)||(store.sports[0]||{}).id||'crossfit';
-  var pre={sportId:sportId,subtype:'',runType:'continua',duration:'',result:'',distance:'',hrAvg:'',hrMax:'',notes:''};
+  // La IA SOLO rellena: deporte, tipo, tiempo y repeticiones.
+  // Nunca toca notas, FC media ni FC máx (esos quedan manuales).
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',reps:'',aiOnly:true};
   function pick(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return '';}
   pre.subtype=pick(obj.tipo,obj.subtype,obj.subtipo);
-  pre.duration=firstNumber(pick(obj.duracion,obj.duración,obj.duration,obj.tiempo_total));
-  pre.result=pick(obj.resultado,obj.result,obj.tiempo,obj.marca,obj.reps,obj.repeticiones);
-  pre.distance=pick(obj.distancia,obj.distance);
-  pre.hrAvg=firstNumber(pick(obj.fc_media,obj.fcMedia,obj.hr_avg,obj.pulso_medio));
-  pre.hrMax=firstNumber(pick(obj.fc_max,obj.fcMax,obj.hr_max,obj.pulso_max));
-  var ej=obj.ejercicios||obj.exercises||obj.movimientos;
-  if(Array.isArray(ej))ej=ej.join(', ');
-  pre.notes=pick(obj.notas,obj.notes,ej,fallbackText).replace(/\s+/g,' ').slice(0,180);
+  // Tiempo: aceptamos "MM:SS" tal cual, o minutos sueltos.
+  var rawTime=pick(obj.tiempo,obj.duracion,obj.duración,obj.duration,obj.tiempo_total,obj.time);
+  pre.time=normalizeTimeStr(rawTime);
+  // Repeticiones: solo el dato de reps.
+  pre.reps=pick(obj.repeticiones,obj.reps,obj.resultado,obj.result);
   // Para CrossFit, normaliza el subtipo a uno de los valores del desplegable.
   if(sportId==='crossfit'&&pre.subtype){
-    var norm=guessCrossfitSubtype(pre.subtype)||guessCrossfitSubtype(pre.notes);
+    var ej=obj.ejercicios||obj.exercises||obj.movimientos;if(Array.isArray(ej))ej=ej.join(' ');
+    var norm=guessCrossfitSubtype(pre.subtype)||guessCrossfitSubtype(String(ej||''));
     if(norm)pre.subtype=norm;
   }
   return pre;
+}
+// Normaliza un texto de tiempo a "MM:SS" si trae ":", o lo deja como minutos sueltos.
+function normalizeTimeStr(v){
+  if(!v)return '';
+  var str=String(v).trim();
+  var mc=str.match(/(\d{1,3})\s*:\s*(\d{1,2})/);
+  if(mc){var mm=parseInt(mc[1])||0,ss=parseInt(mc[2])||0;return (mm<10?'0'+mm:mm)+':'+(ss<10?'0'+ss:ss);}
+  var mn=str.match(/\d{1,3}/);
+  return mn?mn[0]:'';   // minutos sueltos
 }
 
 // Llama a la API de Gemini con la imagen (dataURL) y devuelve una Promesa con el buffer.
@@ -4607,11 +4606,13 @@ function analyzeImageWithGemini(dataUrl,fallbackText){
     var mime=m[1]||'image/jpeg';
     var b64=m[2];
     var prompt='Esta es la foto de la pizarra o pantalla de un entrenamiento (posible WOD de CrossFit, '+
-      'carrera, natación u otro deporte). Extrae los datos del entrenamiento y responde ÚNICAMENTE con un '+
-      'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si no aplica): '+
-      '{"deporte":"crossfit|carrera|piscina u otro nombre","tipo":"AMRAP/EMOM/For Time/Strength/continua/series/...",'+
-      '"duracion":"minutos como número","resultado":"tiempo o reps","distancia":"km o metros","fc_media":"","fc_max":"",'+
-      '"ejercicios":["lista breve de movimientos y reps"],"notas":"resumen corto"}.';
+      'carrera, natación u otro deporte). Extrae ÚNICAMENTE estos cuatro datos y responde SOLO con un '+
+      'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si el dato no aparece): '+
+      '{"deporte":"crossfit|carrera|piscina u otro nombre del deporte",'+
+      '"tipo":"AMRAP/EMOM/For Time/Strength/Skill/Olympic/Gymnastics/Hero WOD/Benchmark/continua/series...",'+
+      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos",'+
+      '"repeticiones":"número total de repeticiones o el esquema de reps (p.ej. 21-15-9), si aparece"}. '+
+      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". No incluyas frecuencia cardíaca, distancia ni notas.';
     var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
       generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
     var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(GEMINI_API_KEY);
@@ -4657,13 +4658,17 @@ function applyPendingPrefill(){
   var pre=_pendingPrefill;
   _pendingPrefill=null;
   function setVal(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null&&String(v)!=='')el.value=v;}
+  // La IA y el parser de texto SOLO rellenan: tipo, tiempo y repeticiones.
+  // Nunca escriben en NOTAS, FC MEDIA ni FC MÁX (campos exclusivamente manuales).
   setVal('actSubtype',pre.subtype);
-  setVal('actDuration',pre.duration);
-  setVal('actResult',pre.result);
-  setVal('actDistance',pre.distance);
-  setVal('actHRavg',pre.hrAvg);
-  setVal('actHRmax',pre.hrMax);
-  setVal('actNotes',pre.notes);
+  if(pre.sportId==='crossfit'){
+    // Tiempo va en la ruleta MM:SS; las repeticiones en el campo de texto.
+    setTimeWheel('actDur',pre.time);
+    setVal('actResult',pre.reps);
+  }else{
+    // Otros deportes mantienen su campo de duración en minutos.
+    setVal('actDuration',pre.time);
+  }
 }
 
 // Orquesta la precarga al marcar un día como hecho.
@@ -4677,7 +4682,7 @@ function prefillFromDay(dayId){
     var heroBtn=document.getElementById('wdayDoneHero');
     if(heroBtn){
       heroBtn.classList.add('busy');
-      heroBtn.innerHTML='<span class="wday-done-spin"></span><span>Leyendo foto con IA…<div class="wday-done-sub">Extrayendo datos del entrenamiento</div></span>';
+      heroBtn.innerHTML='<span class="wday-done-spin"></span> Leyendo…';
     }
     getPhotoData(rec.image).then(function(dataUrl){
       if(!dataUrl||dataUrl.indexOf('data:')!==0){
@@ -4709,8 +4714,51 @@ function prefillFromDay(dayId){
   }
 }
 
+// Formatea la duración de un entreno para mostrar: "MM:SS" se muestra tal cual,
+// un número suelto se interpreta como minutos.
+function fmtActivityDuration(d){
+  if(d===undefined||d===null||d==='')return '';
+  var str=String(d).trim();
+  if(str.indexOf(':')>=0)return str;            // ya es MM:SS
+  if(/^\d+(\.\d+)?$/.test(str))return str+'min';// número = minutos
+  return str;                                    // cualquier otro texto, tal cual
+}
+
+// Genera una ruleta de tiempo MM:SS (mismo estilo que las ruletas de la app).
+// idBase -> crea idBase+'Min' y idBase+'Sec'. selMin/selSec opcionales (números).
+function timeWheelHTML(idBase,selMin,selSec){
+  selMin=parseInt(selMin)||0;selSec=parseInt(selSec)||0;
+  var minOpts='';for(var m=0;m<=120;m++){minOpts+='<option value="'+m+'"'+(m===selMin?' selected':'')+'>'+(m<10?'0'+m:m)+'</option>';}
+  var secOpts='';for(var s=0;s<=59;s++){secOpts+='<option value="'+s+'"'+(s===selSec?' selected':'')+'>'+(s<10?'0'+s:s)+'</option>';}
+  return '<div class="sport-time-wheel">'+
+    '<select id="'+idBase+'Min" aria-label="minutos">'+minOpts+'</select>'+
+    '<span class="stw-colon">:</span>'+
+    '<select id="'+idBase+'Sec" aria-label="segundos">'+secOpts+'</select>'+
+  '</div>';
+}
+// Lee una ruleta de tiempo y devuelve "MM:SS" (o "" si está a 00:00).
+function readTimeWheel(idBase){
+  var mEl=document.getElementById(idBase+'Min');
+  var sEl=document.getElementById(idBase+'Sec');
+  if(!mEl||!sEl)return '';
+  var m=parseInt(mEl.value)||0;var s=parseInt(sEl.value)||0;
+  if(m===0&&s===0)return '';
+  return (m<10?'0'+m:m)+':'+(s<10?'0'+s:s);
+}
+// Coloca un valor "MM:SS" o un número de minutos en una ruleta de tiempo.
+function setTimeWheel(idBase,val){
+  var mEl=document.getElementById(idBase+'Min');
+  var sEl=document.getElementById(idBase+'Sec');
+  if(!mEl||!sEl||val===undefined||val===null||val==='')return;
+  var mm=0,ss=0;var str=String(val).trim();
+  if(str.indexOf(':')>=0){var p=str.split(':');mm=parseInt(p[0])||0;ss=parseInt(p[1])||0;}
+  else{mm=parseInt(str)||0;ss=0;}                 // número suelto = minutos
+  if(mm>120)mm=120;if(ss>59)ss=59;
+  mEl.value=mm;sEl.value=ss;
+}
+
 function setActType(t){actType=t;render();}
-function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:(document.getElementById('actDuration')||{}).value||'',result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);openRegistro('activity');render();}
+function addActivity(){var durVal;if(actType==='crossfit'){durVal=readTimeWheel('actDur');}else{durVal=(document.getElementById('actDuration')||{}).value||'';}var a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:durVal,result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);openRegistro('activity');render();}
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
 function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);openRegistro('records');render();}
 let recVideoData=null;
@@ -6334,7 +6382,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 20</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 21</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
