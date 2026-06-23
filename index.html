@@ -455,8 +455,8 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .maestro-loading,.maestro-error{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;color:var(--text-muted);padding:2px 0}
 .maestro-error{color:#f87171}
 /* Maestro chat page */
-.maestro-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);min-height:380px}
-.maestro-thread{flex:1;overflow-y:auto;padding:6px 2px 12px;display:flex;flex-direction:column;gap:10px}
+.maestro-wrap{display:flex;flex-direction:column;height:calc(100dvh - 250px);min-height:260px;max-height:calc(100dvh - 230px)}
+.maestro-thread{flex:1 1 auto;overflow-y:auto;padding:6px 2px 10px;display:flex;flex-direction:column;gap:10px;min-height:0}
 .maestro-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-family:var(--sans);font-size:13px;line-height:1.5;word-wrap:break-word}
 .maestro-user{align-self:flex-end;background:linear-gradient(135deg,rgba(96,165,250,0.22),rgba(96,165,250,0.12));border:1px solid rgba(96,165,250,0.3);color:#e8f0ff;border-bottom-right-radius:4px}
 .maestro-ai{align-self:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#e0e0e0;border-bottom-left-radius:4px}
@@ -4404,6 +4404,10 @@ function renderActividad(c){
       '</div>';
     }
   }
+  // WOD realizado (rellenado por IA desde foto/texto del día; editable a mano)
+  h+='<div class="input-group" style="margin-top:8px"><label>WOD REALIZADO <span style="color:#c084fc;font-weight:600;font-size:8.5px">✨ IA · editable</span></label>'+
+    '<textarea id="actWod" rows="2" placeholder="Descripción del WOD (ejercicios y reps). La IA lo rellena desde la foto o el texto del día; puedes corregirlo." style="width:100%;resize:vertical;min-height:42px;font-family:var(--sans);font-size:12px;line-height:1.4;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:9px;color:#fff;padding:8px 10px;outline:none;box-sizing:border-box"></textarea>'+
+  '</div>';
   // Notes + Add button in same row
   h+='<div class="row-with-add" style="margin-top:8px;align-items:flex-end">'+
     '<div class="input-group" style="flex:1"><label>NOTAS</label><input type="text" id="actNotes" placeholder="Cómo te sentiste..."></div>'+
@@ -4426,6 +4430,15 @@ function renderActividad(c){
         const col=sportColor(a.type);
         var out='<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
           '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?fmtActivityDuration(a.duration):'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
+        // WOD realizado (si se guardó).
+        if(a.wod){
+          out+='<div style="margin-top:5px;padding:6px 9px;background:rgba(192,132,252,0.06);border-left:2px solid rgba(192,132,252,0.4);border-radius:0 7px 7px 0;font-size:10.5px;color:#cbb6e8;font-family:var(--sans);line-height:1.45;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div>';
+        }
+        // Foto del WOD (si se guardó y sigue disponible; se conserva 4 meses).
+        if(a.photo){
+          var psrc=photoSrc(a.photo);
+          if(psrc)out+='<div style="margin-top:6px"><img src="'+psrc+'" alt="WOD" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:block"></div>';
+        }
         // Maestro: botón de análisis + análisis guardado (si existe).
         if(a.aiAnalysis){
           var ageDays=a.aiAnalysisAt?Math.floor((Date.now()-a.aiAnalysisAt)/(24*60*60*1000)):0;
@@ -4551,6 +4564,7 @@ function maestroKeydown(e){
 }
 // Open the training-registration block and scroll to it.
 function quickAddTraining(){
+  _pendingDayLink=null; // registro manual: sin vínculo a un día concreto
   store.collapsed.sport=false; // ensure expanded
   saveCollapsed();
   if(currentTab!=='actividad'){showTab('actividad');}
@@ -4650,6 +4664,7 @@ function activityLine(a){
   if(a.distance)parts.push('dist '+a.distance);
   if(a.hrAvg)parts.push('FC med '+a.hrAvg);
   if(a.hrMax)parts.push('FC máx '+a.hrMax);
+  if(a.wod)parts.push('WOD: '+String(a.wod).replace(/\s+/g,' ').slice(0,200));
   if(a.notes)parts.push('notas: '+a.notes);
   return '- '+parts.join(' · ');
 }
@@ -4702,6 +4717,20 @@ function purgeOldAnalyses(){
   store.activity.forEach(function(a){
     if(a.aiAnalysis&&a.aiAnalysisAt&&(now-a.aiAnalysisAt>ANALYSIS_TTL)){
       delete a.aiAnalysis;delete a.aiAnalysisAt;changed=true;
+    }
+  });
+  if(changed)save('activity',store.activity);
+  return changed;
+}
+// Las fotos asociadas a registros se conservan 4 meses; pasado ese tiempo se borran
+// de IndexedDB y se quita la referencia del registro (el resto de datos se mantiene).
+var ACTIVITY_PHOTO_TTL=122*24*60*60*1000; // ~4 meses
+function purgeOldActivityPhotos(){
+  var now=Date.now(),changed=false;
+  store.activity.forEach(function(a){
+    if(a.photo&&a.photoSavedAt&&(now-a.photoSavedAt>ACTIVITY_PHOTO_TTL)){
+      if(typeof a.photo==='string'&&a.photo.indexOf('img:')===0){try{deletePhotoData(a.photo);}catch(e){}}
+      delete a.photo;delete a.photoSavedAt;changed=true;
     }
   });
   if(changed)save('activity',store.activity);
@@ -4793,6 +4822,9 @@ var GEMINI_MODEL='gemini-2.5-flash';
 // Buffer con los datos a volcar en el formulario en el próximo render().
 // Estructura: {sportId, subtype, runType, duration, result, distance, hrAvg, hrMax, notes}
 var _pendingPrefill=null;
+// Vínculo pendiente entre el día de la programación y el próximo registro creado.
+// {dayId, photoRef} -> lo consume addActivity para asociar día + copiar la foto.
+var _pendingDayLink=null;
 
 // Mapa de sinónimos para detectar el deporte a partir de texto libre.
 function guessSportId(text){
@@ -4836,12 +4868,13 @@ function firstNumber(text){
 // Construye el buffer de precarga a partir del texto del día (heurístico, sin red).
 function buildPrefillFromText(text){
   var sportId=guessSportId(text)||(store.sports[0]||{}).id||'crossfit';
-  // Igual que la IA: solo deporte, tipo, tiempo y repeticiones. Sin notas ni FC.
-  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',aiOnly:true};
+  // Igual que la IA: solo deporte, tipo, tiempo. Sin notas ni FC.
+  // El WOD realizado es el propio texto del día (lo que el usuario planificó).
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',wod:(text||'').trim(),aiOnly:true};
   if(sportId==='crossfit'){
     pre.subtype=guessCrossfitSubtype(text);
-    // Tiempo: primero "MM:SS", si no, "NN min".
-    var mc=text.match(/(\d{1,3})\s*:\s*(\d{1,2})/);
+    // Tiempo: primero "MM:SS" (formato reloj, sin espacios), si no, "NN min".
+    var mc=text.match(/\b(\d{1,3}):([0-5]\d)\b/);
     if(mc){pre.time=normalizeTimeStr(mc[0]);}
     else{var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);if(md)pre.time=md[1];}
   }else if(sportId==='carrera'){
@@ -4864,12 +4897,16 @@ function buildPrefillFromAI(obj,fallbackText){
   var sportId=guessSportId(rawSport)||guessSportId(fallbackText)||(store.sports[0]||{}).id||'crossfit';
   // La IA SOLO rellena: deporte, tipo y tiempo.
   // Nunca toca repeticiones, notas, FC media ni FC máx (esos quedan manuales).
-  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',aiOnly:true};
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',wod:'',aiOnly:true};
   function pick(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return '';}
   pre.subtype=pick(obj.tipo,obj.subtype,obj.subtipo);
   // Tiempo: aceptamos "MM:SS" tal cual, o minutos sueltos.
   var rawTime=pick(obj.tiempo,obj.duracion,obj.duración,obj.duration,obj.tiempo_total,obj.time);
   pre.time=normalizeTimeStr(rawTime);
+  // WOD realizado: descripción de ejercicios/reps que la IA lee de la pizarra.
+  var ejArr=obj.ejercicios||obj.exercises||obj.movimientos;
+  if(Array.isArray(ejArr))ejArr=ejArr.join('\n');
+  pre.wod=pick(obj.wod,obj.descripcion,obj.descripción,ejArr,obj.workout);
   // Para CrossFit, normaliza el subtipo a uno de los valores del desplegable.
   if(sportId==='crossfit'&&pre.subtype){
     var ej=obj.ejercicios||obj.exercises||obj.movimientos;if(Array.isArray(ej))ej=ej.join(' ');
@@ -4899,12 +4936,13 @@ function analyzeImageWithGemini(dataUrl,fallbackText){
     var mime=m[1]||'image/jpeg';
     var b64=m[2];
     var prompt='Esta es la foto de la pizarra o pantalla de un entrenamiento (posible WOD de CrossFit, '+
-      'carrera, natación u otro deporte). Extrae ÚNICAMENTE estos tres datos y responde SOLO con un '+
+      'carrera, natación u otro deporte). Extrae los datos y responde SOLO con un '+
       'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si el dato no aparece): '+
       '{"deporte":"crossfit|carrera|piscina u otro nombre del deporte",'+
       '"tipo":"AMRAP/EMOM/For Time/Strength/Skill/Olympic/Gymnastics/Hero WOD/Benchmark/continua/series...",'+
-      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos"}. '+
-      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". No incluyas repeticiones, frecuencia cardíaca, distancia ni notas.';
+      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos",'+
+      '"wod":"descripción completa del WOD tal y como aparece en la pizarra: ejercicios, repeticiones y pesos, usa saltos de línea si hace falta"}. '+
+      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". El campo wod debe reflejar fielmente lo que pone la pizarra. No incluyas frecuencia cardíaca ni notas personales.';
     var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
       generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
     var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(apiKey);
@@ -4950,9 +4988,10 @@ function applyPendingPrefill(){
   var pre=_pendingPrefill;
   _pendingPrefill=null;
   function setVal(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null&&String(v)!=='')el.value=v;}
-  // La IA y el parser de texto SOLO rellenan: deporte, tipo y tiempo.
+  // La IA y el parser de texto rellenan: deporte, tipo, tiempo y WOD realizado.
   // Nunca escriben en REPETICIONES, NOTAS, FC MEDIA ni FC MÁX (todos manuales).
   setVal('actSubtype',pre.subtype);
+  setVal('actWod',pre.wod);
   if(pre.sportId==='crossfit'){
     // Tiempo va en la ruleta MM:SS. Las repeticiones quedan manuales.
     setTimeWheel('actDur',pre.time);
@@ -4967,7 +5006,12 @@ function prefillFromDay(dayId){
   var rec=store.weeklyPlan[dayId]||{};
   var hasImage=!!rec.image;
   var hasText=!!(rec.text&&rec.text.trim());
-  if(!hasImage&&!hasText)return; // nada que precargar
+  if(!hasImage&&!hasText){
+    // Sin datos: marcamos el enlace al día igualmente (sin foto) por si se registra a mano luego.
+    return;
+  }
+  // Guardamos el vínculo al día para asociarlo al registro cuando se cree.
+  _pendingDayLink={dayId:dayId,photoRef:rec.image||null};
   if(hasImage){
     // Si no hay clave de Gemini configurada, avisamos y caemos al texto si existe.
     if(!getGeminiKey()){
@@ -5059,7 +5103,47 @@ function setTimeWheel(idBase,val){
 }
 
 function setActType(t){actType=t;render();}
-function addActivity(){var durVal;if(actType==='crossfit'){durVal=readTimeWheel('actDur');}else{durVal=(document.getElementById('actDuration')||{}).value||'';}var a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:durVal,result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);openRegistro('activity');render();}
+function addActivity(){
+  var durVal;
+  if(actType==='crossfit'){durVal=readTimeWheel('actDur');}else{durVal=(document.getElementById('actDuration')||{}).value||'';}
+  var a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,
+    subtype:(document.getElementById('actSubtype')||{}).value||'',
+    duration:durVal,
+    result:(document.getElementById('actResult')||{}).value||'',
+    distance:(document.getElementById('actDistance')||{}).value||'',
+    hrAvg:(document.getElementById('actHRavg')||{}).value||'',
+    hrMax:(document.getElementById('actHRmax')||{}).value||'',
+    wod:(document.getElementById('actWod')||{}).value||'',
+    notes:(document.getElementById('actNotes')||{}).value||''};
+  if(!a.date)return alert('Selecciona fecha');
+  // Asociación con el día de la programación (si el registro vino de "marcar día").
+  var link=_pendingDayLink;_pendingDayLink=null;
+  function finish(){
+    store.activity.push(a);
+    save('activity',store.activity);
+    openRegistro('activity');
+    render();
+  }
+  if(link&&link.dayId){
+    a.dayId=link.dayId;
+    if(link.photoRef){
+      // Copiamos la foto del día a una entrada propia del registro, con marca temporal
+      // para conservarla 4 meses (luego se purga). Así sobrevive aunque se edite el día.
+      getPhotoData(link.photoRef).then(function(dataUrl){
+        if(dataUrl&&typeof dataUrl==='string'&&dataUrl.indexOf('data:')===0){
+          savePhotoData(dataUrl).then(function(newRef){
+            a.photo=newRef;a.photoSavedAt=Date.now();finish();
+          }).catch(function(){finish();});
+        }else if(dataUrl&&typeof dataUrl==='string'){
+          // Legacy/URL: guardamos la referencia directamente.
+          a.photo=dataUrl;a.photoSavedAt=Date.now();finish();
+        }else{finish();}
+      }).catch(function(){finish();});
+      return;
+    }
+  }
+  finish();
+}
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
 function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);openRegistro('records');render();}
 let recVideoData=null;
@@ -6703,7 +6787,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 23</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 24</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7329,8 +7413,9 @@ function migrateLegacyPhotos(){
 }
 
 renderNav();
-// Limpia análisis de Maestro caducados (>1 semana) antes de mostrar nada.
+// Limpia análisis de Maestro caducados (>1 semana) y fotos de registros (>4 meses).
 try{purgeOldAnalyses();}catch(e){}
+try{purgeOldActivityPhotos();}catch(e){}
 showTab('panel');
 // Move old inline photos to IndexedDB (frees localStorage), then init cloud sync.
 migrateLegacyPhotos();
