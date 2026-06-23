@@ -433,7 +433,17 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .wday-view-btn{font-family:var(--sans);font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:8px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.03);color:#ccc;cursor:pointer;transition:all 0.15s;white-space:nowrap}
 .wday-view-btn:active{transform:scale(0.95)}
 .wday-view-btn.add{color:var(--accent);border-color:rgba(167,243,208,0.3)}
-.wday-view-btn.done.active{background:rgba(52,211,153,0.16);border-color:#34d399;color:#34d399}
+/* Hero "Marcar" button — the primary action of the weekly viewer */
+.wday-done-hero{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.3px;padding:13px 16px;border-radius:13px;border:1.5px solid #34d399;background:linear-gradient(135deg,rgba(52,211,153,0.18),rgba(16,185,129,0.10));color:#6ee7b7;cursor:pointer;transition:all 0.18s ease;box-shadow:0 2px 14px rgba(52,211,153,0.12);position:relative;overflow:hidden}
+.wday-done-hero:active{transform:scale(0.975)}
+.wday-done-hero .wday-done-ic{font-size:17px;line-height:1;display:flex;align-items:center}
+.wday-done-hero .wday-done-sub{font-size:10px;font-weight:500;opacity:0.75;letter-spacing:0.2px}
+.wday-done-hero.active{background:linear-gradient(135deg,rgba(52,211,153,0.30),rgba(16,185,129,0.18));color:#fff;box-shadow:0 3px 20px rgba(52,211,153,0.28)}
+.wday-done-hero.active .wday-done-sub{opacity:0.85}
+.wday-done-hero.busy{pointer-events:none;opacity:0.92}
+.wday-done-spin{width:15px;height:15px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:wdaySpin 0.7s linear infinite;display:inline-block}
+@keyframes wdaySpin{to{transform:rotate(360deg)}}
+.wday-ai-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;color:#c084fc;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.3);border-radius:6px;padding:2px 6px;margin-left:4px;letter-spacing:0.2px}
 .wday-view-body{width:100%}
 .wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
 .wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
@@ -4256,15 +4266,26 @@ function renderActividad(c){
     }else{
       body='<div class="wday-view-empty" onclick="openDayEditor(\''+sd.id+'\')">Sin entrenamiento. Pulsa <b>+ Añadir</b> para cargar foto o texto.</div>';
     }
+    var doneSubLabel;
+    if(sdCompleted){doneSubLabel='Toca para desmarcar';}
+    else if(sdHasImage){doneSubLabel='Precarga el registro leyendo la foto';}
+    else if(sdHasText){doneSubLabel='Precarga el registro con el texto';}
+    else{doneSubLabel='Sin datos · solo marca como hecho';}
     viewer='<div class="wday-viewer">'+
       '<div class="wday-view-head">'+
         '<span class="wday-view-date'+(sd.id===todayId?' is-today':'')+'">'+sdDateLabel+(sd.id===todayId?' · HOY':'')+'</span>'+
         '<div class="wday-view-actions">'+
           '<button class="wday-view-btn add" onclick="openDayEditor(\''+sd.id+'\')" title="Añadir o editar">＋ '+(sdHasText||sdHasImage?'Editar':'Añadir')+'</button>'+
-          '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado">'+(sdCompleted?'✓ Hecho':'○ Marcar')+'</button>'+
         '</div>'+
       '</div>'+
       '<div class="wday-view-body">'+body+'</div>'+
+      '<button class="wday-done-hero'+(sdCompleted?' active':'')+'" id="wdayDoneHero" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado y precargar registro">'+
+        '<span class="wday-done-ic">'+(sdCompleted?'✓':'○')+'</span>'+
+        '<span>'+(sdCompleted?'Entrenamiento hecho':'Marcar como hecho')+
+          (!sdCompleted&&sdHasImage?'<span class="wday-ai-badge">✨ IA</span>':'')+
+          '<div class="wday-done-sub">'+doneSubLabel+'</div>'+
+        '</span>'+
+      '</button>'+
     '</div>';
   }
 
@@ -4460,6 +4481,8 @@ function renderActividad(c){
   h+='<button class="fab-train" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">+</button>';
 
   c.innerHTML=h;
+  // Si hay datos de precarga pendientes (al marcar un día como hecho), vuélcalos ahora.
+  applyPendingPrefill();
 }
 // Open the training-registration block and scroll to it.
 function quickAddTraining(){
@@ -4471,6 +4494,219 @@ function quickAddTraining(){
     const el=document.getElementById('sportBlockTitle');
     if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   },150);
+}
+
+// ============ AUTO-PRECARGA DE ENTRENAMIENTO (texto + Gemini visión) ============
+// Al marcar un día como "hecho", intentamos precargar el formulario de "Registrar
+// entrenamiento": si el día tiene foto, la analizamos con Gemini; si solo tiene
+// texto, lo parseamos heurísticamente; si no hay nada, no se precarga nada.
+var GEMINI_API_KEY='AQ.Ab8RN6L9HHK1j6pgxDz0zWfBscTPEqEJFAlxUuxc0108yY9iNw';
+var GEMINI_MODEL='gemini-2.5-flash';
+
+// Buffer con los datos a volcar en el formulario en el próximo render().
+// Estructura: {sportId, subtype, runType, duration, result, distance, hrAvg, hrMax, notes}
+var _pendingPrefill=null;
+
+// Mapa de sinónimos para detectar el deporte a partir de texto libre.
+function guessSportId(text){
+  if(!text)return null;
+  var t=text.toLowerCase();
+  // Primero, intenta casar con los deportes definidos por el usuario.
+  for(var i=0;i<store.sports.length;i++){
+    var sp=store.sports[i];
+    if(t.indexOf(sp.name.toLowerCase())>=0)return sp.id;
+  }
+  // Después, sinónimos comunes hacia los ids por defecto.
+  if(/wod|crossfit|amrap|emom|for time|hero|benchmark|metcon|box jump|thruster|snatch|clean|jerk|burpee/.test(t))return 'crossfit';
+  if(/carrera|correr|running|run|trote|rodaje|series|km|maratón|maraton|trail/.test(t))return 'carrera';
+  if(/piscina|natación|natacion|swim|nadar|crol|braza|espalda|mariposa|largos/.test(t))return 'piscina';
+  return null;
+}
+
+// Detecta el subtipo de CrossFit a partir de texto.
+function guessCrossfitSubtype(text){
+  if(!text)return '';
+  var t=text.toLowerCase();
+  if(/amrap/.test(t))return 'AMRAP';
+  if(/emom/.test(t))return 'EMOM';
+  if(/for ?time|por tiempo/.test(t))return 'For Time';
+  if(/hero/.test(t))return 'Hero WOD';
+  if(/benchmark|girl|fran|cindy|murph|helen|grace/.test(t))return 'Benchmark';
+  if(/strength|fuerza|1rm|3rm|5rm/.test(t))return 'Strength';
+  if(/skill|técnica|tecnica/.test(t))return 'Skill';
+  if(/olympic|olímpico|olimpico|snatch|clean.*jerk/.test(t))return 'Olympic';
+  if(/gymnastics|gimnásticos|gimnasticos|muscle.?up|handstand/.test(t))return 'Gymnastics';
+  return '';
+}
+
+// Extrae un primer número entero (minutos, etc.) de un texto.
+function firstNumber(text){
+  if(!text)return '';
+  var m=String(text).match(/\d{1,4}/);
+  return m?m[0]:'';
+}
+
+// Construye el buffer de precarga a partir del texto del día (heurístico, sin red).
+function buildPrefillFromText(text){
+  var sportId=guessSportId(text)||(store.sports[0]||{}).id||'crossfit';
+  var pre={sportId:sportId,subtype:'',runType:'continua',duration:'',result:'',distance:'',hrAvg:'',hrMax:'',notes:''};
+  // Nota: guardamos el texto original como notas para no perder contexto.
+  pre.notes=text.replace(/\s+/g,' ').trim().slice(0,120);
+  if(sportId==='crossfit'){
+    pre.subtype=guessCrossfitSubtype(text);
+    // Si hay un patrón "NN min" lo usamos como duración.
+    var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);
+    if(md)pre.duration=md[1];
+  }else if(sportId==='carrera'){
+    if(/series|x\s*\d{2,4}\s*m/i.test(text))pre.runType='series';
+    var mk=text.match(/(\d{1,3}(?:[.,]\d)?)\s*k(?:m|ms)?\b/i);
+    if(mk)pre.distance=mk[1].replace(',','.');
+    var mt=text.match(/(\d{1,3})\s*(min|')/i);
+    if(mt)pre.duration=mt[1];
+  }else if(sportId==='piscina'){
+    var mpd=text.match(/(\d{3,5})\s*m\b/i);          // metros (3-5 dígitos)
+    if(mpd)pre.distance=mpd[1];
+    var mpt=text.match(/(\d{1,3})\s*(min|minutos|')/i);
+    if(mpt)pre.duration=mpt[1];
+  }else{
+    var mn=firstNumber(text);
+    if(mn)pre.duration=mn;
+  }
+  return pre;
+}
+
+// Normaliza la respuesta JSON de Gemini al buffer de precarga.
+function buildPrefillFromAI(obj,fallbackText){
+  var rawSport=(obj.deporte||obj.sport||'').toString();
+  var sportId=guessSportId(rawSport)||guessSportId(fallbackText)||(store.sports[0]||{}).id||'crossfit';
+  var pre={sportId:sportId,subtype:'',runType:'continua',duration:'',result:'',distance:'',hrAvg:'',hrMax:'',notes:''};
+  function pick(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return '';}
+  pre.subtype=pick(obj.tipo,obj.subtype,obj.subtipo);
+  pre.duration=firstNumber(pick(obj.duracion,obj.duración,obj.duration,obj.tiempo_total));
+  pre.result=pick(obj.resultado,obj.result,obj.tiempo,obj.marca,obj.reps,obj.repeticiones);
+  pre.distance=pick(obj.distancia,obj.distance);
+  pre.hrAvg=firstNumber(pick(obj.fc_media,obj.fcMedia,obj.hr_avg,obj.pulso_medio));
+  pre.hrMax=firstNumber(pick(obj.fc_max,obj.fcMax,obj.hr_max,obj.pulso_max));
+  var ej=obj.ejercicios||obj.exercises||obj.movimientos;
+  if(Array.isArray(ej))ej=ej.join(', ');
+  pre.notes=pick(obj.notas,obj.notes,ej,fallbackText).replace(/\s+/g,' ').slice(0,180);
+  // Para CrossFit, normaliza el subtipo a uno de los valores del desplegable.
+  if(sportId==='crossfit'&&pre.subtype){
+    var norm=guessCrossfitSubtype(pre.subtype)||guessCrossfitSubtype(pre.notes);
+    if(norm)pre.subtype=norm;
+  }
+  return pre;
+}
+
+// Llama a la API de Gemini con la imagen (dataURL) y devuelve una Promesa con el buffer.
+function analyzeImageWithGemini(dataUrl,fallbackText){
+  return new Promise(function(resolve,reject){
+    // dataUrl = "data:image/jpeg;base64,...." -> separamos mime y datos.
+    var m=/^data:(.*?);base64,(.*)$/.exec(dataUrl||'');
+    if(!m){reject(new Error('Imagen no válida'));return;}
+    var mime=m[1]||'image/jpeg';
+    var b64=m[2];
+    var prompt='Esta es la foto de la pizarra o pantalla de un entrenamiento (posible WOD de CrossFit, '+
+      'carrera, natación u otro deporte). Extrae los datos del entrenamiento y responde ÚNICAMENTE con un '+
+      'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si no aplica): '+
+      '{"deporte":"crossfit|carrera|piscina u otro nombre","tipo":"AMRAP/EMOM/For Time/Strength/continua/series/...",'+
+      '"duracion":"minutos como número","resultado":"tiempo o reps","distancia":"km o metros","fc_media":"","fc_max":"",'+
+      '"ejercicios":["lista breve de movimientos y reps"],"notas":"resumen corto"}.';
+    var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
+      generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(GEMINI_API_KEY);
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){
+        if(!r.ok)return r.text().then(function(t){throw new Error('Gemini '+r.status+': '+t.slice(0,160));});
+        return r.json();
+      })
+      .then(function(data){
+        var txt='';
+        try{txt=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');}catch(e){}
+        if(!txt)throw new Error('Respuesta vacía de Gemini');
+        // Limpia posibles vallas ```json
+        txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+        var obj;
+        try{obj=JSON.parse(txt);}catch(e){
+          var jm=txt.match(/\{[\s\S]*\}/);
+          if(jm){obj=JSON.parse(jm[0]);}else{throw new Error('JSON no parseable');}
+        }
+        resolve(buildPrefillFromAI(obj,fallbackText));
+      })
+      .catch(reject);
+  });
+}
+
+// Abre el bloque de registro y vuelca el buffer en los campos (tras el render()).
+function openRegistroWithPrefill(pre){
+  _pendingPrefill=pre;
+  if(pre&&pre.sportId)actType=pre.sportId;
+  if(pre&&pre.runType)runType=pre.runType;
+  store.collapsed.sport=false;
+  saveCollapsed();
+  if(currentTab!=='actividad'){showTab('actividad');}else{render();}
+  setTimeout(function(){
+    var el=document.getElementById('sportBlockTitle');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },180);
+}
+
+// Aplica el buffer pendiente a los inputs del formulario. Llamada desde render().
+function applyPendingPrefill(){
+  if(!_pendingPrefill)return;
+  var pre=_pendingPrefill;
+  _pendingPrefill=null;
+  function setVal(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null&&String(v)!=='')el.value=v;}
+  setVal('actSubtype',pre.subtype);
+  setVal('actDuration',pre.duration);
+  setVal('actResult',pre.result);
+  setVal('actDistance',pre.distance);
+  setVal('actHRavg',pre.hrAvg);
+  setVal('actHRmax',pre.hrMax);
+  setVal('actNotes',pre.notes);
+}
+
+// Orquesta la precarga al marcar un día como hecho.
+function prefillFromDay(dayId){
+  var rec=store.weeklyPlan[dayId]||{};
+  var hasImage=!!rec.image;
+  var hasText=!!(rec.text&&rec.text.trim());
+  if(!hasImage&&!hasText)return; // nada que precargar
+  if(hasImage){
+    // Marca el botón como ocupado mientras Gemini procesa.
+    var heroBtn=document.getElementById('wdayDoneHero');
+    if(heroBtn){
+      heroBtn.classList.add('busy');
+      heroBtn.innerHTML='<span class="wday-done-spin"></span><span>Leyendo foto con IA…<div class="wday-done-sub">Extrayendo datos del entrenamiento</div></span>';
+    }
+    getPhotoData(rec.image).then(function(dataUrl){
+      if(!dataUrl||dataUrl.indexOf('data:')!==0){
+        // Sin bytes utilizables (p.ej. solo referencia remota); cae a texto si hay.
+        if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
+        else{alert('No se pudo leer la foto para analizarla.');render();}
+        return;
+      }
+      analyzeImageWithGemini(dataUrl,rec.text||'')
+        .then(function(pre){openRegistroWithPrefill(pre);})
+        .catch(function(err){
+          console.warn('Gemini',err);
+          // Fallback: si falla la IA, usamos el texto del día si existe.
+          if(hasText){
+            alert('No se pudo analizar la foto con IA ('+(err.message||'error')+').\nSe precargará con el texto del día.');
+            openRegistroWithPrefill(buildPrefillFromText(rec.text));
+          }else{
+            alert('No se pudo analizar la foto con IA: '+(err.message||'error')+'\n\nRevisa tu conexión o la clave de Gemini. El entrenamiento queda marcado igualmente.');
+            render();
+          }
+        });
+    }).catch(function(){
+      if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
+      else{render();}
+    });
+  }else{
+    // Solo texto: precarga heurística instantánea.
+    openRegistroWithPrefill(buildPrefillFromText(rec.text));
+  }
 }
 
 function setActType(t){actType=t;render();}
@@ -4548,9 +4784,16 @@ function toggleCalendarSync(el){store.weeklyPlan.calendarSync=!store.weeklyPlan.
 
 function toggleDayDone(dayId){
   if(!store.weeklyPlan[dayId])store.weeklyPlan[dayId]={text:'',image:null,done:false};
-  store.weeklyPlan[dayId].done=!store.weeklyPlan[dayId].done;
+  var wasDone=store.weeklyPlan[dayId].done===true;
+  store.weeklyPlan[dayId].done=!wasDone;
   saveWeekly();
-  render();
+  // Solo al marcar (no al desmarcar) intentamos precargar el registro de entrenamiento.
+  if(!wasDone){
+    render();
+    prefillFromDay(dayId);
+  }else{
+    render();
+  }
 }
 
 function clearDayText(dayId){
@@ -6091,7 +6334,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 19</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 20</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
