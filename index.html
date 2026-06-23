@@ -1270,7 +1270,7 @@ if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
 // Weather defaults to automatic
 if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
 // Sun + settings blocks collapsed by default (graph always visible)
-['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog'].forEach(function(k){
+['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setai','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog'].forEach(function(k){
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
@@ -4491,7 +4491,49 @@ function quickAddTraining(){
 // Al marcar un día como "hecho", intentamos precargar el formulario de "Registrar
 // entrenamiento": si el día tiene foto, la analizamos con Gemini; si solo tiene
 // texto, lo parseamos heurísticamente; si no hay nada, no se precarga nada.
-var GEMINI_API_KEY='AQ.Ab8RN6L9HHK1j6pgxDz0zWfBscTPEqEJFAlxUuxc0108yY9iNw';
+// Clave de Gemini: se introduce manualmente en Ajustes y se guarda SOLO en este
+// dispositivo (localStorage 'h_geminiKey'). No se sincroniza ni se incluye en las
+// exportaciones, por seguridad. Cada dispositivo usa su propia clave.
+function getGeminiKey(){try{return localStorage.getItem('h_geminiKey')||'';}catch(e){return '';}}
+function setGeminiKey(k){try{if(k){localStorage.setItem('h_geminiKey',k);}else{localStorage.removeItem('h_geminiKey');}}catch(e){}}
+// Guarda la clave introducida en Ajustes (solo en este dispositivo).
+function saveGeminiKey(){
+  var el=document.getElementById('geminiKeyInput');
+  var k=el?el.value.trim():'';
+  if(!k){alert('Pega tu clave de Gemini antes de guardar.');return;}
+  setGeminiKey(k);
+  render();
+}
+function clearGeminiKey(){
+  if(!confirm('¿Quitar la clave de Gemini de este dispositivo?'))return;
+  setGeminiKey('');
+  render();
+}
+// Hace una llamada mínima a Gemini para comprobar que la clave funciona.
+function testGeminiKey(){
+  var k=getGeminiKey();
+  if(!k){alert('No hay clave guardada.');return;}
+  var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(k);
+  var body={contents:[{parts:[{text:'Responde solo: OK'}]}]};
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.ok){alert('✓ Conexión correcta. La clave de Gemini funciona.');return;}
+      return r.text().then(function(t){
+        if(r.status===400||r.status===403){alert('✗ La clave no es válida o está bloqueada (error '+r.status+').\nGenera una nueva en aistudio.google.com e introdúcela de nuevo.');}
+        else{alert('✗ Error '+r.status+': '+t.slice(0,160));}
+      });
+    })
+    .catch(function(err){alert('✗ No se pudo conectar: '+(err.message||'error')+'\nRevisa tu conexión a internet.');});
+}
+function showGeminiHelp(){
+  alert('Cómo obtener tu clave de Gemini (gratis, ~2 min):\n\n'+
+    '1. Entra en aistudio.google.com con tu cuenta de Google.\n'+
+    '2. Pulsa "Get API key" / "Obtener clave de API" (arriba a la izquierda).\n'+
+    '3. "Create API key" / "Crear clave de API". Si te pide un proyecto, crea uno o usa el que haya.\n'+
+    '4. Copia la clave que aparece.\n'+
+    '5. Vuelve aquí, pégala en el campo y pulsa "Guardar clave".\n\n'+
+    'La clave es gratuita (con límites de uso amplios para uso personal) y se guarda solo en este dispositivo. Puedes revocarla o crear otra en cualquier momento desde aistudio.google.com.');
+}
 var GEMINI_MODEL='gemini-2.5-flash';
 
 // Buffer con los datos a volcar en el formulario en el próximo render().
@@ -4600,6 +4642,8 @@ function normalizeTimeStr(v){
 // Llama a la API de Gemini con la imagen (dataURL) y devuelve una Promesa con el buffer.
 function analyzeImageWithGemini(dataUrl,fallbackText){
   return new Promise(function(resolve,reject){
+    var apiKey=getGeminiKey();
+    if(!apiKey){reject(new Error('Falta la clave de Gemini. Ve a Ajustes → Análisis con IA para introducirla.'));return;}
     // dataUrl = "data:image/jpeg;base64,...." -> separamos mime y datos.
     var m=/^data:(.*?);base64,(.*)$/.exec(dataUrl||'');
     if(!m){reject(new Error('Imagen no válida'));return;}
@@ -4615,7 +4659,7 @@ function analyzeImageWithGemini(dataUrl,fallbackText){
       'No inventes datos: si un campo no se ve en la imagen, déjalo como "". No incluyas frecuencia cardíaca, distancia ni notas.';
     var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
       generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
-    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(GEMINI_API_KEY);
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(apiKey);
     fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
       .then(function(r){
         if(!r.ok)return r.text().then(function(t){throw new Error('Gemini '+r.status+': '+t.slice(0,160));});
@@ -4678,6 +4722,16 @@ function prefillFromDay(dayId){
   var hasText=!!(rec.text&&rec.text.trim());
   if(!hasImage&&!hasText)return; // nada que precargar
   if(hasImage){
+    // Si no hay clave de Gemini configurada, avisamos y caemos al texto si existe.
+    if(!getGeminiKey()){
+      if(hasText){
+        openRegistroWithPrefill(buildPrefillFromText(rec.text));
+      }else{
+        alert('Para analizar la foto con IA necesitas introducir tu clave de Gemini en Ajustes → 🤖 Análisis con IA.\n\nEl entrenamiento queda marcado igualmente.');
+        render();
+      }
+      return;
+    }
     // Marca el botón como ocupado mientras Gemini procesa.
     var heroBtn=document.getElementById('wdayDoneHero');
     if(heroBtn){
@@ -6307,6 +6361,26 @@ function renderAjustes(c){
         '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan solo en este dispositivo (localStorage). Vaciar la caché del navegador <b>puede</b> borrarlos; exporta una copia antes. Esta app pedirá confirmación antes de borrar nada.</p>'+
       '</div>'+
     '</div>'+
+    // AI analysis (Gemini key)
+    '<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'setai\')"><div class="card-title-text"><span>🤖 ANÁLISIS CON IA</span></div><button class="collapse-btn">'+(store.collapsed.setai?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(store.collapsed.setai?' collapsed':'')+'">'+
+        '<div style="font-size:11px;color:var(--text-muted);margin:6px 0 8px;font-family:var(--sans);line-height:1.5">Al marcar un entrenamiento con foto, la app puede leer la pizarra del WOD con IA (Google Gemini) y precargar deporte, tipo, tiempo y repeticiones.</div>'+
+        (getGeminiKey()?
+          '<div style="display:flex;align-items:center;gap:8px;background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:9px 11px;margin-bottom:8px">'+
+            '<span style="font-size:15px">✓</span>'+
+            '<div style="font-family:var(--sans);font-size:12px;font-weight:600;color:#6ee7b7">Clave de Gemini configurada</div>'+
+          '</div>'+
+          '<button class="btn btn-secondary" onclick="testGeminiKey()" style="margin-bottom:6px;font-size:12px">🔌 Probar conexión</button>'+
+          '<button class="btn btn-secondary" onclick="clearGeminiKey()" style="font-size:11px;padding:6px">Quitar clave</button>'
+          :
+          '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Necesitas una clave de API de Google Gemini (gratuita). <span class="fast-time-set-btn" onclick="showGeminiHelp()">Ver cómo →</span></p>'+
+          '<input type="password" id="geminiKeyInput" placeholder="Pega aquí tu clave de Gemini" autocomplete="off" style="font-size:12px;margin-bottom:6px">'+
+          '<button class="btn btn-primary" onclick="saveGeminiKey()" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">✨ Guardar clave</button>'
+        )+
+        '<p style="font-size:9px;color:var(--text-dim);margin-top:8px;line-height:1.45;font-family:var(--serif);font-style:italic">Por seguridad, la clave se guarda <b>solo en este dispositivo</b> y no se sincroniza ni se incluye en las copias de seguridad. Si usas la app en otro dispositivo, tendrás que introducirla allí también.</p>'+
+      '</div>'+
+    '</div>'+
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setloc\')"><div class="card-title-text"><span>📍 UBICACIÓN</span></div><button class="collapse-btn">'+(store.collapsed.setloc?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setloc?' collapsed':'')+'">'+
@@ -6382,7 +6456,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 21</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 22</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
