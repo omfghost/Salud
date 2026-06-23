@@ -444,6 +444,30 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .wday-done-spin{width:11px;height:11px;border:2px solid rgba(255,255,255,0.25);border-top-color:#34d399;border-radius:50%;animation:wdaySpin 0.7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes wdaySpin{to{transform:rotate(360deg)}}
 .wday-ai-badge{display:inline-flex;align-items:center;gap:2px;font-size:8.5px;font-weight:700;color:#c084fc;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.35);border-radius:5px;padding:1px 4px;margin-left:5px;letter-spacing:0.2px;vertical-align:middle}
+/* Maestro (AI coach) */
+.maestro-analyze-btn{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:10px;font-weight:600;color:#c084fc;background:rgba(192,132,252,0.10);border:1px solid rgba(192,132,252,0.3);border-radius:7px;padding:3px 8px;cursor:pointer;transition:all 0.15s;margin-top:6px}
+.maestro-analyze-btn:active{transform:scale(0.96)}
+.maestro-analysis-box{margin-top:8px;background:linear-gradient(135deg,rgba(192,132,252,0.08),rgba(167,139,250,0.04));border:1px solid rgba(192,132,252,0.25);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:11.5px;line-height:1.55;color:#ddd}
+.maestro-analysis-box .ma-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.maestro-analysis-box .ma-title{font-size:10px;font-weight:700;color:#c084fc;letter-spacing:0.4px;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.maestro-analysis-box .ma-clear{font-size:13px;color:var(--text-dim);cursor:pointer;background:none;border:none;padding:0 2px}
+.maestro-analysis-box .ma-expiry{font-size:8.5px;color:var(--text-dim);font-style:italic;margin-top:6px;font-family:var(--serif)}
+.maestro-loading,.maestro-error{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;color:var(--text-muted);padding:2px 0}
+.maestro-error{color:#f87171}
+/* Maestro chat page */
+.maestro-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);min-height:380px}
+.maestro-thread{flex:1;overflow-y:auto;padding:6px 2px 12px;display:flex;flex-direction:column;gap:10px}
+.maestro-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-family:var(--sans);font-size:13px;line-height:1.5;word-wrap:break-word}
+.maestro-user{align-self:flex-end;background:linear-gradient(135deg,rgba(96,165,250,0.22),rgba(96,165,250,0.12));border:1px solid rgba(96,165,250,0.3);color:#e8f0ff;border-bottom-right-radius:4px}
+.maestro-ai{align-self:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#e0e0e0;border-bottom-left-radius:4px}
+.maestro-ai strong{color:#c084fc}
+.maestro-empty{align-self:center;text-align:center;max-width:90%;color:var(--text-muted);font-family:var(--serif);font-style:italic;font-size:12.5px;line-height:1.6;padding:24px 12px}
+.maestro-inputbar{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px;border-top:1px solid var(--border)}
+.maestro-inputbar textarea{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:12px;color:#fff;font-family:var(--sans);font-size:13px;padding:10px 12px;resize:none;max-height:120px;outline:none;line-height:1.4}
+.maestro-inputbar textarea:focus{border-color:rgba(192,132,252,0.5)}
+.maestro-send-btn{flex:0 0 auto;width:42px;height:42px;border-radius:12px;border:none;background:linear-gradient(135deg,#a78bfa,#c084fc);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.maestro-send-btn:active{transform:scale(0.93)}
+.maestro-send-btn:disabled{opacity:0.5;cursor:default}
 .wday-view-body{width:100%}
 .wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
 .wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
@@ -2048,6 +2072,7 @@ var NAV_TABS=[
   {id:'panel',label:'Panel',icon:'🏠'},
   {id:'estado',label:'Estado',icon:'❤️'},
   {id:'actividad',label:'Activ.',icon:'🏋️'},
+  {id:'maestro',label:'Maestro',icon:'🧙'},
   {id:'meditacion',label:'Medit.',icon:'🧘'},
   {id:'sol',label:'Sol',icon:'☀️'}
 ];
@@ -2086,7 +2111,7 @@ function showTab(tab,btn){
 function render(){
   try{
     const c=document.getElementById('content');
-    const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
+    const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,maestro:renderMaestro,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
     c.innerHTML='';
     (renderers[currentTab]||renderPanel)(c);
   }catch(e){console.warn('render',e);}
@@ -4399,8 +4424,23 @@ function renderActividad(c){
       renderRegistros('activity','ENTRENAMIENTOS',function(a){
         const sport=store.sports.find(function(s){return s.id===a.type;});
         const col=sportColor(a.type);
-        return '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
+        var out='<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
           '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?fmtActivityDuration(a.duration):'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
+        // Maestro: botón de análisis + análisis guardado (si existe).
+        if(a.aiAnalysis){
+          var ageDays=a.aiAnalysisAt?Math.floor((Date.now()-a.aiAnalysisAt)/(24*60*60*1000)):0;
+          var daysLeft=Math.max(0,7-ageDays);
+          out+='<div class="maestro-analysis-box" id="aiAnalysis-'+a.id+'">'+
+            '<div class="ma-head"><span class="ma-title">🧙 Análisis de Maestro</span>'+
+              '<button class="ma-clear" onclick="event.stopPropagation();clearActivityAnalysis('+a.id+')" title="Borrar análisis">✕</button></div>'+
+            maestroFmt(a.aiAnalysis)+
+            '<div class="ma-expiry">Se eliminará en '+daysLeft+' día'+(daysLeft===1?'':'s')+'</div>'+
+          '</div>';
+        }else{
+          out+='<button class="maestro-analyze-btn" onclick="event.stopPropagation();analyzeActivity('+a.id+')">🧙 Analizar con Maestro</button>'+
+            '<div id="aiAnalysis-'+a.id+'" style="display:none"></div>';
+        }
+        return out;
       },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
          searchFields:[{key:'duration',label:'Duración',aliases:['min','minutos','duracion']},{key:'hrAvg',label:'FC media',aliases:['fc','pulso','ppm']},{key:'hrMax',label:'FC máx',aliases:['fcmax','maxima']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
          chartMetrics:[
@@ -4475,6 +4515,40 @@ function renderActividad(c){
   // Si hay datos de precarga pendientes (al marcar un día como hecho), vuélcalos ahora.
   applyPendingPrefill();
 }
+
+// ===== Pestaña Maestro (chat con el entrenador IA) =====
+function renderMaestro(c){
+  var hasKey=!!getGeminiKey();
+  var h='<div class="section-title-inline">🧙 MAESTRO <span class="section-subtitle-inline">Tu entrenador con IA</span></div>';
+  if(!hasKey){
+    h+='<div class="card"><div style="padding:18px 14px;text-align:center;font-family:var(--sans)">'+
+      '<div style="font-size:34px;margin-bottom:10px">🧙</div>'+
+      '<div style="font-size:13px;color:#ddd;line-height:1.6;margin-bottom:14px">Para hablar con Maestro necesitas configurar tu clave de Google Gemini (gratuita).</div>'+
+      '<button class="btn btn-primary" onclick="showTab(\'ajustes\')" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">Ir a Ajustes → Análisis con IA</button>'+
+      '</div></div>';
+    c.innerHTML=h;return;
+  }
+  h+='<div class="card"><div style="padding:10px 12px 12px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+      '<div style="font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text-muted)">Conoce todos tus registros</div>'+
+      '<button class="btn btn-secondary" onclick="maestroClear()" style="font-size:10px;padding:4px 8px;width:auto;margin:0">🗑️ Limpiar</button>'+
+    '</div>'+
+    '<div class="maestro-wrap">'+
+      '<div class="maestro-thread" id="maestroThread"></div>'+
+      '<div class="maestro-inputbar">'+
+        '<textarea id="maestroInput" rows="1" placeholder="Pregunta a Maestro…" oninput="maestroAutogrow(this)" onkeydown="maestroKeydown(event)"></textarea>'+
+        '<button class="maestro-send-btn" onclick="maestroSend()" title="Enviar">➤</button>'+
+      '</div>'+
+    '</div>'+
+  '</div></div>';
+  c.innerHTML=h;
+  renderMaestroChat(true);
+}
+function maestroAutogrow(el){el.style.height='auto';el.style.height=Math.min(120,el.scrollHeight)+'px';}
+function maestroKeydown(e){
+  // Enter envía; Shift+Enter hace salto de línea.
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();maestroSend();}
+}
 // Open the training-registration block and scroll to it.
 function quickAddTraining(){
   store.collapsed.sport=false; // ensure expanded
@@ -4534,6 +4608,186 @@ function showGeminiHelp(){
     '5. Vuelve aquí, pégala en el campo y pulsa "Guardar clave".\n\n'+
     'La clave es gratuita (con límites de uso amplios para uso personal) y se guarda solo en este dispositivo. Puedes revocarla o crear otra en cualquier momento desde aistudio.google.com.');
 }
+
+// ================== MAESTRO (entrenador IA con Gemini) ==================
+// Dos usos: (1) análisis de un entreno concreto (mismo deporte, últimos 4 meses),
+// guardado en el propio entreno y autoeliminado tras 1 semana; (2) chat con hilo
+// que tiene en cuenta TODOS los datos de la app.
+
+// Llamada genérica a Gemini de texto. history = [{role:'user'|'model',text:''}...].
+function geminiChat(systemText,history){
+  return new Promise(function(resolve,reject){
+    var k=getGeminiKey();
+    if(!k){reject(new Error('Falta la clave de Gemini. Ve a Ajustes → 🤖 Análisis con IA.'));return;}
+    var contents=(history||[]).map(function(m){return{role:(m.role==='model'?'model':'user'),parts:[{text:String(m.text||'')}]};});
+    var body={contents:contents,generationConfig:{temperature:0.6}};
+    if(systemText)body.systemInstruction={parts:[{text:systemText}]};
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(k);
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){
+        if(!r.ok)return r.text().then(function(t){throw new Error('Gemini '+r.status+': '+t.slice(0,180));});
+        return r.json();
+      })
+      .then(function(data){
+        var txt='';
+        try{txt=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');}catch(e){}
+        if(!txt)throw new Error('Respuesta vacía de Gemini');
+        resolve(txt.trim());
+      })
+      .catch(reject);
+  });
+}
+
+// Nombre legible de un deporte por su id.
+function sportName(id){var sp=store.sports.find(function(s){return s.id===id;});return sp?sp.name:id;}
+
+// Resume un registro de actividad en una línea de texto compacta.
+function activityLine(a){
+  var parts=[fmtDate(a.date)];
+  if(a.subtype)parts.push(a.subtype);
+  if(a.duration)parts.push('tiempo '+fmtActivityDuration(a.duration));
+  if(a.result)parts.push('reps/resultado '+a.result);
+  if(a.distance)parts.push('dist '+a.distance);
+  if(a.hrAvg)parts.push('FC med '+a.hrAvg);
+  if(a.hrMax)parts.push('FC máx '+a.hrMax);
+  if(a.notes)parts.push('notas: '+a.notes);
+  return '- '+parts.join(' · ');
+}
+
+// Contexto para analizar UN entreno: mismo deporte, últimos 4 meses (excluye el propio).
+function buildActivityContext(act){
+  var cutoff=Date.now()-122*24*60*60*1000; // ~4 meses
+  var same=store.activity.filter(function(a){
+    if(a.id===act.id)return false;
+    if(a.type!==act.type)return false;
+    var t=new Date(a.date).getTime();
+    return !isNaN(t)&&t>=cutoff;
+  }).sort(function(x,y){return new Date(y.date)-new Date(x.date);});
+  var recs=store.records.slice(-12).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');});
+  var lines=same.slice(0,40).map(activityLine);
+  var ctx='DEPORTE: '+sportName(act.type)+'\n';
+  ctx+='\nENTRENO A ANALIZAR:\n'+activityLine(act)+'\n';
+  ctx+='\nHISTÓRICO DEL MISMO DEPORTE (últimos 4 meses, '+same.length+' entrenos):\n'+(lines.length?lines.join('\n'):'(sin entrenos previos del mismo deporte)')+'\n';
+  if(recs.length)ctx+='\nMARCAS PERSONALES RECIENTES:\n'+recs.join('\n')+'\n';
+  return ctx;
+}
+
+// Contexto global: resumen de TODOS los datos de la app (para el chat Maestro).
+function buildFullContext(){
+  function lastN(arr,n){return (arr||[]).slice(-n);}
+  var c='RESUMEN DE DATOS DEL USUARIO (app de salud personal). Hoy es '+today()+'.\n';
+  var byType={};store.activity.forEach(function(a){byType[a.type]=(byType[a.type]||0)+1;});
+  c+='\n== ENTRENAMIENTOS =='+'\nTotal: '+store.activity.length+'. Por deporte: '+Object.keys(byType).map(function(k){return sportName(k)+'='+byType[k];}).join(', ')+'\n';
+  c+='Últimos entrenos:\n'+lastN(store.activity,25).map(function(a){return '- '+sportName(a.type)+' '+activityLine(a).slice(2);}).join('\n')+'\n';
+  if(store.records.length)c+='\n== MEJORES MARCAS ==\n'+lastN(store.records,20).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');}).join('\n')+'\n';
+  if(store.wods&&store.wods.length)c+='\n== WODS BENCHMARK GUARDADOS ==\n'+store.wods.slice(0,15).map(function(w){return '- '+w.name+': '+(w.desc||'').slice(0,120);}).join('\n')+'\n';
+  if(store.sleep.length){var sl=lastN(store.sleep,10).map(function(s){return '- '+fmtDate(s.date)+': '+(s.duration||s.hours||'')+(s.quality?' calidad '+s.quality:'');});c+='\n== SUEÑO (últimos) ==\n'+sl.join('\n')+'\n';}
+  if(store.weight.length){var w=lastN(store.weight,10).map(function(x){return '- '+fmtDate(x.date)+': '+(x.value||x.weight||'')+'kg';});c+='\n== PESO (últimos) ==\n'+w.join('\n')+'\n';}
+  if(store.fasting.length){c+='\n== AYUNOS ==\nTotal: '+store.fasting.length+'. Últimos: '+lastN(store.fasting,6).map(function(f){return fmtDate(f.date)+' '+(f.duration||f.hours||'')+'h';}).join(', ')+'\n';}
+  if(store.measurements.length){var mm=lastN(store.measurements,1)[0];c+='\n== MEDIDAS (última) ==\n'+fmtDate(mm.date)+': '+Object.keys(mm).filter(function(k){return['id','date'].indexOf(k)<0;}).map(function(k){return k+'='+mm[k];}).join(', ')+'\n';}
+  if(store.meditation.length){c+='\n== MEDITACIÓN ==\nSesiones: '+store.meditation.length+'. Últimas: '+lastN(store.meditation,6).map(function(x){return fmtDate(x.date)+' '+(x.duration||'')+'min';}).join(', ')+'\n';}
+  if(store.sun.length){c+='\n== SOL / VITAMINA D ==\nSesiones: '+store.sun.length+'. Últimas: '+lastN(store.sun,6).map(function(x){return fmtDate(x.date)+' '+(x.duration||'')+(x.vitd?' ('+x.vitd+' UI)':'');}).join(', ')+'\n';}
+  return c;
+}
+
+var MAESTRO_SYSTEM='Eres "Maestro", un entrenador personal experto (fuerza, CrossFit, running, natación, salud y recuperación) integrado en la app de salud del usuario. '+
+  'Hablas en español, de forma directa, cercana y motivadora, sin rodeos. Das consejos prácticos y concretos basados EXCLUSIVAMENTE en los datos reales del usuario que se te proporcionan. '+
+  'Si no hay datos suficientes para algo, dilo con claridad en vez de inventar. No des diagnósticos médicos; si detectas algo preocupante, recomienda consultar a un profesional. '+
+  'Sé conciso: usa frases cortas y, cuando ayude, listas con viñetas.';
+
+// ---- Análisis por entreno (guardado + expiración 1 semana) ----
+var ANALYSIS_TTL=7*24*60*60*1000;
+function purgeOldAnalyses(){
+  var now=Date.now(),changed=false;
+  store.activity.forEach(function(a){
+    if(a.aiAnalysis&&a.aiAnalysisAt&&(now-a.aiAnalysisAt>ANALYSIS_TTL)){
+      delete a.aiAnalysis;delete a.aiAnalysisAt;changed=true;
+    }
+  });
+  if(changed)save('activity',store.activity);
+  return changed;
+}
+function analyzeActivity(actId){
+  var act=store.activity.find(function(a){return a.id===actId;});
+  if(!act)return;
+  if(!getGeminiKey()){alert('Para usar Maestro necesitas tu clave de Gemini en Ajustes → 🤖 Análisis con IA.');return;}
+  var box=document.getElementById('aiAnalysis-'+actId);
+  if(box){box.style.display='block';box.innerHTML='<div class="maestro-loading"><span class="wday-done-spin"></span> Maestro está analizando tu entreno…</div>';}
+  var ctx=buildActivityContext(act);
+  var userMsg='Analiza este entrenamiento concreto comparándolo con mi histórico del mismo deporte. '+
+    'Dime: 1) si el resultado/tiempo es bueno respecto a mis marcas anteriores, 2) si la intensidad (pulsaciones) encaja, '+
+    '3) progresión o estancamiento que observes, 4) 2-3 consejos concretos para mejorar la próxima vez. '+
+    'Ten en cuenta mis notas si las hay.\n\n'+ctx;
+  geminiChat(MAESTRO_SYSTEM,[{role:'user',text:userMsg}])
+    .then(function(txt){
+      act.aiAnalysis=txt;act.aiAnalysisAt=Date.now();
+      save('activity',store.activity);
+      render();
+    })
+    .catch(function(err){
+      if(box)box.innerHTML='<div class="maestro-error">No se pudo analizar: '+escapeHTML(err.message||'error')+'</div>';
+    });
+}
+function clearActivityAnalysis(actId){
+  var act=store.activity.find(function(a){return a.id===actId;});
+  if(!act)return;
+  delete act.aiAnalysis;delete act.aiAnalysisAt;
+  save('activity',store.activity);render();
+}
+
+// ---- Chat Maestro (con hilo) ----
+var maestroHistory=[];
+function loadMaestroHistory(){try{maestroHistory=JSON.parse(localStorage.getItem('h_maestroChat')||'[]');}catch(e){maestroHistory=[];}}
+function saveMaestroHistory(){try{localStorage.setItem('h_maestroChat',JSON.stringify(maestroHistory.slice(-40)));}catch(e){}}
+loadMaestroHistory();
+function maestroSend(){
+  var inp=document.getElementById('maestroInput');
+  if(!inp)return;
+  var msg=inp.value.trim();
+  if(!msg)return;
+  if(!getGeminiKey()){alert('Para usar Maestro necesitas tu clave de Gemini en Ajustes → 🤖 Análisis con IA.');return;}
+  maestroHistory.push({role:'user',text:msg});
+  saveMaestroHistory();
+  inp.value='';
+  renderMaestroChat(true);
+  var sys=MAESTRO_SYSTEM+'\n\n'+buildFullContext();
+  var hist=maestroHistory.slice(-16);
+  geminiChat(sys,hist)
+    .then(function(txt){
+      maestroHistory.push({role:'model',text:txt});
+      saveMaestroHistory();
+      renderMaestroChat(true);
+    })
+    .catch(function(err){
+      maestroHistory.push({role:'model',text:'⚠️ No pude responder: '+(err.message||'error')});
+      saveMaestroHistory();
+      renderMaestroChat(true);
+    });
+}
+function maestroClear(){
+  if(!confirm('¿Borrar toda la conversación con Maestro?'))return;
+  maestroHistory=[];saveMaestroHistory();renderMaestroChat();
+}
+function maestroFmt(t){
+  var h=escapeHTML(t);
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/^\s*[-*]\s+(.+)$/gm,'• $1');
+  h=h.replace(/\n/g,'<br>');
+  return h;
+}
+function renderMaestroChat(scroll){
+  var thread=document.getElementById('maestroThread');
+  if(!thread)return;
+  var pending=maestroHistory.length&&maestroHistory[maestroHistory.length-1].role==='user';
+  var html=maestroHistory.map(function(m){
+    if(m.role==='user')return '<div class="maestro-msg maestro-user">'+escapeHTML(m.text)+'</div>';
+    return '<div class="maestro-msg maestro-ai">'+maestroFmt(m.text)+'</div>';
+  }).join('');
+  if(pending)html+='<div class="maestro-msg maestro-ai"><span class="wday-done-spin"></span> Maestro está pensando…</div>';
+  if(!maestroHistory.length)html='<div class="maestro-empty">Escribe abajo para empezar. Maestro conoce tus entrenos, marcas, sueño, peso y demás registros.<br><br>Ej: «¿Cómo voy de progresión este mes?», «Diseña un WOD de piernas para mañana», «¿Duermo bastante para entrenar así?»</div>';
+  thread.innerHTML=html;
+  if(scroll)thread.scrollTop=thread.scrollHeight;
+}
 var GEMINI_MODEL='gemini-2.5-flash';
 
 // Buffer con los datos a volcar en el formulario en el próximo render().
@@ -4583,16 +4837,13 @@ function firstNumber(text){
 function buildPrefillFromText(text){
   var sportId=guessSportId(text)||(store.sports[0]||{}).id||'crossfit';
   // Igual que la IA: solo deporte, tipo, tiempo y repeticiones. Sin notas ni FC.
-  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',reps:'',aiOnly:true};
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',aiOnly:true};
   if(sportId==='crossfit'){
     pre.subtype=guessCrossfitSubtype(text);
     // Tiempo: primero "MM:SS", si no, "NN min".
     var mc=text.match(/(\d{1,3})\s*:\s*(\d{1,2})/);
     if(mc){pre.time=normalizeTimeStr(mc[0]);}
     else{var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);if(md)pre.time=md[1];}
-    // Repeticiones: patrón "NN reps" o "NN repeticiones".
-    var mr=text.match(/(\d{1,4})\s*(reps?|repeticiones)/i);
-    if(mr)pre.reps=mr[1];
   }else if(sportId==='carrera'){
     if(/series|x\s*\d{2,4}\s*m/i.test(text))pre.runType='series';
     var mt=text.match(/(\d{1,3})\s*(min|')/i);
@@ -4611,16 +4862,14 @@ function buildPrefillFromText(text){
 function buildPrefillFromAI(obj,fallbackText){
   var rawSport=(obj.deporte||obj.sport||'').toString();
   var sportId=guessSportId(rawSport)||guessSportId(fallbackText)||(store.sports[0]||{}).id||'crossfit';
-  // La IA SOLO rellena: deporte, tipo, tiempo y repeticiones.
-  // Nunca toca notas, FC media ni FC máx (esos quedan manuales).
-  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',reps:'',aiOnly:true};
+  // La IA SOLO rellena: deporte, tipo y tiempo.
+  // Nunca toca repeticiones, notas, FC media ni FC máx (esos quedan manuales).
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',aiOnly:true};
   function pick(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return '';}
   pre.subtype=pick(obj.tipo,obj.subtype,obj.subtipo);
   // Tiempo: aceptamos "MM:SS" tal cual, o minutos sueltos.
   var rawTime=pick(obj.tiempo,obj.duracion,obj.duración,obj.duration,obj.tiempo_total,obj.time);
   pre.time=normalizeTimeStr(rawTime);
-  // Repeticiones: solo el dato de reps.
-  pre.reps=pick(obj.repeticiones,obj.reps,obj.resultado,obj.result);
   // Para CrossFit, normaliza el subtipo a uno de los valores del desplegable.
   if(sportId==='crossfit'&&pre.subtype){
     var ej=obj.ejercicios||obj.exercises||obj.movimientos;if(Array.isArray(ej))ej=ej.join(' ');
@@ -4650,13 +4899,12 @@ function analyzeImageWithGemini(dataUrl,fallbackText){
     var mime=m[1]||'image/jpeg';
     var b64=m[2];
     var prompt='Esta es la foto de la pizarra o pantalla de un entrenamiento (posible WOD de CrossFit, '+
-      'carrera, natación u otro deporte). Extrae ÚNICAMENTE estos cuatro datos y responde SOLO con un '+
+      'carrera, natación u otro deporte). Extrae ÚNICAMENTE estos tres datos y responde SOLO con un '+
       'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si el dato no aparece): '+
       '{"deporte":"crossfit|carrera|piscina u otro nombre del deporte",'+
       '"tipo":"AMRAP/EMOM/For Time/Strength/Skill/Olympic/Gymnastics/Hero WOD/Benchmark/continua/series...",'+
-      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos",'+
-      '"repeticiones":"número total de repeticiones o el esquema de reps (p.ej. 21-15-9), si aparece"}. '+
-      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". No incluyas frecuencia cardíaca, distancia ni notas.';
+      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos"}. '+
+      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". No incluyas repeticiones, frecuencia cardíaca, distancia ni notas.';
     var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
       generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
     var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(apiKey);
@@ -4702,13 +4950,12 @@ function applyPendingPrefill(){
   var pre=_pendingPrefill;
   _pendingPrefill=null;
   function setVal(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null&&String(v)!=='')el.value=v;}
-  // La IA y el parser de texto SOLO rellenan: tipo, tiempo y repeticiones.
-  // Nunca escriben en NOTAS, FC MEDIA ni FC MÁX (campos exclusivamente manuales).
+  // La IA y el parser de texto SOLO rellenan: deporte, tipo y tiempo.
+  // Nunca escriben en REPETICIONES, NOTAS, FC MEDIA ni FC MÁX (todos manuales).
   setVal('actSubtype',pre.subtype);
   if(pre.sportId==='crossfit'){
-    // Tiempo va en la ruleta MM:SS; las repeticiones en el campo de texto.
+    // Tiempo va en la ruleta MM:SS. Las repeticiones quedan manuales.
     setTimeWheel('actDur',pre.time);
-    setVal('actResult',pre.reps);
   }else{
     // Otros deportes mantienen su campo de duración en minutos.
     setVal('actDuration',pre.time);
@@ -6456,7 +6703,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 22</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 23</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7082,6 +7329,8 @@ function migrateLegacyPhotos(){
 }
 
 renderNav();
+// Limpia análisis de Maestro caducados (>1 semana) antes de mostrar nada.
+try{purgeOldAnalyses();}catch(e){}
 showTab('panel');
 // Move old inline photos to IndexedDB (frees localStorage), then init cloud sync.
 migrateLegacyPhotos();
