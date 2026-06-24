@@ -252,12 +252,13 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 
 /* NAV BOTTOM - 6 buttons evenly spaced, glow text */
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid var(--border);padding:8px 4px calc(8px + var(--safe-bottom));z-index:100}
-.nav-inner{max-width:480px;margin:0 auto;display:flex;width:100%;gap:0}
-.nav-btn{flex:1 1 0;min-width:0;padding:10px 0;background:transparent;border:none;color:#666;font-size:10.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all 0.25s;text-align:center;letter-spacing:0.3px;font-family:var(--sans);position:relative;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-inner{max-width:480px;margin:0 auto;display:flex;width:100%;justify-content:space-between;align-items:center;gap:0;padding:0 6px;box-sizing:border-box}
+.nav-btn{flex:0 0 auto;min-width:0;padding:10px 2px;background:transparent;border:none;color:#666;font-size:9.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all 0.25s;text-align:center;letter-spacing:0.1px;font-family:var(--sans);position:relative;text-transform:uppercase;white-space:nowrap}
 .nav-btn.active{background:transparent;color:var(--accent);font-weight:700;text-shadow:0 0 12px rgba(167,243,208,0.7),0 0 24px rgba(134,239,172,0.4);box-shadow:none}
 .nav-btn.active::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:18px;height:2px;border-radius:2px;background:var(--grad-primary);box-shadow:0 0 8px rgba(134,239,172,0.6)}
 /* Icons-only nav mode (toggle in Ajustes) */
-.nav-inner.nav-icons-only .nav-btn{padding:8px 0}
+.nav-inner.nav-icons-only{padding:0 10px}
+.nav-inner.nav-icons-only .nav-btn{padding:8px 6px}
 .nav-btn-icon{font-size:22px;line-height:1;display:block;filter:grayscale(0.15)}
 .nav-btn.active .nav-btn-icon{filter:none;transform:translateY(-1px)}
 .nav-inner.nav-icons-only .nav-btn.active::after{bottom:0}
@@ -331,15 +332,16 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .divider{height:1px;background:var(--border);margin:10px 0}
 
 /* PANEL CARDS */
-.panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px;width:100%}
-.panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:11px 10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
+.panel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px;width:100%}
+.panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:9px 8px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
 .panel-card-today{border-color:rgba(52,211,153,0.45);box-shadow:0 0 0 1px rgba(52,211,153,0.25),0 0 14px rgba(52,211,153,0.12)}
 .panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
 .panel-card-today-badge{position:absolute;top:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
-.panel-card-icon{font-size:16px;margin-bottom:5px;display:block}
-.panel-card-title{font-size:9.5px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.8px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--sans)}
-.panel-card-value{font-family:var(--sans);font-size:21px;font-weight:600;color:#fff;letter-spacing:-0.4px;margin-top:3px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
+.panel-card-head{display:flex;align-items:center;gap:5px;min-width:0;margin-bottom:3px}
+.panel-card-icon{font-size:14px;line-height:1;flex-shrink:0}
+.panel-card-title{font-size:8.5px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:var(--sans);min-width:0;flex:1}
+.panel-card-value{font-family:var(--sans);font-size:19px;font-weight:600;color:#fff;letter-spacing:-0.4px;margin-top:1px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
 .panel-card-unit{font-size:10px;color:var(--text-dim);margin-left:2px;font-weight:400;font-family:var(--sans);font-style:normal}
 .panel-card-sub{font-size:9.5px;color:var(--text-dim);margin-top:2px;font-weight:400;font-family:var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panel-section-title{font-family:var(--sans);font-size:12px;color:#999;font-weight:600;margin:9px 0 6px;padding-left:2px;display:flex;align-items:center;justify-content:space-between;font-style:normal;text-transform:uppercase;letter-spacing:1px}
@@ -1294,7 +1296,7 @@ if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
 // Weather defaults to automatic
 if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
 // Sun + settings blocks collapsed by default (graph always visible)
-['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setai','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog'].forEach(function(k){
+['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setai','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog','medhistory','acthistory'].forEach(function(k){
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
@@ -2071,9 +2073,9 @@ function updateHeaderQuote(forceNew){
 var NAV_TABS=[
   {id:'panel',label:'Panel',icon:'🏠'},
   {id:'estado',label:'Estado',icon:'❤️'},
-  {id:'actividad',label:'Activ.',icon:'🏋️'},
+  {id:'actividad',label:'Actividad',icon:'🏋️'},
   {id:'maestro',label:'Maestro',icon:'🧙'},
-  {id:'meditacion',label:'Medit.',icon:'🧘'},
+  {id:'meditacion',label:'Meditar',icon:'🧘'},
   {id:'sol',label:'Sol',icon:'☀️'}
 ];
 function renderNav(){
@@ -2351,7 +2353,7 @@ const WIDGET_DEFS={
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   vitd_total:{name:'Vit D sol',icon:'☀️',section:'sol',get:function(){if(!Array.isArray(store.sun)||!store.sun.length)return null;const boost=(typeof vitDSunBoostAt==='function')?Math.min(60,vitDSunBoostAt(new Date())):0;return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte actual'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
-  health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
+  health_status:{name:'Estado de salud',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
 };
 </script>
 <script>
@@ -2990,7 +2992,7 @@ function renderPanel(c){
     '</div>';
   }else{
     widgetsHTML+='<div class="panel-grid">'+
-      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 2">Aún no hay datos.</div>')+
+      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 3">Aún no hay datos.</div>')+
     '</div>';
   }
   pBlocks.widgets=widgetsHTML;
@@ -3039,13 +3041,13 @@ function renderWidget(id){
   const data=def.get();
   if(!data){
     // Show empty placeholder instead of hiding entirely
-    return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
+    return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
   }
   // Highlight when the shown datum was recorded today
   const isToday=data.date&&String(data.date).substring(0,10)===today();
   const todayCls=isToday?' panel-card-today':'';
   const todayBadge=isToday?'<span class="panel-card-today-badge">HOY</span>':'';
-  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
+  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
 }
 
 function renderWidgetsModal(){
@@ -3339,6 +3341,22 @@ function renderRegistros(key,label,itemRenderer,opts){
   const flt=regFilter[key]||{};
   const maxOn=!!regMaxOnly[key];
   const filterOpen=!!regFilterOpen[key];
+  // Modo "noCollapse": sin cabecera colapsable propia; el contenido se muestra
+  // directamente (se usa cuando el bloque ya vive dentro de una tarjeta desplegable).
+  if(opts.noCollapse){
+    let hn='<div class="registros-block" style="margin-top:4px">'+
+      '<div class="registros-toolbar">'+
+        '<input type="text" class="registros-search'+(fields.length?' has-filter':'')+'" id="regsearch_'+key+'" placeholder="🔍 Buscar..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
+        (fields.length?'<button class="reg-filter-btn'+(flt.field||filterOpen?' active':'')+'" onclick="toggleRegFilter(\''+key+'\')" title="Filtrar y ordenar">⚙</button>':'')+
+        (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openRegChart(\''+key+'\')">📈</button>':'')+
+      '</div>'+
+      (fields.length&&filterOpen?renderRegFilterPanel(key):'')+
+      '<div class="registros-list" id="reglist_'+key+'">'+
+        buildRegItems(key,searchQ)+
+      '</div>'+
+    '</div>';
+    return hn;
+  }
   let h='<div class="registros-block" style="margin-top:10px">'+
     '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
@@ -4460,7 +4478,7 @@ function renderActividad(c){
             '<div id="aiAnalysis-'+a.id+'" style="display:none"></div>';
         }
         return out;
-      },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
+      },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',noCollapse:true,
          searchFields:[{key:'duration',label:'Duración',aliases:['min','minutos','duracion']},{key:'hrAvg',label:'FC media',aliases:['fc','pulso','ppm']},{key:'hrMax',label:'FC máx',aliases:['fcmax','maxima']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
          chartMetrics:[
            {key:'id',label:'Nº entrenos',color:'#34d399',aggregate:'count',yLabel:'entrenos'},
@@ -4702,27 +4720,58 @@ function buildActivityContext(act){
   return ctx;
 }
 
-// Contexto global: resumen de TODOS los datos de la app (para el chat Maestro).
+// Vuelca un registro genérico como "campo=valor" para no depender de nombres exactos.
+function dumpRecord(r,skip){
+  skip=skip||['id'];
+  return Object.keys(r).filter(function(k){return skip.indexOf(k)<0&&r[k]!==''&&r[k]!==null&&r[k]!==undefined;})
+    .map(function(k){
+      var v=r[k];
+      if(typeof v==='object')v=JSON.stringify(v);
+      // Acortamos referencias de foto (no aportan al análisis).
+      if(k==='photo'||k==='photoRef'||k==='image'){v='[foto]';}
+      return k+'='+String(v).slice(0,160);
+    }).join(', ');
+}
+// Resumen legible de una colección: total + últimos N registros con todos sus campos.
+function dumpCollection(title,arr,n,skip){
+  if(!arr||!arr.length)return '';
+  var rows=arr.slice(-n).map(function(r){return '- '+dumpRecord(r,skip);});
+  return '\n== '+title+' ==\nTotal registros: '+arr.length+'. Más recientes:\n'+rows.join('\n')+'\n';
+}
+
+// Contexto global: TODOS los datos de la app (para el chat Maestro y los análisis).
 function buildFullContext(){
-  function lastN(arr,n){return (arr||[]).slice(-n);}
-  var c='RESUMEN DE DATOS DEL USUARIO (app de salud personal). Hoy es '+today()+'.\n';
+  var c='RESUMEN COMPLETO DE DATOS DEL USUARIO (app de salud personal). Hoy es '+today()+'. '+
+    'Tienes acceso a TODOS estos registros y debes usarlos para responder cualquier consulta sobre entrenamientos, sueño, peso, ayuno, medidas, meditación y exposición solar / vitamina D.\n';
+  // Entrenamientos con resumen por deporte + detalle.
   var byType={};store.activity.forEach(function(a){byType[a.type]=(byType[a.type]||0)+1;});
-  c+='\n== ENTRENAMIENTOS =='+'\nTotal: '+store.activity.length+'. Por deporte: '+Object.keys(byType).map(function(k){return sportName(k)+'='+byType[k];}).join(', ')+'\n';
-  c+='Últimos entrenos:\n'+lastN(store.activity,25).map(function(a){return '- '+sportName(a.type)+' '+activityLine(a).slice(2);}).join('\n')+'\n';
-  if(store.records.length)c+='\n== MEJORES MARCAS ==\n'+lastN(store.records,20).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');}).join('\n')+'\n';
-  if(store.wods&&store.wods.length)c+='\n== WODS BENCHMARK GUARDADOS ==\n'+store.wods.slice(0,15).map(function(w){return '- '+w.name+': '+(w.desc||'').slice(0,120);}).join('\n')+'\n';
-  if(store.sleep.length){var sl=lastN(store.sleep,10).map(function(s){return '- '+fmtDate(s.date)+': '+(s.duration||s.hours||'')+(s.quality?' calidad '+s.quality:'');});c+='\n== SUEÑO (últimos) ==\n'+sl.join('\n')+'\n';}
-  if(store.weight.length){var w=lastN(store.weight,10).map(function(x){return '- '+fmtDate(x.date)+': '+(x.value||x.weight||'')+'kg';});c+='\n== PESO (últimos) ==\n'+w.join('\n')+'\n';}
-  if(store.fasting.length){c+='\n== AYUNOS ==\nTotal: '+store.fasting.length+'. Últimos: '+lastN(store.fasting,6).map(function(f){return fmtDate(f.date)+' '+(f.duration||f.hours||'')+'h';}).join(', ')+'\n';}
-  if(store.measurements.length){var mm=lastN(store.measurements,1)[0];c+='\n== MEDIDAS (última) ==\n'+fmtDate(mm.date)+': '+Object.keys(mm).filter(function(k){return['id','date'].indexOf(k)<0;}).map(function(k){return k+'='+mm[k];}).join(', ')+'\n';}
-  if(store.meditation.length){c+='\n== MEDITACIÓN ==\nSesiones: '+store.meditation.length+'. Últimas: '+lastN(store.meditation,6).map(function(x){return fmtDate(x.date)+' '+(x.duration||'')+'min';}).join(', ')+'\n';}
-  if(store.sun.length){c+='\n== SOL / VITAMINA D ==\nSesiones: '+store.sun.length+'. Últimas: '+lastN(store.sun,6).map(function(x){return fmtDate(x.date)+' '+(x.duration||'')+(x.vitd?' ('+x.vitd+' UI)':'');}).join(', ')+'\n';}
+  c+='\n== ENTRENAMIENTOS ==\nTotal: '+store.activity.length+'. Por deporte: '+(Object.keys(byType).map(function(k){return sportName(k)+'='+byType[k];}).join(', ')||'ninguno')+'\n';
+  if(store.activity.length)c+='Últimos entrenos:\n'+store.activity.slice(-30).map(function(a){return '- '+sportName(a.type)+' '+activityLine(a).slice(2);}).join('\n')+'\n';
+  // Resto de colecciones, volcando todos sus campos genéricamente.
+  c+=dumpCollection('MEJORES MARCAS',store.records,25);
+  if(store.wods&&store.wods.length)c+='\n== WODS BENCHMARK GUARDADOS ==\n'+store.wods.slice(0,20).map(function(w){return '- '+w.name+': '+(w.desc||'').slice(0,160);}).join('\n')+'\n';
+  c+=dumpCollection('SUEÑO',store.sleep,15);
+  c+=dumpCollection('PESO (kg)',store.weight,20);
+  c+=dumpCollection('AYUNOS',store.fasting,15);
+  c+=dumpCollection('MEDIDAS CORPORALES',store.measurements,8);
+  c+=dumpCollection('MEDITACIÓN',store.meditation,15);
+  c+=dumpCollection('SOL / VITAMINA D',store.sun,20);
+  // Ajustes relevantes de vitamina D (línea base) si existen.
+  if(store.settings&&(store.settings.vitDBaseline||store.settings.skinType)){
+    c+='\n== PERFIL VITAMINA D / PIEL ==\n';
+    if(store.settings.vitDBaseline)c+='Nivel base analítica: '+store.settings.vitDBaseline+(store.settings.vitDBaselineDate?' (fecha '+store.settings.vitDBaselineDate+')':'')+'\n';
+    if(store.settings.skinType)c+='Tipo de piel: '+store.settings.skinType+'\n';
+    if(store.settings.clothing)c+='Ropa habitual: '+store.settings.clothing+'\n';
+  }
   return c;
 }
 
 var MAESTRO_SYSTEM='Eres "Maestro", un entrenador personal experto (fuerza, CrossFit, running, natación, salud y recuperación) integrado en la app de salud del usuario. '+
-  'Hablas en español, de forma directa, cercana y motivadora, sin rodeos. Das consejos prácticos y concretos basados EXCLUSIVAMENTE en los datos reales del usuario que se te proporcionan. '+
-  'Si no hay datos suficientes para algo, dilo con claridad en vez de inventar. No des diagnósticos médicos; si detectas algo preocupante, recomienda consultar a un profesional. '+
+  'Hablas en español, de forma directa, cercana y motivadora, sin rodeos. '+
+  'IMPORTANTE: junto a estas instrucciones recibes un RESUMEN COMPLETO DE DATOS del usuario con sus entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar / vitamina D. '+
+  'SIEMPRE debes basar tus respuestas en esos datos reales. Antes de decir que no tienes información, revisa con atención todas las secciones del resumen (incluida SOL / VITAMINA D). '+
+  'Si de verdad un dato no aparece en el resumen, dilo con claridad e indica al usuario que lo registre; nunca te lo inventes. '+
+  'No des diagnósticos médicos; si detectas algo preocupante, recomienda consultar a un profesional. '+
   'Sé conciso: usa frases cortas y, cuando ayude, listas con viñetas.';
 
 // ---- Análisis por entreno (guardado + expiración 1 semana) ----
@@ -4794,9 +4843,15 @@ function maestroSend(){
   saveMaestroHistory();
   inp.value='';
   renderMaestroChat(true);
-  var sys=MAESTRO_SYSTEM+'\n\n'+buildFullContext();
-  var hist=maestroHistory.slice(-16);
-  geminiChat(sys,hist)
+  // El contexto de datos va como systemInstruction Y como turno inicial del hilo,
+  // para asegurar que el modelo siempre lo vea aunque ignore las system instructions.
+  var ctxText=buildFullContext();
+  var primer=[
+    {role:'user',text:'Estos son MIS datos actuales de la app. Tenlos en cuenta para todo lo que te pregunte a partir de ahora:\n\n'+ctxText},
+    {role:'model',text:'Entendido. He revisado tus entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar / vitamina D. ¿En qué te ayudo?'}
+  ];
+  var hist=primer.concat(maestroHistory.slice(-14));
+  geminiChat(MAESTRO_SYSTEM,hist)
     .then(function(txt){
       maestroHistory.push({role:'model',text:txt});
       saveMaestroHistory();
@@ -5660,11 +5715,15 @@ function renderMeditacion(c){
   '</div>';
 
   if(store.meditation.length){
-    h+='<div class="card" style="padding:12px">'+
-      renderRegistros('meditation','SESIONES',function(m){
-        return '<div style="font-size:11.5px">'+fmtTime(m.duration)+' · Inh '+m.inhale+'s / Exh '+m.exhale+'s</div>';
-      },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc',
-         searchFields:[{key:'duration',label:'Duración',aliases:['duracion','tiempo','segundos','min']},{key:'date',label:'Fecha',aliases:['fecha','día']}]})+
+    var medHistCollapsed=store.collapsed.medhistory!==false; // plegada por defecto
+    h+='<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'medhistory\')"><div class="card-title-text"><span>📜 HISTÓRICO SESIONES <span class="registros-count">('+store.meditation.length+')</span></span></div><button class="collapse-btn">'+(medHistCollapsed?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(medHistCollapsed?' collapsed':'')+'">'+
+        renderRegistros('meditation','SESIONES',function(m){
+          return '<div style="font-size:11.5px">'+fmtTime(m.duration)+' · Inh '+m.inhale+'s / Exh '+m.exhale+'s</div>';
+        },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc',noCollapse:true,
+           searchFields:[{key:'duration',label:'Duración',aliases:['duracion','tiempo','segundos','min']},{key:'date',label:'Fecha',aliases:['fecha','día']}]})+
+      '</div>'+
     '</div>';
   }
 
@@ -6824,7 +6883,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 24.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 25.1</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
