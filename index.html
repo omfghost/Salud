@@ -457,19 +457,37 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .maestro-loading,.maestro-error{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;color:var(--text-muted);padding:2px 0}
 .maestro-error{color:#f87171}
 /* Maestro chat page */
-.maestro-wrap{display:flex;flex-direction:column;height:calc(100dvh - 310px);min-height:200px;max-height:calc(100dvh - 290px)}
-.maestro-thread{flex:1 1 auto;overflow-y:auto;padding:6px 2px 10px;display:flex;flex-direction:column;gap:10px;min-height:0}
+/* Maestro: pantalla fija (sin scroll de página); solo el hilo hace scroll */
+.maestro-page{display:flex;flex-direction:column;height:calc(100dvh - 172px - var(--safe-top) - var(--safe-bottom));max-height:calc(100dvh - 172px - var(--safe-top) - var(--safe-bottom));min-height:280px}
+.maestro-topbar{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 2px 8px;flex:0 0 auto}
+.maestro-topbar-title{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.maestro-topbar-btns{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.maestro-tool-btn{display:flex;align-items:center;gap:3px;font-family:var(--sans);font-size:10px;font-weight:600;padding:5px 8px;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.03);color:#bbb;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.maestro-tool-btn:active{transform:scale(0.94)}
+.maestro-tool-btn.save{color:#6ee7b7;border-color:rgba(52,211,153,0.3)}
+.maestro-tool-btn.saved{color:#c084fc;border-color:rgba(192,132,252,0.3)}
+.maestro-wrap{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;background:var(--grad-card);border:1px solid var(--border);border-radius:14px;padding:10px 11px}
+.maestro-thread{flex:1 1 auto;overflow-y:auto;padding:4px 2px 8px;display:flex;flex-direction:column;gap:10px;min-height:0}
 .maestro-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-family:var(--sans);font-size:13px;line-height:1.5;word-wrap:break-word}
 .maestro-user{align-self:flex-end;background:linear-gradient(135deg,rgba(96,165,250,0.22),rgba(96,165,250,0.12));border:1px solid rgba(96,165,250,0.3);color:#e8f0ff;border-bottom-right-radius:4px}
 .maestro-ai{align-self:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#e0e0e0;border-bottom-left-radius:4px}
 .maestro-ai strong{color:#c084fc}
 .maestro-empty{align-self:center;text-align:center;max-width:90%;color:var(--text-muted);font-family:var(--serif);font-style:italic;font-size:12.5px;line-height:1.6;padding:24px 12px}
-.maestro-inputbar{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px;border-top:1px solid var(--border)}
-.maestro-inputbar textarea{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:12px;color:#fff;font-family:var(--sans);font-size:13px;padding:10px 12px;resize:none;max-height:120px;outline:none;line-height:1.4}
+.maestro-inputbar{display:flex;gap:8px;align-items:flex-end;padding:8px 0 0;border-top:1px solid var(--border);flex:0 0 auto}
+.maestro-inputbar textarea{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:12px;color:#fff;font-family:var(--sans);font-size:13px;padding:10px 12px;resize:none;max-height:110px;outline:none;line-height:1.4}
 .maestro-inputbar textarea:focus{border-color:rgba(192,132,252,0.5)}
 .maestro-send-btn{flex:0 0 auto;width:42px;height:42px;border-radius:12px;border:none;background:linear-gradient(135deg,#a78bfa,#c084fc);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
 .maestro-send-btn:active{transform:scale(0.93)}
 .maestro-send-btn:disabled{opacity:0.5;cursor:default}
+/* Saved conversations panel */
+.maestro-saved-list{flex:1 1 auto;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+.maestro-saved-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:11px;padding:10px 12px;cursor:pointer;transition:all 0.15s;position:relative}
+.maestro-saved-item:active{transform:scale(0.99)}
+.maestro-saved-title{font-family:var(--sans);font-size:12.5px;font-weight:600;color:#ddd;margin-bottom:3px;padding-right:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.maestro-saved-meta{font-family:var(--sans);font-size:9.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.4px}
+.maestro-saved-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:7px;border:none;background:rgba(248,113,113,0.12);color:#f87171;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.maestro-saved-del:active{transform:scale(0.9)}
+.maestro-saved-empty{align-self:center;text-align:center;color:var(--text-muted);font-family:var(--serif);font-style:italic;font-size:12.5px;padding:30px 14px;line-height:1.6}
 .wday-view-body{width:100%}
 .wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
 .wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
@@ -1270,6 +1288,7 @@ const store={
     {name:'Annie',desc:'50-40-30-20-10 DU + Sit-ups'}
   ],
   records:JSON.parse(localStorage.getItem('h_records')||'[]'),
+  maestroSaved:JSON.parse(localStorage.getItem('h_maestroSaved')||'[]'),
   sports:JSON.parse(localStorage.getItem('h_sports')||'null')||DEFAULT_SPORTS,
   sportParams:JSON.parse(localStorage.getItem('h_sportParams')||'{}'),
   settings:JSON.parse(localStorage.getItem('h_settings')||'{"music":true,"transitionSound":true,"autoLocation":true,"lat":40.4168,"lng":-3.7038,"sunEffects":true,"countdown":3,"weather":"soleado","autoWeather":true,"skinType":"III","clothing":"shorts"}'),
@@ -2093,6 +2112,8 @@ function renderNav(){
 }
 
 function showTab(tab,btn){
+  // Al entrar a Maestro desde otra pestaña, siempre empezamos en la vista de chat.
+  if(tab==='maestro'&&currentTab!=='maestro')maestroView='chat';
   currentTab=tab;
   reorderMode=false;
   if(typeof collapseAllRegistros==='function')collapseAllRegistros();
@@ -4565,19 +4586,52 @@ function renderActividad(c){
 // ===== Pestaña Maestro (chat con el entrenador IA) =====
 function renderMaestro(c){
   var hasKey=!!getGeminiKey();
-  var h='<div class="section-title-inline">🧙 MAESTRO <span class="section-subtitle-inline">Tu entrenador con IA</span></div>';
   if(!hasKey){
-    h+='<div class="card"><div style="padding:18px 14px;text-align:center;font-family:var(--sans)">'+
+    var hk='<div class="section-title-inline">🧙 MAESTRO <span class="section-subtitle-inline">Tu entrenador con IA</span></div>'+
+      '<div class="card"><div style="padding:18px 14px;text-align:center;font-family:var(--sans)">'+
       '<div style="font-size:34px;margin-bottom:10px">🧙</div>'+
       '<div style="font-size:13px;color:#ddd;line-height:1.6;margin-bottom:14px">Para hablar con Maestro necesitas configurar tu clave de Google Gemini (gratuita).</div>'+
       '<button class="btn btn-primary" onclick="showTab(\'ajustes\')" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">Ir a Ajustes → Análisis con IA</button>'+
       '</div></div>';
-    c.innerHTML=h;return;
+    c.innerHTML=hk;return;
   }
-  h+='<div class="card"><div style="padding:10px 12px 12px">'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
-      '<div style="font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text-muted)">Conoce todos tus registros</div>'+
-      '<button class="btn btn-secondary" onclick="maestroClear()" style="font-size:10px;padding:4px 8px;width:auto;margin:0">🗑️ Limpiar</button>'+
+  // Vista de conversaciones guardadas
+  if(maestroView==='saved'){
+    var saved=loadMaestroSaved();
+    var sh='<div class="maestro-page">'+
+      '<div class="maestro-topbar">'+
+        '<div class="maestro-topbar-title">💾 Conversaciones guardadas ('+saved.length+')</div>'+
+        '<div class="maestro-topbar-btns">'+
+          (saved.length?'<button class="maestro-tool-btn" onclick="maestroDeleteAllSaved()" title="Borrar todas">🗑️ Todas</button>':'')+
+          '<button class="maestro-tool-btn" onclick="maestroShowChat()" title="Volver al chat">← Volver</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="maestro-wrap">'+
+        '<div class="maestro-saved-list">';
+    if(!saved.length){
+      sh+='<div class="maestro-saved-empty">Aún no has guardado ninguna conversación.<br><br>En el chat, pulsa 💾 Guardar para conservar la conversación actual.</div>';
+    }else{
+      sh+=saved.slice().reverse().map(function(s){
+        return '<div class="maestro-saved-item" onclick="maestroOpenSaved('+s.id+')">'+
+          '<button class="maestro-saved-del" onclick="event.stopPropagation();maestroDeleteSaved('+s.id+')" title="Borrar">✕</button>'+
+          '<div class="maestro-saved-title">'+escapeHTML(s.title||'Conversación')+'</div>'+
+          '<div class="maestro-saved-meta">'+fmtDate(s.date)+' · '+s.messages.length+' mensajes</div>'+
+        '</div>';
+      }).join('');
+    }
+    sh+='</div></div></div>';
+    c.innerHTML=sh;
+    return;
+  }
+  // Vista de chat (por defecto)
+  var h='<div class="maestro-page">'+
+    '<div class="maestro-topbar">'+
+      '<div class="maestro-topbar-title">🧙 Maestro · conoce todos tus datos</div>'+
+      '<div class="maestro-topbar-btns">'+
+        '<button class="maestro-tool-btn save" onclick="maestroSaveCurrent()" title="Guardar esta conversación">💾</button>'+
+        '<button class="maestro-tool-btn saved" onclick="maestroShowSaved()" title="Ver conversaciones guardadas">📚</button>'+
+        '<button class="maestro-tool-btn" onclick="maestroClear()" title="Vaciar el chat actual">🗑️</button>'+
+      '</div>'+
     '</div>'+
     '<div class="maestro-wrap">'+
       '<div class="maestro-thread" id="maestroThread"></div>'+
@@ -4586,7 +4640,7 @@ function renderMaestro(c){
         '<button class="maestro-send-btn" onclick="maestroSend()" title="Enviar">➤</button>'+
       '</div>'+
     '</div>'+
-  '</div></div>';
+  '</div>';
   c.innerHTML=h;
   renderMaestroChat(true);
 }
@@ -4880,6 +4934,45 @@ function clearActivityAnalysis(actId){
 
 // ---- Chat Maestro (con hilo) ----
 var maestroHistory=[];
+// Vista actual de la pestaña Maestro: 'chat' (por defecto) o 'saved'.
+var maestroView='chat';
+function maestroShowSaved(){maestroView='saved';render();}
+function maestroShowChat(){maestroView='chat';render();}
+// --- Conversaciones guardadas (solo en este dispositivo) ---
+function loadMaestroSaved(){return Array.isArray(store.maestroSaved)?store.maestroSaved:[];}
+function persistMaestroSaved(arr){save('maestroSaved',arr.slice(-50));} // save() sincroniza y persiste
+// Guarda la conversación actual como una entrada nueva.
+function maestroSaveCurrent(){
+  if(!maestroHistory.length){alert('No hay ninguna conversación que guardar todavía.');return;}
+  // Título = primera pregunta del usuario (recortada).
+  var firstUser=maestroHistory.find(function(m){return m.role==='user';});
+  var title=firstUser?firstUser.text.replace(/\s+/g,' ').slice(0,60):'Conversación';
+  var saved=loadMaestroSaved().slice();
+  saved.push({id:Date.now(),date:new Date().toISOString(),title:title,messages:maestroHistory.slice()});
+  persistMaestroSaved(saved);
+  alert('Conversación guardada ✓');
+}
+// Abre una conversación guardada en el chat y la deja activa para seguir hablando.
+function maestroOpenSaved(id){
+  var saved=loadMaestroSaved();
+  var conv=saved.find(function(s){return s.id===id;});
+  if(!conv)return;
+  maestroHistory=(conv.messages||[]).slice(); // se convierte en la conversación activa
+  saveMaestroHistory();
+  maestroView='chat';
+  render();
+}
+function maestroDeleteSaved(id){
+  if(!confirm('¿Borrar esta conversación guardada?'))return;
+  var saved=loadMaestroSaved().filter(function(s){return s.id!==id;});
+  persistMaestroSaved(saved);
+  render();
+}
+function maestroDeleteAllSaved(){
+  if(!confirm('¿Borrar TODAS las conversaciones guardadas? Esta acción no se puede deshacer.'))return;
+  persistMaestroSaved([]);
+  render();
+}
 function loadMaestroHistory(){try{maestroHistory=JSON.parse(localStorage.getItem('h_maestroChat')||'[]');}catch(e){maestroHistory=[];}}
 function saveMaestroHistory(){try{localStorage.setItem('h_maestroChat',JSON.stringify(maestroHistory.slice(-40)));}catch(e){}}
 loadMaestroHistory();
@@ -4908,10 +5001,24 @@ function maestroSend(){
       renderMaestroChat(true);
     })
     .catch(function(err){
-      maestroHistory.push({role:'model',text:'⚠️ No pude responder: '+(err.message||'error')});
+      maestroHistory.push({role:'model',text:maestroFriendlyError(err)});
       saveMaestroHistory();
       renderMaestroChat(true);
     });
+}
+// Convierte errores técnicos de la API en un mensaje breve y profesional de una línea.
+function maestroFriendlyError(err){
+  var m=String((err&&err.message)||err||'').toLowerCase();
+  if(m.indexOf('429')>=0||m.indexOf('quota')>=0||m.indexOf('rate')>=0||m.indexOf('resource has been exhausted')>=0||m.indexOf('overload')>=0||m.indexOf('503')>=0||m.indexOf('unavailable')>=0){
+    return 'Maestro está saturado por alta demanda en este momento. Inténtalo de nuevo en unos minutos.';
+  }
+  if(m.indexOf('api key')>=0||m.indexOf('api_key')>=0||m.indexOf('400')>=0||m.indexOf('403')>=0||m.indexOf('permission')>=0){
+    return 'No se pudo conectar con Maestro: revisa tu clave de Gemini en Ajustes → 🤖 Análisis con IA.';
+  }
+  if(m.indexOf('failed to fetch')>=0||m.indexOf('network')>=0||m.indexOf('networkerror')>=0){
+    return 'Sin conexión con Maestro. Comprueba tu conexión a internet e inténtalo de nuevo.';
+  }
+  return 'Maestro no pudo responder ahora mismo. Inténtalo de nuevo en unos minutos.';
 }
 function maestroClear(){
   if(!confirm('¿Borrar toda la conversación con Maestro?'))return;
@@ -6933,7 +7040,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 25.4</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 26.1</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7169,6 +7276,7 @@ function buildExportData(){
     sleep:store.sleep,activity:store.activity,weight:store.weight,allergy:store.allergy,
     vo2max:store.vo2max,vo2history:store.vo2history,fasting:store.fasting,measurements:store.measurements,
     meditation:store.meditation,programs:store.programs,sun:store.sun,wods:store.wods,records:store.records,
+    maestroSaved:store.maestroSaved,
     sports:store.sports,sportParams:store.sportParams,settings:store.settings,
     // ALL layout/order/position state
     widgets:store.widgets,weeklyPlan:store.weeklyPlan,activeDays:store.activeDays,
