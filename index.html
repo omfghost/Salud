@@ -4763,14 +4763,64 @@ function buildFullContext(){
     if(store.settings.skinType)c+='Tipo de piel: '+store.settings.skinType+'\n';
     if(store.settings.clothing)c+='Ropa habitual: '+store.settings.clothing+'\n';
   }
+  // VALORES ACTUALES CALCULADOS. Reutilizamos las funciones get() de TODOS los widgets
+  // del panel (barrido automático) para que Maestro vea exactamente las mismas métricas
+  // que muestra la app: nivel de vitamina D estimado, puntuación de sueño, HRV, VO2máx,
+  // peso, medidas, estado de salud, etc. Excluimos solo los widgets de configuración.
+  try{
+    if(typeof WIDGET_DEFS==='object'){
+      // Widgets que son opciones de configuración (clima, tipo de piel, ropa), no métricas.
+      var CONFIG_WIDGETS={soleado:1,parcial:1,nublado:1,muyNublado:1,lluvia:1,
+        I:1,II:1,III:1,IV:1,V:1,VI:1,
+        swimsuit:1,pantsonly:1,shorts:1,light:1,long:1,covered:1};
+      var vals=[];
+      Object.keys(WIDGET_DEFS).forEach(function(id){
+        if(CONFIG_WIDGETS[id])return;
+        var def=WIDGET_DEFS[id];
+        if(!def||typeof def.get!=='function')return;
+        var d=null;try{d=def.get();}catch(e){}
+        if(d&&d.val!==undefined&&d.val!==null&&String(d.val)!==''){
+          vals.push('- '+def.name+': '+d.val+(d.unit?' '+d.unit:'')+(d.sub?' ('+String(d.sub).replace(/<[^>]*>/g,'').trim()+')':''));
+        }
+      });
+      if(vals.length){
+        c+='\n== VALORES ACTUALES (calculados por la app, son el estado presente del usuario; úsalos siempre) ==\n'+vals.join('\n')+'\n';
+      }
+    }
+  }catch(e){}
+  // ANÁLISIS DE SALUD INTEGRAL: desglose por dominios (sueño, actividad, ayuno, sol/vitD,
+  // meditación, alergia, VO2máx) con puntuación, valor medio y objetivo óptimo de cada uno.
+  try{
+    if(typeof computeHealth==='function'){
+      var hr=computeHealth(28);
+      if(hr&&hr.hasData){
+        c+='\n== ANÁLISIS DE SALUD (últimas 4 semanas, puntuación /100) ==\nPuntuación global: '+hr.composite;
+        if(typeof healthRating==='function'){var rt=healthRating(hr.composite);if(rt)c+=' ('+rt.label+')';}
+        c+='\nDesglose por área:\n';
+        c+=hr.domains.map(function(d){return '- '+d.name+': '+d.score+'/100 · actual '+d.value+' · óptimo '+d.optimal;}).join('\n')+'\n';
+      }
+    }
+  }catch(e){}
+  // VITAMINA D detallada: media diaria estimada y nivel sérico estimado.
+  try{
+    if(typeof estimatedVitDNgml==='function'){
+      var ng=estimatedVitDNgml();
+      if(ng!==undefined&&ng!==null&&!isNaN(ng)){
+        c+='\n== VITAMINA D (estimación de la app) ==\nNivel sérico estimado actual: '+Number(ng).toFixed(1)+' ng/ml';
+        if(typeof vitDStatus==='function'){var vs=vitDStatus(ng);if(vs&&vs.label)c+=' ('+vs.label+')';}
+        if(typeof vitDAvgDaily30==='function'){var av=vitDAvgDaily30();if(av!==undefined&&av!==null&&!isNaN(av))c+='\nProducción media diaria por sol (últimos 30 días): '+Math.round(av)+' UI/día';}
+        c+='\nNota: este nivel ya combina tu analítica base con la exposición solar registrada. Es tu valor actual de vitamina D; úsalo y NO pidas una analítica si te preguntan por él.\n';
+      }
+    }
+  }catch(e){}
   return c;
 }
 
 var MAESTRO_SYSTEM='Eres "Maestro", un entrenador personal experto (fuerza, CrossFit, running, natación, salud y recuperación) integrado en la app de salud del usuario. '+
   'Hablas en español, de forma directa, cercana y motivadora, sin rodeos. '+
-  'IMPORTANTE: junto a estas instrucciones recibes un RESUMEN COMPLETO DE DATOS del usuario con sus entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar / vitamina D. '+
-  'SIEMPRE debes basar tus respuestas en esos datos reales. Antes de decir que no tienes información, revisa con atención todas las secciones del resumen (incluida SOL / VITAMINA D). '+
-  'Si de verdad un dato no aparece en el resumen, dilo con claridad e indica al usuario que lo registre; nunca te lo inventes. '+
+  'IMPORTANTE: junto a estas instrucciones recibes un RESUMEN COMPLETO DE DATOS del usuario con tres tipos de información: (1) REGISTROS HISTÓRICOS de entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar; (2) VALORES ACTUALES ya calculados por la app (nivel de vitamina D estimado en ng/ml, puntuación de sueño, HRV, VO2máx, peso, medidas, estado de salud, etc.); y (3) un ANÁLISIS DE SALUD con la puntuación de cada área (sueño, actividad, ayuno, sol/vitamina D, meditación...) y su objetivo óptimo. '+
+  'SIEMPRE debes basar tus respuestas en esos datos reales. Si te preguntan por la vitamina D, usa el "Nivel VitD actual" de la sección VALORES ACTUALES; nunca digas que no tienes el dato ni pidas una analítica si ese valor aparece en el resumen. '+
+  'Antes de decir que no tienes información, revisa con atención TODAS las secciones del resumen. Si de verdad un dato no aparece, dilo con claridad e indica al usuario que lo registre; nunca te lo inventes. '+
   'No des diagnósticos médicos; si detectas algo preocupante, recomienda consultar a un profesional. '+
   'Sé conciso: usa frases cortas y, cuando ayude, listas con viñetas.';
 
@@ -6883,7 +6933,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 25.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 25.4</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
