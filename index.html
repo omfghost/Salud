@@ -1094,6 +1094,14 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 </div>
 </div>
 
+<div class="modal" id="modal-activityDetail">
+<div class="modal-content" style="max-width:440px">
+<div class="modal-handle"></div>
+<div class="modal-header"><div class="modal-title" id="actDetailTitle">Entrenamiento</div><button class="modal-close" onclick="closeModal('activityDetail')">×</button></div>
+<div id="actDetailContent" style="font-size:13px;color:#ddd;line-height:1.55;font-family:var(--sans)"></div>
+</div>
+</div>
+
 <div class="modal" id="modal-vitdLevels">
 <div class="modal-content" style="max-width:440px">
 <div class="modal-handle"></div>
@@ -4497,12 +4505,15 @@ function renderActividad(c){
       renderRegistros('activity','ENTRENAMIENTOS',function(a){
         const sport=store.sports.find(function(s){return s.id===a.type;});
         const col=sportColor(a.type);
-        var out='<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
+        // Toda la ficha es pulsable: abre el detalle con TODOS los datos del entreno.
+        var out='<div onclick="showActivityDetail('+a.id+')" style="cursor:pointer">'+
+          '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'<span style="margin-left:auto;color:var(--text-dim);font-size:12px">›</span></div>'+
           '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?fmtActivityDuration(a.duration):'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
-        // WOD realizado (si se guardó).
+        // Previsualización del WOD (máx. ~3 líneas) para reconocer el entreno sin pulsar.
         if(a.wod){
-          out+='<div style="margin-top:5px;padding:6px 9px;background:rgba(192,132,252,0.06);border-left:2px solid rgba(192,132,252,0.4);border-radius:0 7px 7px 0;font-size:10.5px;color:#cbb6e8;font-family:var(--sans);line-height:1.45;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div>';
+          out+='<div style="margin-top:5px;padding:6px 9px;background:rgba(192,132,252,0.06);border-left:2px solid rgba(192,132,252,0.4);border-radius:0 7px 7px 0;font-size:10.5px;color:#cbb6e8;font-family:var(--sans);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div>';
         }
+        out+='</div>';   // fin de zona pulsable
         // Maestro: botón de análisis + análisis guardado (si existe).
         if(a.aiAnalysis){
           var ageDays=a.aiAnalysisAt?Math.floor((Date.now()-a.aiAnalysisAt)/(24*60*60*1000)):0;
@@ -4775,7 +4786,37 @@ function activityLine(a){
   return '- '+parts.join(' · ');
 }
 
-// Contexto para analizar UN entreno: mismo deporte, últimos 4 meses (excluye el propio).
+// Extrae movimientos/ejercicios clave de un texto de WOD para detectar coincidencias
+// entre entrenos (thrusters, pull-ups, snatch, run, etc.).
+function extractMovements(text){
+  if(!text)return [];
+  var t=(' '+String(text).toLowerCase()+' ').replace(/[^a-záéíóúñ0-9\s-]/g,' ');
+  // Vocabulario de movimientos comunes (ES/EN) que solemos ver en WODs.
+  var vocab=['thruster','thrusters','snatch','clean','jerk','deadlift','peso muerto','squat','sentadilla',
+    'pull-up','pull up','pullup','dominada','dominadas','muscle-up','muscle up','muscleup','push-up','push up','flexion','flexión',
+    'box jump','salto cajon','salto cajón','burpee','burpees','wall ball','wallball','double under','double-under','comba',
+    'row','remo','run','carrera','correr','bike','assault','echo bike','ski','toes to bar','t2b','knees to elbow',
+    'handstand','hspu','pistol','lunge','zancada','kettlebell','kb swing','swing','clean and jerk','power clean','front squat',
+    'back squat','overhead squat','ohs','sit-up','sit up','abdominal','rope climb','cuerda','farmer','sandbag','press','press banca',
+    'bench press','shoulder press','push press','strict press','c2b','chest to bar','gtoh','ground to overhead'];
+  var found={};
+  vocab.forEach(function(m){ if(t.indexOf(' '+m+' ')>=0||t.indexOf(' '+m+'s ')>=0){
+    // Normalizamos plural/variantes a una clave canónica corta.
+    var key=m.replace(/s$/,'').replace(/-/g,' ').trim();
+    found[key]=true;
+  }});
+  return Object.keys(found);
+}
+// ¿Cuántos movimientos comparten dos listas de ejercicios?
+function sharedMovementCount(a,b){
+  if(!a.length||!b.length)return 0;
+  var setB={};b.forEach(function(m){setB[m]=true;});
+  var n=0;a.forEach(function(m){if(setB[m])n++;});
+  return n;
+}
+
+// Contexto para analizar UN entreno: mismo deporte, últimos 4 meses, dando prioridad a
+// los entrenos que comparten ejercicios con el actual (comparación específica, no genérica).
 function buildActivityContext(act){
   var cutoff=Date.now()-122*24*60*60*1000; // ~4 meses
   var same=store.activity.filter(function(a){
@@ -4783,14 +4824,43 @@ function buildActivityContext(act){
     if(a.type!==act.type)return false;
     var t=new Date(a.date).getTime();
     return !isNaN(t)&&t>=cutoff;
-  }).sort(function(x,y){return new Date(y.date)-new Date(x.date);});
-  var recs=store.records.slice(-12).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');});
-  var lines=same.slice(0,40).map(activityLine);
+  });
+  var actMoves=extractMovements(act.wod||act.subtype||'');
+  // Anotamos cada entreno con los movimientos que comparte con el actual y ordenamos:
+  // primero los que más ejercicios comparten, luego por fecha (más reciente).
+  same.forEach(function(a){a._shared=sharedMovementCount(actMoves,extractMovements(a.wod||a.subtype||''));});
+  same.sort(function(x,y){
+    if(y._shared!==x._shared)return y._shared-x._shared;
+    return new Date(y.date)-new Date(x.date);
+  });
+  // Línea de entreno para el contexto, con WOD completo y marca de ejercicios compartidos.
+  function ctxLine(a){
+    var base=activityLineFull(a);
+    if(a._shared>0)base+=' [comparte '+a._shared+' ejercicio'+(a._shared===1?'':'s')+' con el analizado]';
+    return base;
+  }
+  var lines=same.slice(0,40).map(ctxLine);
+  var recs=store.records.slice(-15).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');});
   var ctx='DEPORTE: '+sportName(act.type)+'\n';
-  ctx+='\nENTRENO A ANALIZAR:\n'+activityLine(act)+'\n';
-  ctx+='\nHISTÓRICO DEL MISMO DEPORTE (últimos 4 meses, '+same.length+' entrenos):\n'+(lines.length?lines.join('\n'):'(sin entrenos previos del mismo deporte)')+'\n';
+  if(actMoves.length)ctx+='EJERCICIOS DETECTADOS EN ESTE ENTRENO: '+actMoves.join(', ')+'\n';
+  ctx+='\nENTRENO A ANALIZAR (con su WOD completo):\n'+activityLineFull(act)+'\n';
+  var withShared=same.filter(function(a){return a._shared>0;}).length;
+  ctx+='\nHISTÓRICO DEL MISMO DEPORTE (últimos 4 meses, '+same.length+' entrenos'+(withShared?', '+withShared+' comparten ejercicios con el actual'.replace('ejercicios','ejercicios'):'')+'). Ordenados por similitud de ejercicios:\n'+(lines.length?lines.join('\n'):'(sin entrenos previos del mismo deporte)')+'\n';
   if(recs.length)ctx+='\nMARCAS PERSONALES RECIENTES:\n'+recs.join('\n')+'\n';
   return ctx;
+}
+// Como activityLine pero con el WOD completo (sin truncar a 200), para análisis detallado.
+function activityLineFull(a){
+  var parts=[fmtDate(a.date)];
+  if(a.subtype)parts.push(a.subtype);
+  if(a.duration)parts.push('tiempo '+fmtActivityDuration(a.duration));
+  if(a.result)parts.push('reps/resultado '+a.result);
+  if(a.distance)parts.push('dist '+a.distance);
+  if(a.hrAvg)parts.push('FC med '+a.hrAvg);
+  if(a.hrMax)parts.push('FC máx '+a.hrMax);
+  if(a.wod)parts.push('WOD: '+String(a.wod).replace(/\s+/g,' ').trim());
+  if(a.notes)parts.push('notas: '+a.notes);
+  return '- '+parts.join(' · ');
 }
 
 // Vuelca un registro genérico como "campo=valor" para no depender de nombres exactos.
@@ -4936,10 +5006,12 @@ function analyzeActivity(actId){
   var box=document.getElementById('aiAnalysis-'+actId);
   if(box){box.style.display='block';box.innerHTML='<div class="maestro-loading"><span class="wday-done-spin"></span> Maestro está analizando tu entreno…</div>';}
   var ctx=buildActivityContext(act);
-  var userMsg='Analiza este entrenamiento concreto comparándolo con mi histórico del mismo deporte. '+
-    'Dime: 1) si el resultado/tiempo es bueno respecto a mis marcas anteriores, 2) si la intensidad (pulsaciones) encaja, '+
-    '3) progresión o estancamiento que observes, 4) 2-3 consejos concretos para mejorar la próxima vez. '+
-    'Ten en cuenta mis notas si las hay.\n\n'+ctx;
+  var userMsg='Analiza este entrenamiento concreto comparándolo con mi histórico del MISMO deporte. '+
+    'IMPORTANTE: prioriza la comparación con los entrenos que comparten EJERCICIOS similares (están marcados como "[comparte N ejercicios...]" y ordenados por similitud). '+
+    'Si hay WODs anteriores con los mismos movimientos (p.ej. mismos thrusters, mismas dominadas, misma carrera), compara tiempos, repeticiones y cargas movimiento a movimiento, no de forma genérica. '+
+    'Dime: 1) si el resultado/tiempo es bueno respecto a esos entrenos comparables y a mis marcas, 2) si la intensidad (pulsaciones FC media/máx) encaja —y si no registré FC en este entreno, indícamelo y sugiéreme registrarla—, '+
+    '3) progresión o estancamiento en los ejercicios concretos, 4) 2-3 consejos específicos para mejorar la próxima vez. '+
+    'Ten en cuenta mis notas si las hay. Sé concreto y apóyate en los números reales.\n\n'+ctx;
   geminiChat(MAESTRO_SYSTEM,[{role:'user',text:userMsg}])
     .then(function(txt){
       act.aiAnalysis=txt;act.aiAnalysisAt=Date.now();
@@ -4950,6 +5022,49 @@ function analyzeActivity(actId){
       if(box)box.innerHTML='<div class="maestro-error">No se pudo analizar: '+escapeHTML(err.message||'error')+'</div>';
     });
 }
+// Muestra TODOS los datos guardados de un entreno en un modal al pulsarlo en el histórico.
+function showActivityDetail(actId){
+  var a=store.activity.find(function(x){return x.id===actId;});
+  if(!a)return;
+  var sport=store.sports.find(function(s){return s.id===a.type;});
+  var col=sportColor(a.type);
+  var title=(sport?sport.name:a.type)+(a.subtype?' · '+a.subtype:'');
+  var tEl=document.getElementById('actDetailTitle');if(tEl)tEl.textContent=title;
+  // Construimos una ficha con todos los campos que tengan valor.
+  function row(label,val){
+    if(val===undefined||val===null||String(val).trim()==='')return '';
+    return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">'+
+      '<span style="color:var(--text-muted);font-size:11.5px;text-transform:uppercase;letter-spacing:0.4px;flex-shrink:0">'+label+'</span>'+
+      '<span style="color:#fff;font-size:13px;font-weight:600;text-align:right">'+escapeHTML(String(val))+'</span></div>';
+  }
+  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="sport-color-dot" style="background:'+col+';width:12px;height:12px"></span>'+
+    '<span style="color:'+col+';font-weight:700;font-size:15px">'+escapeHTML(sport?sport.name:a.type)+'</span></div>';
+  h+=row('Fecha',fmtDate(a.date));
+  if(a.subtype)h+=row('Tipo',a.subtype);
+  if(a.duration)h+=row('Tiempo',fmtActivityDuration(a.duration));
+  if(a.result)h+=row(a.type==='crossfit'?'Repeticiones':'Resultado',a.result);
+  if(a.distance)h+=row('Distancia',a.distance);
+  h+=row('FC media',a.hrAvg?a.hrAvg+' ppm':'');
+  h+=row('FC máxima',a.hrMax?a.hrMax+' ppm':'');
+  // El WOD completo (texto manual o de la IA), respetando saltos de línea.
+  if(a.wod){
+    h+='<div style="margin-top:12px"><div style="color:#c084fc;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">WOD realizado</div>'+
+      '<div style="background:rgba(192,132,252,0.07);border-left:3px solid rgba(192,132,252,0.4);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12.5px;color:#e0d5f0;line-height:1.5;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div></div>';
+  }
+  if(a.notes){
+    h+='<div style="margin-top:12px"><div style="color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">Notas</div>'+
+      '<div style="font-size:12.5px;color:#ccc;line-height:1.5;white-space:pre-wrap">'+escapeHTML(a.notes)+'</div></div>';
+  }
+  // Si faltan las pulsaciones, lo indicamos discretamente.
+  if(!a.hrAvg&&!a.hrMax){
+    h+='<div style="margin-top:12px;font-size:10.5px;color:var(--text-dim);font-style:italic;font-family:var(--serif)">Este entrenamiento no tiene frecuencia cardíaca registrada. Puedes añadirla con el botón ✎ Editar.</div>';
+  }
+  // Acciones rápidas: editar.
+  h+='<div style="margin-top:16px"><button class="btn btn-secondary" onclick="closeModal(\'activityDetail\');editItem(\'activity\','+a.id+')" style="font-size:12px">✎ Editar este entrenamiento</button></div>';
+  var cEl=document.getElementById('actDetailContent');if(cEl)cEl.innerHTML=h;
+  openModal('activityDetail');
+}
+
 function clearActivityAnalysis(actId){
   var act=store.activity.find(function(a){return a.id===actId;});
   if(!act)return;
@@ -7109,7 +7224,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.4</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
