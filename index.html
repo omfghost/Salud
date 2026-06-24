@@ -458,7 +458,10 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .maestro-error{color:#f87171}
 /* Maestro chat page */
 /* Maestro: pantalla fija (sin scroll de página); solo el hilo hace scroll */
-.maestro-page{display:flex;flex-direction:column;height:calc(100dvh - 172px - var(--safe-top) - var(--safe-bottom));max-height:calc(100dvh - 172px - var(--safe-top) - var(--safe-bottom));min-height:280px}
+body.maestro-mode{overflow:hidden;height:100dvh}
+body.maestro-mode .app{min-height:0;height:auto}
+body.maestro-mode .content{overflow:hidden}
+.maestro-page{display:flex;flex-direction:column;height:calc(100dvh - 152px - var(--safe-top) - var(--safe-bottom));max-height:calc(100dvh - 152px - var(--safe-top) - var(--safe-bottom));min-height:240px}
 .maestro-topbar{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 2px 8px;flex:0 0 auto}
 .maestro-topbar-title{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .maestro-topbar-btns{display:flex;align-items:center;gap:5px;flex:0 0 auto}
@@ -2116,6 +2119,9 @@ function showTab(tab,btn){
   if(tab==='maestro'&&currentTab!=='maestro')maestroView='chat';
   currentTab=tab;
   reorderMode=false;
+  // Maestro usa pantalla fija (sin scroll de página): marcamos el body para neutralizar
+  // el min-height/padding que en el resto de pestañas permiten el scroll normal.
+  if(document&&document.body)document.body.classList.toggle('maestro-mode',tab==='maestro');
   if(typeof collapseAllRegistros==='function')collapseAllRegistros();
   renderNav();
   const ha=document.getElementById('headerActions');
@@ -5267,8 +5273,7 @@ function prefillFromDay(dayId){
       if(hasText){
         openRegistroWithPrefill(buildPrefillFromText(rec.text));
       }else{
-        alert('Para analizar la foto con IA necesitas introducir tu clave de Gemini en Ajustes → 🤖 Análisis con IA.\n\nEl entrenamiento queda marcado igualmente.');
-        render();
+        handleAiFailureNoText(dayId,'Para leer la foto con IA necesitas tu clave de Gemini en Ajustes → 🤖 Análisis con IA.');
       }
       return;
     }
@@ -5282,29 +5287,57 @@ function prefillFromDay(dayId){
       if(!dataUrl||dataUrl.indexOf('data:')!==0){
         // Sin bytes utilizables (p.ej. solo referencia remota); cae a texto si hay.
         if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
-        else{alert('No se pudo leer la foto para analizarla.');render();}
+        else{handleAiFailureNoText(dayId,'No se pudo leer la foto del entrenamiento.');}
         return;
       }
       analyzeImageWithGemini(dataUrl,rec.text||'')
         .then(function(pre){openRegistroWithPrefill(pre);})
         .catch(function(err){
           console.warn('Gemini',err);
-          // Fallback: si falla la IA, usamos el texto del día si existe.
+          // Fallback: si falla la IA pero hay texto del día, lo usamos sin molestar.
           if(hasText){
-            alert('No se pudo analizar la foto con IA ('+(err.message||'error')+').\nSe precargará con el texto del día.');
             openRegistroWithPrefill(buildPrefillFromText(rec.text));
           }else{
-            alert('No se pudo analizar la foto con IA: '+(err.message||'error')+'\n\nRevisa tu conexión o la clave de Gemini. El entrenamiento queda marcado igualmente.');
-            render();
+            // Solo foto y la IA ha fallado: ofrecemos registrar a mano o desmarcar.
+            handleAiFailureNoText(dayId,aiShortError(err));
           }
         });
     }).catch(function(){
       if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
-      else{render();}
+      else{handleAiFailureNoText(dayId,'No se pudo leer la foto del entrenamiento.');}
     });
   }else{
     // Solo texto: precarga heurística instantánea.
     openRegistroWithPrefill(buildPrefillFromText(rec.text));
+  }
+}
+// Mensaje corto y profesional para fallos de la IA (alta demanda, conexión, clave).
+function aiShortError(err){
+  var m=String((err&&err.message)||err||'').toLowerCase();
+  if(m.indexOf('429')>=0||m.indexOf('quota')>=0||m.indexOf('rate')>=0||m.indexOf('exhausted')>=0||m.indexOf('overload')>=0||m.indexOf('503')>=0||m.indexOf('unavailable')>=0){
+    return 'El análisis con IA está saturado por alta demanda ahora mismo.';
+  }
+  if(m.indexOf('api key')>=0||m.indexOf('api_key')>=0||m.indexOf('400')>=0||m.indexOf('403')>=0||m.indexOf('permission')>=0){
+    return 'No se pudo usar la IA: revisa tu clave de Gemini en Ajustes.';
+  }
+  if(m.indexOf('fetch')>=0||m.indexOf('network')>=0){
+    return 'Sin conexión para analizar la foto con IA.';
+  }
+  return 'El análisis con IA no está disponible en este momento.';
+}
+// Cuando la IA falla y el día solo tiene foto (sin texto de respaldo), preguntamos al
+// usuario si quiere registrar el entreno a mano o dejar el día SIN marcar para reintentar.
+function handleAiFailureNoText(dayId,shortMsg){
+  var ok=confirm(shortMsg+'\n\n¿Quieres registrar el entrenamiento manualmente?\n\n• Aceptar: abre el registro para rellenarlo a mano (el día queda marcado).\n• Cancelar: deja el día SIN marcar para volver a intentarlo más tarde.');
+  if(ok){
+    // Registro manual con el día asociado (la foto se copiará al guardar).
+    openRegistroWithPrefill({sportId:(store.sports[0]||{}).id||'crossfit',subtype:'',runType:'continua',time:'',wod:'',aiOnly:true});
+  }else{
+    // Desmarcamos el día y descartamos el vínculo pendiente.
+    if(store.weeklyPlan[dayId])store.weeklyPlan[dayId].done=false;
+    _pendingDayLink=null;
+    saveWeekly();
+    render();
   }
 }
 
@@ -7040,7 +7073,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 26.1</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 26.2</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
