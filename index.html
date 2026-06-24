@@ -1450,16 +1450,30 @@ function deletePhotoData(ref){
 // Synchronous cache of resolved photos so render() can show them without async.
 // Filled on demand by ensurePhotoCached().
 var _photoCache={};
+var _photoMissing={};   // refs que existen en datos pero cuyos bytes no están en IndexedDB
+var _pendingPhotoChecks=[];   // verificaciones de fotos diferidas tras sincronización remota
 function ensurePhotoCached(ref){
   if(!ref||ref.indexOf('img:')!==0)return;          // nothing to resolve
   if(_photoCache[ref]!==undefined)return;            // already cached (or pending)
   _photoCache[ref]=null;                             // mark pending to avoid duplicate loads
   getPhotoData(ref).then(function(data){
-    _photoCache[ref]=data||null;
-    // Re-render so the freshly-loaded image appears.
+    if(data){
+      _photoCache[ref]=data;
+      delete _photoMissing[ref];
+    }else{
+      // Los bytes no están en este dispositivo (no migrados / no sincronizados / perdidos).
+      _photoCache[ref]=null;
+      _photoMissing[ref]=true;
+    }
+    // Re-render so the freshly-loaded image (or missing state) appears.
+    if(typeof render==='function')render();
+  }).catch(function(){
+    _photoCache[ref]=null;_photoMissing[ref]=true;
     if(typeof render==='function')render();
   });
 }
+// ¿Sabemos que esta foto falta (bytes no disponibles en este dispositivo)?
+function photoIsMissing(ref){return !!(ref&&_photoMissing[ref]);}
 // Returns a directly-usable src for a ref (cached value, or the ref itself if legacy).
 function photoSrc(ref){
   if(!ref)return '';
@@ -4329,7 +4343,11 @@ function renderActividad(c){
     let body;
     if(sdHasImage){
       const sdImgSrc=photoSrc(sdData.image);
-      body='<div class="wday-view-img" onclick="openImageViewer(\''+sd.id+'\',\'actividad\')">'+(sdImgSrc?'<img src="'+sdImgSrc+'">':'<div style="padding:30px;text-align:center;color:var(--text-muted);font-size:11px">Cargando foto…</div>')+'<span class="wday-view-zoom">⤢</span></div>'+
+      var sdPhotoInner;
+      if(sdImgSrc){sdPhotoInner='<img src="'+sdImgSrc+'">';}
+      else if(photoIsMissing(sdData.image)){sdPhotoInner='<div style="padding:22px 14px;text-align:center;color:var(--text-dim);font-size:10.5px;line-height:1.5;font-family:var(--sans)">📷 Foto no disponible en este dispositivo<br><span style="font-size:9px">Se subió en otro dispositivo o se limpió la caché. Vuelve a adjuntarla aquí si la necesitas.</span></div>';}
+      else{sdPhotoInner='<div style="padding:30px;text-align:center;color:var(--text-muted);font-size:11px">Cargando foto…</div>';}
+      body='<div class="wday-view-img" onclick="openImageViewer(\''+sd.id+'\',\'actividad\')">'+sdPhotoInner+'<span class="wday-view-zoom">⤢</span></div>'+
         (sdHasText?'<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>':'');
     }else if(sdHasText){
       body='<div class="wday-view-text" onclick="openDayEditor(\''+sd.id+'\')">'+escapeHTML(sdData.text)+'</div>';
@@ -5615,8 +5633,11 @@ function clearDayImage(){
   document.getElementById('dayImageInput').value='';
 }
 function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;const prev=store.weeklyPlan[editingDayId]||{};
-  // If the photo was replaced with a different one, delete the previous from IndexedDB.
-  if(prev.image&&prev.image!==editingImageData)deletePhotoData(prev.image);
+  // If the photo was replaced with a different one, delete the previous from IndexedDB,
+  // but only if it isn't still referenced by another day or an activity record.
+  if(prev.image&&prev.image!==editingImageData&&prev.image.indexOf&&prev.image.indexOf('img:')===0){
+    if(!photoRefInUse(prev.image,editingDayId,editingImageData))deletePhotoData(prev.image);
+  }
   store.weeklyPlan[editingDayId]={text:text,image:editingImageData,done:prev.done===true};saveWeekly();closeDayEditor();render();}
 
 // === Quick fill: edit text/photo for several days at once ===
@@ -5631,7 +5652,8 @@ function openQuickFill(){
   quickFillBuf={};
   quickFillDays().forEach(function(d){
     var data=store.weeklyPlan[d.id]||{text:'',image:null};
-    quickFillBuf[d.id]={text:data.text||'',image:data.image||null};
+    // Guardamos también la imagen original para saber si el usuario la cambia de verdad.
+    quickFillBuf[d.id]={text:data.text||'',image:data.image||null,originalImage:data.image||null};
   });
   renderQuickFill();
   document.getElementById('modal-quickFill').classList.add('active');
@@ -5698,13 +5720,38 @@ function saveQuickFill(){
   Object.keys(quickFillBuf).forEach(function(id){
     var prev=store.weeklyPlan[id]||{};
     var buf=quickFillBuf[id];
-    // If this day's photo changed (replaced or removed), free the old one from IndexedDB.
-    if(prev.image&&prev.image!==buf.image)deletePhotoData(prev.image);
+    // SOLO borramos la foto anterior si el usuario la cambió EXPLÍCITAMENTE en este modal
+    // (es decir, la imagen que el modal tenía al abrirse difiere de la que se guarda).
+    // Nunca comparamos contra prev.image directamente, porque la sincronización en la nube
+    // puede haber modificado store.weeklyPlan mientras el modal estaba abierto, y eso
+    // provocaría borrar por error fotos que el usuario no tocó.
+    var original=(buf.originalImage!==undefined)?buf.originalImage:prev.image;
+    if(original&&original!==buf.image&&original.indexOf&&original.indexOf('img:')===0){
+      // Además, solo borramos si esa referencia ya no está en uso por ningún día.
+      if(!photoRefInUse(original,id,buf.image))deletePhotoData(original);
+    }
     store.weeklyPlan[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
   });
   saveWeekly();
   closeQuickFill();
   render();
+}
+// ¿La referencia de foto sigue usándose por algún día (distinto de excludeDay) o por la
+// nueva imagen que vamos a guardar? Evita borrar bytes que aún están en uso.
+function photoRefInUse(ref,excludeDay,newImg){
+  if(!ref)return false;
+  if(newImg===ref)return true;
+  var wp=store.weeklyPlan||{};
+  var inUse=false;
+  Object.keys(wp).forEach(function(k){
+    if(k===excludeDay)return;
+    if(wp[k]&&wp[k].image===ref)inUse=true;
+  });
+  // También comprobamos los registros de actividad (la foto se copia al registrar).
+  if(!inUse&&Array.isArray(store.activity)){
+    store.activity.forEach(function(a){if(a&&a.photo===ref)inUse=true;});
+  }
+  return inUse;
 }
 var imageViewerOrigin=null;
 var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
@@ -6945,7 +6992,8 @@ function renderAjustes(c){
             html+='<div style="font-size:11px;color:var(--accent);margin:2px 0 4px;font-family:var(--sans)">✓ Sesión iniciada como <b>'+escapeHTML(who)+'</b></div>'+
               '<div id="fbStatusLine" style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;font-family:var(--sans)">'+(syncOn?'Conectado · sincronización activa':'Sincronización en pausa')+'</div>';
             if(syncOn){
-              html+='<button class="btn btn-primary" onclick="fbPushNow()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c;margin-bottom:6px">☁️ Forzar guardado ahora</button>';
+              html+='<button class="btn btn-primary" onclick="fbPushNow()" style="background:rgba(251,146,60,0.15);border-color:rgba(251,146,60,0.4);color:#fb923c;margin-bottom:6px">☁️ Forzar guardado ahora</button>'+
+                '<button class="btn btn-primary" onclick="fbPullNow()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa;margin-bottom:6px">⬇️ Cargar desde la nube</button>';
             }
             html+='<button class="btn btn-secondary" onclick="fbSignOut()" style="font-size:11px;padding:6px;margin-bottom:6px">Cerrar sesión</button>';
           }else{
@@ -6953,7 +7001,10 @@ function renderAjustes(c){
               '<button class="btn btn-primary" onclick="fbLoginGoogle()" style="background:rgba(96,165,250,0.15);border-color:rgba(96,165,250,0.4);color:#60a5fa;margin-bottom:6px">Iniciar sesión con Google</button>'+
               '<div style="font-size:10px;color:var(--text-dim);text-align:center;margin:2px 0 6px;font-family:var(--sans)">— o con email —</div>'+
               '<input type="email" id="fbEmail" placeholder="Email" autocomplete="username" style="font-size:12px;margin-bottom:5px">'+
-              '<input type="password" id="fbPass" placeholder="Contraseña" autocomplete="current-password" style="font-size:12px;margin-bottom:6px">'+
+              '<div style="position:relative;margin-bottom:6px">'+
+                '<input type="password" id="fbPass" placeholder="Contraseña" autocomplete="current-password" style="font-size:12px;margin-bottom:0;padding-right:42px;width:100%;box-sizing:border-box">'+
+                '<button type="button" onclick="togglePassVisibility(\'fbPass\',this)" title="Mostrar u ocultar contraseña" style="position:absolute;top:50%;right:6px;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;line-height:1;color:var(--text-muted)">👁️</button>'+
+              '</div>'+
               '<button class="btn btn-primary" onclick="fbLoginEmail()" style="margin-bottom:6px">Entrar / Crear cuenta</button>';
           }
           html+='<p style="font-size:9px;color:var(--text-dim);margin-top:4px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan en tu proyecto de Firebase, vinculados a tu cuenta. Cada cambio se sube al instante y se recibe en tiempo real en tus otros dispositivos. Las fotos y vídeos se guardan en cada dispositivo (no ocupan la nube).</p>';
@@ -6992,7 +7043,10 @@ function renderAjustes(c){
           '<button class="btn btn-secondary" onclick="clearGeminiKey()" style="font-size:11px;padding:6px">Quitar clave</button>'
           :
           '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Necesitas una clave de API de Google Gemini (gratuita). <span class="fast-time-set-btn" onclick="showGeminiHelp()">Ver cómo →</span></p>'+
-          '<input type="password" id="geminiKeyInput" placeholder="Pega aquí tu clave de Gemini" autocomplete="off" style="font-size:12px;margin-bottom:6px">'+
+          '<div style="position:relative;margin-bottom:6px">'+
+            '<input type="password" id="geminiKeyInput" placeholder="Pega aquí tu clave de Gemini" autocomplete="off" style="font-size:12px;margin-bottom:0;padding-right:42px;width:100%;box-sizing:border-box">'+
+            '<button type="button" onclick="togglePassVisibility(\'geminiKeyInput\',this)" title="Mostrar u ocultar" style="position:absolute;top:50%;right:6px;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;line-height:1;color:var(--text-muted)">👁️</button>'+
+          '</div>'+
           '<button class="btn btn-primary" onclick="saveGeminiKey()" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">✨ Guardar clave</button>'
         )+
         '<p style="font-size:9px;color:var(--text-dim);margin-top:8px;line-height:1.45;font-family:var(--serif);font-style:italic">Por seguridad, la clave se guarda <b>solo en este dispositivo</b> y no se sincroniza ni se incluye en las copias de seguridad. Si usas la app en otro dispositivo, tendrás que introducirla allí también.</p>'+
@@ -7073,7 +7127,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 26.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.1</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7125,10 +7179,15 @@ function fbSetSyncEnabled(on){
 }
 function fbSetStatus(s,msg){
   FB.status=s;
+  if(s==='synced')FB.lastSyncTime=Date.now();
   const el=document.getElementById('fbStatusLine');
   if(el){
+    var syncedLabel='✓ Sincronizado';
+    if(s==='synced'&&FB.lastSyncTime){
+      try{var t=new Date(FB.lastSyncTime);syncedLabel='✓ Sincronizado a las '+(t.getHours()<10?'0':'')+t.getHours()+':'+(t.getMinutes()<10?'0':'')+t.getMinutes();}catch(e){}
+    }
     const map={off:'',connecting:'Conectando…',ready:'Conectado · sincronización activa',
-               syncing:'Sincronizando…',synced:'✓ Sincronizado',error:(msg||'Error'),
+               syncing:'Sincronizando…',synced:syncedLabel,error:(msg||'Error'),
                paused:'Sincronización en pausa',
                nouser:'Inicia sesión para sincronizar'};
     el.textContent=map[s]||'';
@@ -7299,6 +7358,39 @@ function fbPushNow(){
     fbSetStatus('synced');
   }).catch(function(err){console.warn('push',err);fbSetStatus('error','No se pudo guardar en la nube');});
 }
+// Alterna mostrar/ocultar un campo de contraseña (cambia el icono del botón).
+function togglePassVisibility(inputId,btn){
+  var el=document.getElementById(inputId);
+  if(!el)return;
+  if(el.type==='password'){el.type='text';if(btn)btn.textContent='🙈';}
+  else{el.type='password';if(btn)btn.textContent='👁️';}
+}
+// Descarga puntual: trae lo ÚLTIMO guardado en la nube y lo aplica al dispositivo.
+// Útil si la sincronización en vivo falló o si quieres forzar recuperar el estado remoto.
+function fbPullNow(){
+  const ref=fbDocRef();
+  if(!ref){alert('Inicia sesión para cargar desde la nube.');return;}
+  if(!confirm('Cargar desde la nube reemplazará los datos de este dispositivo con la última copia guardada en la nube.\n\n(Tus fotos locales se conservan.) ¿Continuar?'))return;
+  const fs=FB.mods.fs;
+  fbSetStatus('syncing');
+  fs.getDoc(ref).then(function(snap){
+    if(!snap.exists()){alert('No hay ninguna copia guardada en la nube todavía.');fbSetStatus('ready');return;}
+    const d=snap.data();
+    if(!d||!d.data){alert('La copia de la nube está vacía o dañada.');fbSetStatus('error','Copia remota vacía');return;}
+    // Evitamos que el push automático se dispare por estos cambios (es una carga, no edición).
+    FB.applyingRemote=true;
+    try{
+      applyImportedData(d.data);
+      render();
+      fbSetStatus('synced');
+      alert('✓ Datos cargados desde la nube correctamente.');
+    }finally{FB.applyingRemote=false;}
+  }).catch(function(err){
+    console.warn('pull',err);
+    fbSetStatus('error','No se pudo cargar desde la nube');
+    alert('No se pudo cargar desde la nube. Revisa tu conexión e inténtalo de nuevo.');
+  });
+}
 
 // forCloud=true strips nothing structurally but marks that photo refs are device-local.
 // Photos live in IndexedDB per-device; only their reference ids travel. The receiving
@@ -7466,6 +7558,7 @@ function applyImportedData(d){
   // have locally, keep whatever photo this device already had for that day/measurement.
   const localWeekly=store.weeklyPlan||{};
   const localMeas=Array.isArray(store.measurements)?store.measurements:[];
+  _pendingPhotoChecks=[];   // verificaciones diferidas de fotos (caso 2 abajo)
   Object.keys(d).forEach(function(k){
     if(k==='_meta')return;
     if(d[k]!==undefined){
@@ -7476,8 +7569,15 @@ function applyImportedData(d){
           if(inc&&typeof inc==='object'&&'image'in inc){
             var incImg=inc.image;
             var locImg=localWeekly[dayId]&&localWeekly[dayId].image;
-            // If incoming has no image but we had one locally, keep ours.
+            // Caso 1: el remoto no trae imagen pero teníamos una local -> conservamos la nuestra.
             if(!incImg&&locImg){inc.image=locImg;}
+            // Caso 2: el remoto trae una referencia DISTINTA a la local. Para no perder una foto
+            // cuyos bytes solo existen en este dispositivo, si tenemos local con bytes y la
+            // entrante apunta a bytes que NO tenemos, conservamos la local. (Comprobación async
+            // diferida: marcamos para verificar tras aplicar.)
+            else if(incImg&&locImg&&incImg!==locImg){
+              _pendingPhotoChecks.push({dayId:dayId,incImg:incImg,locImg:locImg});
+            }
           }
         });
       }
@@ -7506,6 +7606,26 @@ function applyImportedData(d){
       else localStorage.setItem('h_'+k,JSON.stringify(d[k]));
     }
   });
+  // Verificación diferida de fotos (caso 2): para cada día donde el remoto trajo una
+  // referencia distinta, comprobamos si sus bytes existen en este dispositivo. Si NO
+  // existen pero sí tenemos los de la imagen local previa, restauramos la local para no
+  // mostrar "foto no disponible" ni perder una foto que solo está aquí.
+  if(_pendingPhotoChecks.length){
+    var checks=_pendingPhotoChecks.slice();_pendingPhotoChecks=[];
+    checks.forEach(function(chk){
+      getPhotoData(chk.incImg).then(function(incData){
+        if(incData)return; // la entrante tiene bytes: nos quedamos con ella (ya aplicada)
+        // La entrante no tiene bytes aquí; comprobamos si la local sí los tiene.
+        getPhotoData(chk.locImg).then(function(locData){
+          if(locData&&store.weeklyPlan[chk.dayId]){
+            store.weeklyPlan[chk.dayId].image=chk.locImg;
+            saveWeekly();
+            if(typeof render==='function')render();
+          }
+        });
+      });
+    });
+  }
   return importedFormula;
 }
 
