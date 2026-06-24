@@ -4503,11 +4503,6 @@ function renderActividad(c){
         if(a.wod){
           out+='<div style="margin-top:5px;padding:6px 9px;background:rgba(192,132,252,0.06);border-left:2px solid rgba(192,132,252,0.4);border-radius:0 7px 7px 0;font-size:10.5px;color:#cbb6e8;font-family:var(--sans);line-height:1.45;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div>';
         }
-        // Foto del WOD (si se guardó y sigue disponible; se conserva 4 meses).
-        if(a.photo){
-          var psrc=photoSrc(a.photo);
-          if(psrc)out+='<div style="margin-top:6px"><img src="'+psrc+'" alt="WOD" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:block"></div>';
-        }
         // Maestro: botón de análisis + análisis guardado (si existe).
         if(a.aiAnalysis){
           var ageDays=a.aiAnalysisAt?Math.floor((Date.now()-a.aiAnalysisAt)/(24*60*60*1000)):0;
@@ -4918,10 +4913,16 @@ function purgeOldAnalyses(){
 // de IndexedDB y se quita la referencia del registro (el resto de datos se mantiene).
 var ACTIVITY_PHOTO_TTL=122*24*60*60*1000; // ~4 meses
 function purgeOldActivityPhotos(){
-  var now=Date.now(),changed=false;
+  // El histórico ya NO guarda fotos (solo el texto del WOD). Limpiamos cualquier foto
+  // que registros antiguos pudieran tener, liberando el peso correspondiente.
+  var changed=false;
   store.activity.forEach(function(a){
-    if(a.photo&&a.photoSavedAt&&(now-a.photoSavedAt>ACTIVITY_PHOTO_TTL)){
-      if(typeof a.photo==='string'&&a.photo.indexOf('img:')===0){try{deletePhotoData(a.photo);}catch(e){}}
+    if(a.photo){
+      // Solo borramos los bytes de IndexedDB si esa referencia no la usa la programación
+      // semanal (la foto del día sí debe conservarse allí).
+      if(typeof a.photo==='string'&&a.photo.indexOf('img:')===0){
+        if(!photoRefInUse(a.photo,null,null)){try{deletePhotoData(a.photo);}catch(e){}}
+      }
       delete a.photo;delete a.photoSavedAt;changed=true;
     }
   });
@@ -5284,7 +5285,7 @@ function prefillFromDay(dayId){
     return;
   }
   // Guardamos el vínculo al día para asociarlo al registro cuando se cree.
-  _pendingDayLink={dayId:dayId,photoRef:rec.image||null};
+  _pendingDayLink={dayId:dayId};
   if(hasImage){
     // Si no hay clave de Gemini configurada, avisamos y caemos al texto si existe.
     if(!getGeminiKey()){
@@ -5416,33 +5417,14 @@ function addActivity(){
     wod:(document.getElementById('actWod')||{}).value||'',
     notes:(document.getElementById('actNotes')||{}).value||''};
   if(!a.date)return alert('Selecciona fecha');
-  // Asociación con el día de la programación (si el registro vino de "marcar día").
+  // Asociamos el día de la programación (si el registro vino de "marcar día"), pero
+  // NO copiamos la foto: el histórico guarda solo el texto del WOD para no duplicar peso.
   var link=_pendingDayLink;_pendingDayLink=null;
-  function finish(){
-    store.activity.push(a);
-    save('activity',store.activity);
-    openRegistro('activity');
-    render();
-  }
-  if(link&&link.dayId){
-    a.dayId=link.dayId;
-    if(link.photoRef){
-      // Copiamos la foto del día a una entrada propia del registro, con marca temporal
-      // para conservarla 4 meses (luego se purga). Así sobrevive aunque se edite el día.
-      getPhotoData(link.photoRef).then(function(dataUrl){
-        if(dataUrl&&typeof dataUrl==='string'&&dataUrl.indexOf('data:')===0){
-          savePhotoData(dataUrl).then(function(newRef){
-            a.photo=newRef;a.photoSavedAt=Date.now();finish();
-          }).catch(function(){finish();});
-        }else if(dataUrl&&typeof dataUrl==='string'){
-          // Legacy/URL: guardamos la referencia directamente.
-          a.photo=dataUrl;a.photoSavedAt=Date.now();finish();
-        }else{finish();}
-      }).catch(function(){finish();});
-      return;
-    }
-  }
-  finish();
+  if(link&&link.dayId)a.dayId=link.dayId;
+  store.activity.push(a);
+  save('activity',store.activity);
+  openRegistro('activity');
+  render();
 }
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
 function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);openRegistro('records');render();}
@@ -7127,7 +7109,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.1</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.2</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
