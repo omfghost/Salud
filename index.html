@@ -150,6 +150,12 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .sport-form-grid .input-group{margin-bottom:0}
 .sport-form-grid .input-group label{font-size:8.5px;letter-spacing:0.2px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sport-form-grid .input-group input,.sport-form-grid .input-group select{font-size:13px;padding:7px 8px}
+/* Compact MM:SS time wheel for the training form (matches app time wheels) */
+.sport-time-wheel{display:flex;align-items:center;justify-content:center;gap:1px;background:rgba(0,0,0,0.32);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 4px;height:32px;box-sizing:border-box}
+.sport-time-wheel select{background:transparent!important;border:none!important;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;text-align:center;text-align-last:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0!important;outline:none;min-width:0;width:auto;flex:0 1 auto}
+.sport-time-wheel select::-ms-expand{display:none}
+.sport-time-wheel option{background:#16171c;color:#fff}
+.sport-time-wheel .stw-colon{color:var(--text-dim);font-size:13px;font-weight:600;padding:0 1px}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%}
 .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%}
 
@@ -246,12 +252,13 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 
 /* NAV BOTTOM - 6 buttons evenly spaced, glow text */
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid var(--border);padding:8px 4px calc(8px + var(--safe-bottom));z-index:100}
-.nav-inner{max-width:480px;margin:0 auto;display:flex;width:100%;gap:0}
-.nav-btn{flex:1 1 0;min-width:0;padding:10px 0;background:transparent;border:none;color:#666;font-size:11.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all 0.25s;text-align:center;letter-spacing:0.3px;font-family:var(--sans);position:relative;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-inner{max-width:480px;margin:0 auto;display:flex;width:100%;justify-content:space-between;align-items:center;gap:0;padding:0 6px;box-sizing:border-box}
+.nav-btn{flex:0 0 auto;min-width:0;padding:10px 2px;background:transparent;border:none;color:#666;font-size:10.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all 0.25s;text-align:center;letter-spacing:0.1px;font-family:var(--sans);position:relative;text-transform:uppercase;white-space:nowrap}
 .nav-btn.active{background:transparent;color:var(--accent);font-weight:700;text-shadow:0 0 12px rgba(167,243,208,0.7),0 0 24px rgba(134,239,172,0.4);box-shadow:none}
 .nav-btn.active::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:18px;height:2px;border-radius:2px;background:var(--grad-primary);box-shadow:0 0 8px rgba(134,239,172,0.6)}
 /* Icons-only nav mode (toggle in Ajustes) */
-.nav-inner.nav-icons-only .nav-btn{padding:8px 0}
+.nav-inner.nav-icons-only{padding:0 10px}
+.nav-inner.nav-icons-only .nav-btn{padding:8px 6px}
 .nav-btn-icon{font-size:22px;line-height:1;display:block;filter:grayscale(0.15)}
 .nav-btn.active .nav-btn-icon{filter:none;transform:translateY(-1px)}
 .nav-inner.nav-icons-only .nav-btn.active::after{bottom:0}
@@ -325,15 +332,16 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .divider{height:1px;background:var(--border);margin:10px 0}
 
 /* PANEL CARDS */
-.panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px;width:100%}
-.panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:11px 10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
+.panel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px;width:100%}
+.panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:9px 8px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
 .panel-card-today{border-color:rgba(52,211,153,0.45);box-shadow:0 0 0 1px rgba(52,211,153,0.25),0 0 14px rgba(52,211,153,0.12)}
 .panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
 .panel-card-today-badge{position:absolute;bottom:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
-.panel-card-icon{font-size:16px;margin-bottom:5px;display:block}
-.panel-card-title{font-size:10px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.7px;line-height:1.2;font-family:var(--sans);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;height:24px}
-.panel-card-value{font-family:var(--sans);font-size:23px;font-weight:600;color:#fff;letter-spacing:-0.4px;margin-top:3px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
+.panel-card-head{display:flex;align-items:flex-start;gap:5px;min-width:0;margin-bottom:4px;min-height:24px}
+.panel-card-icon{font-size:14px;line-height:1.3;flex-shrink:0}
+.panel-card-title{font-size:9px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:var(--sans);min-width:0;flex:1}
+.panel-card-value{font-family:var(--sans);font-size:21px;font-weight:600;color:#fff;letter-spacing:-0.4px;margin-top:1px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
 .panel-card-unit{font-size:10px;color:var(--text-dim);margin-left:2px;font-weight:400;font-family:var(--sans);font-style:normal}
 .panel-card-sub{font-size:9.5px;color:var(--text-dim);margin-top:2px;font-weight:400;font-family:var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panel-section-title{font-family:var(--sans);font-size:12px;color:#999;font-weight:600;margin:9px 0 6px;padding-left:2px;display:flex;align-items:center;justify-content:space-between;font-style:normal;text-transform:uppercase;letter-spacing:1px}
@@ -434,6 +442,34 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .wday-view-btn:active{transform:scale(0.95)}
 .wday-view-btn.add{color:var(--accent);border-color:rgba(167,243,208,0.3)}
 .wday-view-btn.done.active{background:rgba(52,211,153,0.16);border-color:#34d399;color:#34d399}
+.wday-view-btn.busy{pointer-events:none;opacity:0.85}
+.wday-done-spin{width:11px;height:11px;border:2px solid rgba(255,255,255,0.25);border-top-color:#34d399;border-radius:50%;animation:wdaySpin 0.7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes wdaySpin{to{transform:rotate(360deg)}}
+.wday-ai-badge{display:inline-flex;align-items:center;gap:2px;font-size:8.5px;font-weight:700;color:#c084fc;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.35);border-radius:5px;padding:1px 4px;margin-left:5px;letter-spacing:0.2px;vertical-align:middle}
+/* Maestro (AI coach) */
+.maestro-analyze-btn{display:inline-flex;align-items:center;gap:4px;font-family:var(--sans);font-size:10px;font-weight:600;color:#c084fc;background:rgba(192,132,252,0.10);border:1px solid rgba(192,132,252,0.3);border-radius:7px;padding:3px 8px;cursor:pointer;transition:all 0.15s;margin-top:6px}
+.maestro-analyze-btn:active{transform:scale(0.96)}
+.maestro-analysis-box{margin-top:8px;background:linear-gradient(135deg,rgba(192,132,252,0.08),rgba(167,139,250,0.04));border:1px solid rgba(192,132,252,0.25);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:11.5px;line-height:1.55;color:#ddd}
+.maestro-analysis-box .ma-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.maestro-analysis-box .ma-title{font-size:10px;font-weight:700;color:#c084fc;letter-spacing:0.4px;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.maestro-analysis-box .ma-clear{font-size:13px;color:var(--text-dim);cursor:pointer;background:none;border:none;padding:0 2px}
+.maestro-analysis-box .ma-expiry{font-size:8.5px;color:var(--text-dim);font-style:italic;margin-top:6px;font-family:var(--serif)}
+.maestro-loading,.maestro-error{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;color:var(--text-muted);padding:2px 0}
+.maestro-error{color:#f87171}
+/* Maestro chat page */
+.maestro-wrap{display:flex;flex-direction:column;height:calc(100dvh - 310px);min-height:200px;max-height:calc(100dvh - 290px)}
+.maestro-thread{flex:1 1 auto;overflow-y:auto;padding:6px 2px 10px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.maestro-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-family:var(--sans);font-size:13px;line-height:1.5;word-wrap:break-word}
+.maestro-user{align-self:flex-end;background:linear-gradient(135deg,rgba(96,165,250,0.22),rgba(96,165,250,0.12));border:1px solid rgba(96,165,250,0.3);color:#e8f0ff;border-bottom-right-radius:4px}
+.maestro-ai{align-self:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#e0e0e0;border-bottom-left-radius:4px}
+.maestro-ai strong{color:#c084fc}
+.maestro-empty{align-self:center;text-align:center;max-width:90%;color:var(--text-muted);font-family:var(--serif);font-style:italic;font-size:12.5px;line-height:1.6;padding:24px 12px}
+.maestro-inputbar{display:flex;gap:8px;align-items:flex-end;padding:8px 0 2px;border-top:1px solid var(--border)}
+.maestro-inputbar textarea{flex:1;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:12px;color:#fff;font-family:var(--sans);font-size:13px;padding:10px 12px;resize:none;max-height:120px;outline:none;line-height:1.4}
+.maestro-inputbar textarea:focus{border-color:rgba(192,132,252,0.5)}
+.maestro-send-btn{flex:0 0 auto;width:42px;height:42px;border-radius:12px;border:none;background:linear-gradient(135deg,#a78bfa,#c084fc);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.maestro-send-btn:active{transform:scale(0.93)}
+.maestro-send-btn:disabled{opacity:0.5;cursor:default}
 .wday-view-body{width:100%}
 .wday-view-text{font-family:var(--sans);font-size:12px;color:#ddd;line-height:1.55;white-space:pre-wrap;word-break:break-word;cursor:pointer;padding:2px 0}
 .wday-view-empty{font-family:var(--serif);font-style:italic;font-size:12px;color:#777;cursor:pointer;padding:6px 0;line-height:1.5}
@@ -1241,7 +1277,7 @@ const store={
   panelCollapsed:JSON.parse(localStorage.getItem('h_panelCollapsed')||'{}'),
   collapsed:JSON.parse(localStorage.getItem('h_collapsed')||'{}'),
   estadoOrder:JSON.parse(localStorage.getItem('h_estadoOrder')||'null')||DEFAULT_ESTADO_ORDER,
-  activityOrder:JSON.parse(localStorage.getItem('h_activityOrder')||'null')||['weekly','sport','records','wods'],
+  activityOrder:JSON.parse(localStorage.getItem('h_activityOrder')||'null')||['weekly','sport','acthistory','records','wods'],
   panelOrder:JSON.parse(localStorage.getItem('h_panelOrder')||'null')||['sun','weekly','bodyState','widgets'],
   lightLog:JSON.parse(localStorage.getItem('h_lightLog')||'{"amanecer":{},"ocaso":{},"higiene":{}}'),
   solOrder:JSON.parse(localStorage.getItem('h_solOrder')||'null')||['environment','hormones','suntimer','lightfreq'],
@@ -1260,7 +1296,7 @@ if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
 // Weather defaults to automatic
 if(store.settings.autoWeather===undefined)store.settings.autoWeather=true;
 // Sun + settings blocks collapsed by default (graph always visible)
-['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog'].forEach(function(k){
+['sunweather','skintype','clothing','sunloc','hormones','suntimer','environment','skinclothing','setdata','setai','setloc','setsports','setsummary','setabout','setappearance','setglossary','vitdAccum','vitdEstim','vitdBaseline','medprog','medhistory','acthistory'].forEach(function(k){
   if(store.collapsed[k]===undefined)store.collapsed[k]=true;
 });
 
@@ -2037,8 +2073,9 @@ function updateHeaderQuote(forceNew){
 var NAV_TABS=[
   {id:'panel',label:'Panel',icon:'🏠'},
   {id:'estado',label:'Estado',icon:'❤️'},
-  {id:'actividad',label:'Activ.',icon:'🏋️'},
-  {id:'meditacion',label:'Medit.',icon:'🧘'},
+  {id:'actividad',label:'Actividad',icon:'🏋️'},
+  {id:'maestro',label:'Maestro',icon:'🧙'},
+  {id:'meditacion',label:'Meditar',icon:'🧘'},
   {id:'sol',label:'Sol',icon:'☀️'}
 ];
 function renderNav(){
@@ -2076,7 +2113,7 @@ function showTab(tab,btn){
 function render(){
   try{
     const c=document.getElementById('content');
-    const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
+    const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,maestro:renderMaestro,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
     c.innerHTML='';
     (renderers[currentTab]||renderPanel)(c);
   }catch(e){console.warn('render',e);}
@@ -2301,22 +2338,22 @@ checkWeeklyReset();
 const WIDGET_DEFS={
   weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date),date:w.date}:null;}},
   weight_avg:{name:'Peso media mes',icon:'📊',section:'estado',get:function(){const v=avg(filterByRange(store.weight,'1m'),'value');return v>0?{val:v,unit:'kg',sub:'30d'}:null;}},
-  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return (s&&s.hrv!=null&&s.hrv!=='')?{val:s.hrv,unit:'ms',sub:fmtDate(s.date),date:s.date}:null;}},
+  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date),date:s.date}:null;}},
   sleep_hrv_avg:{name:'HRV media mes',icon:'💗',section:'estado',get:function(){const v=avg(filterByRange(store.sleep,'1m'),'hrv');return v>0?{val:v,unit:'ms',sub:'30 días'}:null;}},
   sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate,date:s.date};}},
   sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating,date:s.date};}},
-  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return (s&&s.hr!=null&&s.hr!=='')?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
+  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
   fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date),date:f.date}:null;}},
   fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
   meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s',date:m.date};}},
-  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(a.duration+'min');if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(fmtActivityDuration(a.duration));if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
   waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   vitd_total:{name:'Vit D sol',icon:'☀️',section:'sol',get:function(){if(!Array.isArray(store.sun)||!store.sun.length)return null;const boost=(typeof vitDSunBoostAt==='function')?Math.min(60,vitDSunBoostAt(new Date())):0;return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte actual'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
-  health_status:{name:'Estado de salud (4 sem)',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
+  health_status:{name:'Estado de salud',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
 };
 </script>
 <script>
@@ -2955,7 +2992,7 @@ function renderPanel(c){
     '</div>';
   }else{
     widgetsHTML+='<div class="panel-grid">'+
-      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 2">Aún no hay datos.</div>')+
+      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 3">Aún no hay datos.</div>')+
     '</div>';
   }
   pBlocks.widgets=widgetsHTML;
@@ -3004,13 +3041,13 @@ function renderWidget(id){
   const data=def.get();
   if(!data){
     // Show empty placeholder instead of hiding entirely
-    return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
+    return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
   }
   // Highlight when the shown datum was recorded today
   const isToday=data.date&&String(data.date).substring(0,10)===today();
   const todayCls=isToday?' panel-card-today':'';
   const todayBadge=isToday?'<span class="panel-card-today-badge">HOY</span>':'';
-  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
+  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
 }
 
 function renderWidgetsModal(){
@@ -3304,6 +3341,22 @@ function renderRegistros(key,label,itemRenderer,opts){
   const flt=regFilter[key]||{};
   const maxOn=!!regMaxOnly[key];
   const filterOpen=!!regFilterOpen[key];
+  // Modo "noCollapse": sin cabecera colapsable propia; el contenido se muestra
+  // directamente (se usa cuando el bloque ya vive dentro de una tarjeta desplegable).
+  if(opts.noCollapse){
+    let hn='<div class="registros-block" style="margin-top:4px">'+
+      '<div class="registros-toolbar">'+
+        '<input type="text" class="registros-search'+(fields.length?' has-filter':'')+'" id="regsearch_'+key+'" placeholder="🔍 Buscar..." value="'+escapeHTML(searchQ)+'" oninput="setRegSearch(\''+key+'\',this.value)">'+
+        (fields.length?'<button class="reg-filter-btn'+(flt.field||filterOpen?' active':'')+'" onclick="toggleRegFilter(\''+key+'\')" title="Filtrar y ordenar">⚙</button>':'')+
+        (opts.chartLabel&&opts.chartKey?'<button class="chart-icon-btn" onclick="openRegChart(\''+key+'\')">📈</button>':'')+
+      '</div>'+
+      (fields.length&&filterOpen?renderRegFilterPanel(key):'')+
+      '<div class="registros-list" id="reglist_'+key+'">'+
+        buildRegItems(key,searchQ)+
+      '</div>'+
+    '</div>';
+    return hn;
+  }
   let h='<div class="registros-block" style="margin-top:10px">'+
     '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
@@ -3491,7 +3544,7 @@ function toggleRegMax(key){
 // and the first/default block which may stay as configured.
 const ACCORDION_GROUPS={
   estado:['fasting','sleep','body','allergy','vo2','light','health'],
-  actividad:['weekly','sport','records','wods'],
+  actividad:['weekly','sport','acthistory','records','wods'],
   sol:['environment','hormones','suntimer','lightfreq'],
   ajustes:['setdata','setloc','setsports','setsummary','setglossary','setabout']
 };
@@ -4190,7 +4243,7 @@ function renderActividad(c){
 
   // Reorder mode: simple list with up/down
   if(actReorderMode){
-    const names={weekly:'📅 Programación semanal',sport:'🏋️ Entrenamientos',records:'🥇 Mejores marcas',wods:'🏆 WODs Benchmark'};
+    const names={weekly:'📅 Programación semanal',sport:'🏋️ Registrar entrenamiento',acthistory:'📜 Histórico entrenamientos',records:'🥇 Mejores marcas',wods:'🏆 WODs Benchmark'};
     h+='<div class="widget-reorder-list">'+
       store.activityOrder.map(function(id,idx){
         return '<div class="widget-reorder-item">'+
@@ -4261,7 +4314,9 @@ function renderActividad(c){
         '<span class="wday-view-date'+(sd.id===todayId?' is-today':'')+'">'+sdDateLabel+(sd.id===todayId?' · HOY':'')+'</span>'+
         '<div class="wday-view-actions">'+
           '<button class="wday-view-btn add" onclick="openDayEditor(\''+sd.id+'\')" title="Añadir o editar">＋ '+(sdHasText||sdHasImage?'Editar':'Añadir')+'</button>'+
-          '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado">'+(sdCompleted?'✓ Hecho':'○ Marcar')+'</button>'+
+          '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" id="wdayDoneHero" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado y precargar registro">'+(sdCompleted?'✓ Hecho':'○ Marcar')+
+            (!sdCompleted&&sdHasImage?'<span class="wday-ai-badge">✨ IA</span>':'')+
+          '</button>'+
         '</div>'+
       '</div>'+
       '<div class="wday-view-body">'+body+'</div>'+
@@ -4315,8 +4370,8 @@ function renderActividad(c){
           '</div>')+'';
   if(actType==='crossfit'){
     h+='<div class="sport-form-grid sport-form-grid-4">'+
-      '<div class="input-group"><label>DURACIÓN</label><input type="number" id="actDuration" placeholder="45"></div>'+
-      '<div class="input-group"><label>TIEMPO/REPS</label><input type="text" id="actResult" placeholder="8:42"></div>'+
+      '<div class="input-group"><label>TIEMPO</label>'+timeWheelHTML('actDur')+'</div>'+
+      '<div class="input-group"><label>REPETICIONES</label><input type="text" id="actResult" placeholder="100 reps"></div>'+
       '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="155"></div>'+
       '<div class="input-group"><label>FC MÁX</label><input type="number" id="actHRmax" placeholder="185"></div>'+
     '</div>';
@@ -4367,12 +4422,24 @@ function renderActividad(c){
       '</div>';
     }
   }
+  // WOD realizado (rellenado por IA desde foto/texto del día; editable a mano)
+  h+='<div class="input-group" style="margin-top:8px"><label>WOD REALIZADO <span style="color:#c084fc;font-weight:600;font-size:8.5px">✨ IA · editable</span></label>'+
+    '<textarea id="actWod" rows="5" placeholder="Descripción del WOD (ejercicios y reps). La IA lo rellena desde la foto o el texto del día; puedes corregirlo." style="width:100%;resize:vertical;min-height:110px;font-family:var(--sans);font-size:12.5px;line-height:1.5;background:rgba(0,0,0,0.3);border:1px solid var(--border-strong);border-radius:9px;color:#fff;padding:9px 11px;outline:none;box-sizing:border-box"></textarea>'+
+  '</div>';
   // Notes + Add button in same row
   h+='<div class="row-with-add" style="margin-top:8px;align-items:flex-end">'+
     '<div class="input-group" style="flex:1"><label>NOTAS</label><input type="text" id="actNotes" placeholder="Cómo te sentiste..."></div>'+
     '<button class="add-btn" onclick="addActivity()" title="Registrar entrenamiento">+</button>'+
   '</div>';
-  // History within same block, with color legend + color-coded entries
+  h+='</div></div>';
+  actBlocks.sport=h.slice(_bs);h=h.slice(0,_bs);
+
+  // 1b) HISTÓRICO DE ENTRENAMIENTOS — tarjeta desplegable independiente
+  _bs=h.length;
+  var actHistCollapsed=store.collapsed.acthistory!==false; // plegada por defecto, igual que el resto
+  h+='<div class="card">'+
+    '<div class="card-title" onclick="toggleEstadoBlock(\'acthistory\')"><div class="card-title-text"><span>📜 HISTÓRICO ENTRENAMIENTOS'+(store.activity.length?' <span class="registros-count">('+store.activity.length+')</span>':'')+'</span></div><button class="collapse-btn">'+(actHistCollapsed?'▼':'▲')+'</button></div>'+
+    '<div class="collapsible'+(actHistCollapsed?' collapsed':'')+'">';
   if(store.activity.length){
     // Build color legend of sports that appear in history
     const usedSports={};
@@ -4381,23 +4448,47 @@ function renderActividad(c){
       const sp=store.sports.find(function(s){return s.id===sid;});
       return '<span class="sport-legend-item"><span class="sport-color-dot" style="background:'+sportColor(sid)+'"></span>'+(sp?sp.name:sid)+'</span>';
     }).join('');
-    h+='<div class="env-divider"></div>'+
-      '<div class="sub-section-label" style="margin-top:2px">📜 HISTÓRICO</div>'+
-      '<div class="sport-legend">'+legend+'</div>'+
+    h+='<div class="sport-legend" style="margin-top:2px">'+legend+'</div>'+
       renderRegistros('activity','ENTRENAMIENTOS',function(a){
         const sport=store.sports.find(function(s){return s.id===a.type;});
         const col=sportColor(a.type);
-        return '<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
-          '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?a.duration+'min':'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
-      },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',
+        var out='<div style="font-size:11.5px;color:#ccc;display:flex;align-items:center"><span class="sport-color-dot" style="background:'+col+'"></span><strong style="color:'+col+'">'+(sport?sport.name:a.type)+'</strong>'+(a.subtype?' · '+a.subtype:'')+'</div>'+
+          '<div style="font-size:11px;color:#999;margin-top:2px;padding-left:14px">'+(a.duration?fmtActivityDuration(a.duration):'')+(a.result?' · '+a.result:'')+(a.distance?' · '+a.distance:'')+(a.hrAvg?' · '+a.hrAvg+'ppm':'')+'</div>';
+        // WOD realizado (si se guardó).
+        if(a.wod){
+          out+='<div style="margin-top:5px;padding:6px 9px;background:rgba(192,132,252,0.06);border-left:2px solid rgba(192,132,252,0.4);border-radius:0 7px 7px 0;font-size:10.5px;color:#cbb6e8;font-family:var(--sans);line-height:1.45;white-space:pre-wrap">'+escapeHTML(a.wod)+'</div>';
+        }
+        // Foto del WOD (si se guardó y sigue disponible; se conserva 4 meses).
+        if(a.photo){
+          var psrc=photoSrc(a.photo);
+          if(psrc)out+='<div style="margin-top:6px"><img src="'+psrc+'" alt="WOD" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:block"></div>';
+        }
+        // Maestro: botón de análisis + análisis guardado (si existe).
+        if(a.aiAnalysis){
+          var ageDays=a.aiAnalysisAt?Math.floor((Date.now()-a.aiAnalysisAt)/(24*60*60*1000)):0;
+          var daysLeft=Math.max(0,7-ageDays);
+          out+='<div class="maestro-analysis-box" id="aiAnalysis-'+a.id+'">'+
+            '<div class="ma-head"><span class="ma-title">🧙 Análisis de Maestro</span>'+
+              '<button class="ma-clear" onclick="event.stopPropagation();clearActivityAnalysis('+a.id+')" title="Borrar análisis">✕</button></div>'+
+            maestroFmt(a.aiAnalysis)+
+            '<div class="ma-expiry">Se eliminará en '+daysLeft+' día'+(daysLeft===1?'':'s')+'</div>'+
+          '</div>';
+        }else{
+          out+='<button class="maestro-analyze-btn" onclick="event.stopPropagation();analyzeActivity('+a.id+')">🧙 Analizar con Maestro</button>'+
+            '<div id="aiAnalysis-'+a.id+'" style="display:none"></div>';
+        }
+        return out;
+      },{chartLabel:'Nº entrenamientos',chartKey:'id',chartColor:'#34d399',chartAggregate:'count',chartYLabel:'entrenos',noCollapse:true,
          searchFields:[{key:'duration',label:'Duración',aliases:['min','minutos','duracion']},{key:'hrAvg',label:'FC media',aliases:['fc','pulso','ppm']},{key:'hrMax',label:'FC máx',aliases:['fcmax','maxima']},{key:'date',label:'Fecha',aliases:['fecha','día']}],
          chartMetrics:[
            {key:'id',label:'Nº entrenos',color:'#34d399',aggregate:'count',yLabel:'entrenos'},
            {key:'duration',label:'Minutos',color:'#60a5fa',aggregate:'sum',yLabel:'min'}
          ]});
+  }else{
+    h+='<div style="font-size:11px;color:var(--text-muted);padding:8px 2px;font-family:var(--sans)">Aún no has registrado entrenamientos.</div>';
   }
   h+='</div></div>';
-  actBlocks.sport=h.slice(_bs);h=h.slice(0,_bs);
+  actBlocks.acthistory=h.slice(_bs);h=h.slice(0,_bs);
 
   // 2) RECORDS (mejores marcas) - with video support
   _bs=h.length;
@@ -4451,7 +4542,14 @@ function renderActividad(c){
   '</div>';
   actBlocks.wods=h.slice(_bs);h=h.slice(0,_bs);
 
-  // Assemble blocks in user-defined order
+  // Assemble blocks in user-defined order.
+  // Migración: si 'acthistory' no está en el orden guardado, lo colocamos tras 'sport'.
+  if(store.activityOrder.indexOf('acthistory')===-1){
+    var _si=store.activityOrder.indexOf('sport');
+    if(_si>=0){store.activityOrder.splice(_si+1,0,'acthistory');}
+    else{store.activityOrder.push('acthistory');}
+    saveActivityOrder();
+  }
   store.activityOrder.forEach(function(id){
     if(actBlocks[id])h+=actBlocks[id];
   });
@@ -4460,9 +4558,46 @@ function renderActividad(c){
   h+='<button class="fab-train" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">+</button>';
 
   c.innerHTML=h;
+  // Si hay datos de precarga pendientes (al marcar un día como hecho), vuélcalos ahora.
+  applyPendingPrefill();
+}
+
+// ===== Pestaña Maestro (chat con el entrenador IA) =====
+function renderMaestro(c){
+  var hasKey=!!getGeminiKey();
+  var h='<div class="section-title-inline">🧙 MAESTRO <span class="section-subtitle-inline">Tu entrenador con IA</span></div>';
+  if(!hasKey){
+    h+='<div class="card"><div style="padding:18px 14px;text-align:center;font-family:var(--sans)">'+
+      '<div style="font-size:34px;margin-bottom:10px">🧙</div>'+
+      '<div style="font-size:13px;color:#ddd;line-height:1.6;margin-bottom:14px">Para hablar con Maestro necesitas configurar tu clave de Google Gemini (gratuita).</div>'+
+      '<button class="btn btn-primary" onclick="showTab(\'ajustes\')" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">Ir a Ajustes → Análisis con IA</button>'+
+      '</div></div>';
+    c.innerHTML=h;return;
+  }
+  h+='<div class="card"><div style="padding:10px 12px 12px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+      '<div style="font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text-muted)">Conoce todos tus registros</div>'+
+      '<button class="btn btn-secondary" onclick="maestroClear()" style="font-size:10px;padding:4px 8px;width:auto;margin:0">🗑️ Limpiar</button>'+
+    '</div>'+
+    '<div class="maestro-wrap">'+
+      '<div class="maestro-thread" id="maestroThread"></div>'+
+      '<div class="maestro-inputbar">'+
+        '<textarea id="maestroInput" rows="1" placeholder="Pregunta a Maestro…" oninput="maestroAutogrow(this)" onkeydown="maestroKeydown(event)"></textarea>'+
+        '<button class="maestro-send-btn" onclick="maestroSend()" title="Enviar">➤</button>'+
+      '</div>'+
+    '</div>'+
+  '</div></div>';
+  c.innerHTML=h;
+  renderMaestroChat(true);
+}
+function maestroAutogrow(el){el.style.height='auto';el.style.height=Math.min(120,el.scrollHeight)+'px';}
+function maestroKeydown(e){
+  // Enter envía; Shift+Enter hace salto de línea.
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();maestroSend();}
 }
 // Open the training-registration block and scroll to it.
 function quickAddTraining(){
+  _pendingDayLink=null; // registro manual: sin vínculo a un día concreto
   store.collapsed.sport=false; // ensure expanded
   saveCollapsed();
   if(currentTab!=='actividad'){showTab('actividad');}
@@ -4473,8 +4608,634 @@ function quickAddTraining(){
   },150);
 }
 
+// ============ AUTO-PRECARGA DE ENTRENAMIENTO (texto + Gemini visión) ============
+// Al marcar un día como "hecho", intentamos precargar el formulario de "Registrar
+// entrenamiento": si el día tiene foto, la analizamos con Gemini; si solo tiene
+// texto, lo parseamos heurísticamente; si no hay nada, no se precarga nada.
+// Clave de Gemini: se introduce manualmente en Ajustes y se guarda SOLO en este
+// dispositivo (localStorage 'h_geminiKey'). No se sincroniza ni se incluye en las
+// exportaciones, por seguridad. Cada dispositivo usa su propia clave.
+function getGeminiKey(){try{return localStorage.getItem('h_geminiKey')||'';}catch(e){return '';}}
+function setGeminiKey(k){try{if(k){localStorage.setItem('h_geminiKey',k);}else{localStorage.removeItem('h_geminiKey');}}catch(e){}}
+// Guarda la clave introducida en Ajustes (solo en este dispositivo).
+function saveGeminiKey(){
+  var el=document.getElementById('geminiKeyInput');
+  var k=el?el.value.trim():'';
+  if(!k){alert('Pega tu clave de Gemini antes de guardar.');return;}
+  setGeminiKey(k);
+  render();
+}
+function clearGeminiKey(){
+  if(!confirm('¿Quitar la clave de Gemini de este dispositivo?'))return;
+  setGeminiKey('');
+  render();
+}
+// Hace una llamada mínima a Gemini para comprobar que la clave funciona.
+function testGeminiKey(){
+  var k=getGeminiKey();
+  if(!k){alert('No hay clave guardada.');return;}
+  var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(k);
+  var body={contents:[{parts:[{text:'Responde solo: OK'}]}]};
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.ok){alert('✓ Conexión correcta. La clave de Gemini funciona.');return;}
+      return r.text().then(function(t){
+        if(r.status===400||r.status===403){alert('✗ La clave no es válida o está bloqueada (error '+r.status+').\nGenera una nueva en aistudio.google.com e introdúcela de nuevo.');}
+        else{alert('✗ Error '+r.status+': '+t.slice(0,160));}
+      });
+    })
+    .catch(function(err){alert('✗ No se pudo conectar: '+(err.message||'error')+'\nRevisa tu conexión a internet.');});
+}
+function showGeminiHelp(){
+  alert('Cómo obtener tu clave de Gemini (gratis, ~2 min):\n\n'+
+    '1. Entra en aistudio.google.com con tu cuenta de Google.\n'+
+    '2. Pulsa "Get API key" / "Obtener clave de API" (arriba a la izquierda).\n'+
+    '3. "Create API key" / "Crear clave de API". Si te pide un proyecto, crea uno o usa el que haya.\n'+
+    '4. Copia la clave que aparece.\n'+
+    '5. Vuelve aquí, pégala en el campo y pulsa "Guardar clave".\n\n'+
+    'La clave es gratuita (con límites de uso amplios para uso personal) y se guarda solo en este dispositivo. Puedes revocarla o crear otra en cualquier momento desde aistudio.google.com.');
+}
+
+// ================== MAESTRO (entrenador IA con Gemini) ==================
+// Dos usos: (1) análisis de un entreno concreto (mismo deporte, últimos 4 meses),
+// guardado en el propio entreno y autoeliminado tras 1 semana; (2) chat con hilo
+// que tiene en cuenta TODOS los datos de la app.
+
+// Llamada genérica a Gemini de texto. history = [{role:'user'|'model',text:''}...].
+function geminiChat(systemText,history){
+  return new Promise(function(resolve,reject){
+    var k=getGeminiKey();
+    if(!k){reject(new Error('Falta la clave de Gemini. Ve a Ajustes → 🤖 Análisis con IA.'));return;}
+    var contents=(history||[]).map(function(m){return{role:(m.role==='model'?'model':'user'),parts:[{text:String(m.text||'')}]};});
+    var body={contents:contents,generationConfig:{temperature:0.6}};
+    if(systemText)body.systemInstruction={parts:[{text:systemText}]};
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(k);
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){
+        if(!r.ok)return r.text().then(function(t){throw new Error('Gemini '+r.status+': '+t.slice(0,180));});
+        return r.json();
+      })
+      .then(function(data){
+        var txt='';
+        try{txt=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');}catch(e){}
+        if(!txt)throw new Error('Respuesta vacía de Gemini');
+        resolve(txt.trim());
+      })
+      .catch(reject);
+  });
+}
+
+// Nombre legible de un deporte por su id.
+function sportName(id){var sp=store.sports.find(function(s){return s.id===id;});return sp?sp.name:id;}
+
+// Resume un registro de actividad en una línea de texto compacta.
+function activityLine(a){
+  var parts=[fmtDate(a.date)];
+  if(a.subtype)parts.push(a.subtype);
+  if(a.duration)parts.push('tiempo '+fmtActivityDuration(a.duration));
+  if(a.result)parts.push('reps/resultado '+a.result);
+  if(a.distance)parts.push('dist '+a.distance);
+  if(a.hrAvg)parts.push('FC med '+a.hrAvg);
+  if(a.hrMax)parts.push('FC máx '+a.hrMax);
+  if(a.wod)parts.push('WOD: '+String(a.wod).replace(/\s+/g,' ').slice(0,200));
+  if(a.notes)parts.push('notas: '+a.notes);
+  return '- '+parts.join(' · ');
+}
+
+// Contexto para analizar UN entreno: mismo deporte, últimos 4 meses (excluye el propio).
+function buildActivityContext(act){
+  var cutoff=Date.now()-122*24*60*60*1000; // ~4 meses
+  var same=store.activity.filter(function(a){
+    if(a.id===act.id)return false;
+    if(a.type!==act.type)return false;
+    var t=new Date(a.date).getTime();
+    return !isNaN(t)&&t>=cutoff;
+  }).sort(function(x,y){return new Date(y.date)-new Date(x.date);});
+  var recs=store.records.slice(-12).map(function(r){return '- '+r.name+': '+r.value+(r.date?' ('+fmtDate(r.date)+')':'');});
+  var lines=same.slice(0,40).map(activityLine);
+  var ctx='DEPORTE: '+sportName(act.type)+'\n';
+  ctx+='\nENTRENO A ANALIZAR:\n'+activityLine(act)+'\n';
+  ctx+='\nHISTÓRICO DEL MISMO DEPORTE (últimos 4 meses, '+same.length+' entrenos):\n'+(lines.length?lines.join('\n'):'(sin entrenos previos del mismo deporte)')+'\n';
+  if(recs.length)ctx+='\nMARCAS PERSONALES RECIENTES:\n'+recs.join('\n')+'\n';
+  return ctx;
+}
+
+// Vuelca un registro genérico como "campo=valor" para no depender de nombres exactos.
+function dumpRecord(r,skip){
+  skip=skip||['id'];
+  return Object.keys(r).filter(function(k){return skip.indexOf(k)<0&&r[k]!==''&&r[k]!==null&&r[k]!==undefined;})
+    .map(function(k){
+      var v=r[k];
+      if(typeof v==='object')v=JSON.stringify(v);
+      // Acortamos referencias de foto (no aportan al análisis).
+      if(k==='photo'||k==='photoRef'||k==='image'){v='[foto]';}
+      return k+'='+String(v).slice(0,160);
+    }).join(', ');
+}
+// Resumen legible de una colección: total + últimos N registros con todos sus campos.
+function dumpCollection(title,arr,n,skip){
+  if(!arr||!arr.length)return '';
+  var rows=arr.slice(-n).map(function(r){return '- '+dumpRecord(r,skip);});
+  return '\n== '+title+' ==\nTotal registros: '+arr.length+'. Más recientes:\n'+rows.join('\n')+'\n';
+}
+
+// Contexto global: TODOS los datos de la app (para el chat Maestro y los análisis).
+function buildFullContext(){
+  var c='RESUMEN COMPLETO DE DATOS DEL USUARIO (app de salud personal). Hoy es '+today()+'. '+
+    'Tienes acceso a TODOS estos registros y debes usarlos para responder cualquier consulta sobre entrenamientos, sueño, peso, ayuno, medidas, meditación y exposición solar / vitamina D.\n';
+  // Entrenamientos con resumen por deporte + detalle.
+  var byType={};store.activity.forEach(function(a){byType[a.type]=(byType[a.type]||0)+1;});
+  c+='\n== ENTRENAMIENTOS ==\nTotal: '+store.activity.length+'. Por deporte: '+(Object.keys(byType).map(function(k){return sportName(k)+'='+byType[k];}).join(', ')||'ninguno')+'\n';
+  if(store.activity.length)c+='Últimos entrenos:\n'+store.activity.slice(-30).map(function(a){return '- '+sportName(a.type)+' '+activityLine(a).slice(2);}).join('\n')+'\n';
+  // Resto de colecciones, volcando todos sus campos genéricamente.
+  c+=dumpCollection('MEJORES MARCAS',store.records,25);
+  if(store.wods&&store.wods.length)c+='\n== WODS BENCHMARK GUARDADOS ==\n'+store.wods.slice(0,20).map(function(w){return '- '+w.name+': '+(w.desc||'').slice(0,160);}).join('\n')+'\n';
+  c+=dumpCollection('SUEÑO',store.sleep,15);
+  c+=dumpCollection('PESO (kg)',store.weight,20);
+  c+=dumpCollection('AYUNOS',store.fasting,15);
+  c+=dumpCollection('MEDIDAS CORPORALES',store.measurements,8);
+  c+=dumpCollection('MEDITACIÓN',store.meditation,15);
+  c+=dumpCollection('SOL / VITAMINA D',store.sun,20);
+  // Ajustes relevantes de vitamina D (línea base) si existen.
+  if(store.settings&&(store.settings.vitDBaseline||store.settings.skinType)){
+    c+='\n== PERFIL VITAMINA D / PIEL ==\n';
+    if(store.settings.vitDBaseline)c+='Nivel base analítica: '+store.settings.vitDBaseline+(store.settings.vitDBaselineDate?' (fecha '+store.settings.vitDBaselineDate+')':'')+'\n';
+    if(store.settings.skinType)c+='Tipo de piel: '+store.settings.skinType+'\n';
+    if(store.settings.clothing)c+='Ropa habitual: '+store.settings.clothing+'\n';
+  }
+  return c;
+}
+
+var MAESTRO_SYSTEM='Eres "Maestro", un entrenador personal experto (fuerza, CrossFit, running, natación, salud y recuperación) integrado en la app de salud del usuario. '+
+  'Hablas en español, de forma directa, cercana y motivadora, sin rodeos. '+
+  'IMPORTANTE: junto a estas instrucciones recibes un RESUMEN COMPLETO DE DATOS del usuario con sus entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar / vitamina D. '+
+  'SIEMPRE debes basar tus respuestas en esos datos reales. Antes de decir que no tienes información, revisa con atención todas las secciones del resumen (incluida SOL / VITAMINA D). '+
+  'Si de verdad un dato no aparece en el resumen, dilo con claridad e indica al usuario que lo registre; nunca te lo inventes. '+
+  'No des diagnósticos médicos; si detectas algo preocupante, recomienda consultar a un profesional. '+
+  'Sé conciso: usa frases cortas y, cuando ayude, listas con viñetas.';
+
+// ---- Análisis por entreno (guardado + expiración 1 semana) ----
+var ANALYSIS_TTL=7*24*60*60*1000;
+function purgeOldAnalyses(){
+  var now=Date.now(),changed=false;
+  store.activity.forEach(function(a){
+    if(a.aiAnalysis&&a.aiAnalysisAt&&(now-a.aiAnalysisAt>ANALYSIS_TTL)){
+      delete a.aiAnalysis;delete a.aiAnalysisAt;changed=true;
+    }
+  });
+  if(changed)save('activity',store.activity);
+  return changed;
+}
+// Las fotos asociadas a registros se conservan 4 meses; pasado ese tiempo se borran
+// de IndexedDB y se quita la referencia del registro (el resto de datos se mantiene).
+var ACTIVITY_PHOTO_TTL=122*24*60*60*1000; // ~4 meses
+function purgeOldActivityPhotos(){
+  var now=Date.now(),changed=false;
+  store.activity.forEach(function(a){
+    if(a.photo&&a.photoSavedAt&&(now-a.photoSavedAt>ACTIVITY_PHOTO_TTL)){
+      if(typeof a.photo==='string'&&a.photo.indexOf('img:')===0){try{deletePhotoData(a.photo);}catch(e){}}
+      delete a.photo;delete a.photoSavedAt;changed=true;
+    }
+  });
+  if(changed)save('activity',store.activity);
+  return changed;
+}
+function analyzeActivity(actId){
+  var act=store.activity.find(function(a){return a.id===actId;});
+  if(!act)return;
+  if(!getGeminiKey()){alert('Para usar Maestro necesitas tu clave de Gemini en Ajustes → 🤖 Análisis con IA.');return;}
+  var box=document.getElementById('aiAnalysis-'+actId);
+  if(box){box.style.display='block';box.innerHTML='<div class="maestro-loading"><span class="wday-done-spin"></span> Maestro está analizando tu entreno…</div>';}
+  var ctx=buildActivityContext(act);
+  var userMsg='Analiza este entrenamiento concreto comparándolo con mi histórico del mismo deporte. '+
+    'Dime: 1) si el resultado/tiempo es bueno respecto a mis marcas anteriores, 2) si la intensidad (pulsaciones) encaja, '+
+    '3) progresión o estancamiento que observes, 4) 2-3 consejos concretos para mejorar la próxima vez. '+
+    'Ten en cuenta mis notas si las hay.\n\n'+ctx;
+  geminiChat(MAESTRO_SYSTEM,[{role:'user',text:userMsg}])
+    .then(function(txt){
+      act.aiAnalysis=txt;act.aiAnalysisAt=Date.now();
+      save('activity',store.activity);
+      render();
+    })
+    .catch(function(err){
+      if(box)box.innerHTML='<div class="maestro-error">No se pudo analizar: '+escapeHTML(err.message||'error')+'</div>';
+    });
+}
+function clearActivityAnalysis(actId){
+  var act=store.activity.find(function(a){return a.id===actId;});
+  if(!act)return;
+  delete act.aiAnalysis;delete act.aiAnalysisAt;
+  save('activity',store.activity);render();
+}
+
+// ---- Chat Maestro (con hilo) ----
+var maestroHistory=[];
+function loadMaestroHistory(){try{maestroHistory=JSON.parse(localStorage.getItem('h_maestroChat')||'[]');}catch(e){maestroHistory=[];}}
+function saveMaestroHistory(){try{localStorage.setItem('h_maestroChat',JSON.stringify(maestroHistory.slice(-40)));}catch(e){}}
+loadMaestroHistory();
+function maestroSend(){
+  var inp=document.getElementById('maestroInput');
+  if(!inp)return;
+  var msg=inp.value.trim();
+  if(!msg)return;
+  if(!getGeminiKey()){alert('Para usar Maestro necesitas tu clave de Gemini en Ajustes → 🤖 Análisis con IA.');return;}
+  maestroHistory.push({role:'user',text:msg});
+  saveMaestroHistory();
+  inp.value='';
+  renderMaestroChat(true);
+  // El contexto de datos va como systemInstruction Y como turno inicial del hilo,
+  // para asegurar que el modelo siempre lo vea aunque ignore las system instructions.
+  var ctxText=buildFullContext();
+  var primer=[
+    {role:'user',text:'Estos son MIS datos actuales de la app. Tenlos en cuenta para todo lo que te pregunte a partir de ahora:\n\n'+ctxText},
+    {role:'model',text:'Entendido. He revisado tus entrenamientos, sueño, peso, ayunos, medidas, meditación y exposición solar / vitamina D. ¿En qué te ayudo?'}
+  ];
+  var hist=primer.concat(maestroHistory.slice(-14));
+  geminiChat(MAESTRO_SYSTEM,hist)
+    .then(function(txt){
+      maestroHistory.push({role:'model',text:txt});
+      saveMaestroHistory();
+      renderMaestroChat(true);
+    })
+    .catch(function(err){
+      maestroHistory.push({role:'model',text:'⚠️ No pude responder: '+(err.message||'error')});
+      saveMaestroHistory();
+      renderMaestroChat(true);
+    });
+}
+function maestroClear(){
+  if(!confirm('¿Borrar toda la conversación con Maestro?'))return;
+  maestroHistory=[];saveMaestroHistory();renderMaestroChat();
+}
+function maestroFmt(t){
+  var h=escapeHTML(t);
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/^\s*[-*]\s+(.+)$/gm,'• $1');
+  h=h.replace(/\n/g,'<br>');
+  return h;
+}
+function renderMaestroChat(scroll){
+  var thread=document.getElementById('maestroThread');
+  if(!thread)return;
+  var pending=maestroHistory.length&&maestroHistory[maestroHistory.length-1].role==='user';
+  var html=maestroHistory.map(function(m){
+    if(m.role==='user')return '<div class="maestro-msg maestro-user">'+escapeHTML(m.text)+'</div>';
+    return '<div class="maestro-msg maestro-ai">'+maestroFmt(m.text)+'</div>';
+  }).join('');
+  if(pending)html+='<div class="maestro-msg maestro-ai"><span class="wday-done-spin"></span> Maestro está pensando…</div>';
+  if(!maestroHistory.length)html='<div class="maestro-empty">Escribe abajo para empezar. Maestro conoce tus entrenos, marcas, sueño, peso y demás registros.<br><br>Ej: «¿Cómo voy de progresión este mes?», «Diseña un WOD de piernas para mañana», «¿Duermo bastante para entrenar así?»</div>';
+  thread.innerHTML=html;
+  if(scroll)thread.scrollTop=thread.scrollHeight;
+}
+var GEMINI_MODEL='gemini-2.5-flash';
+
+// Buffer con los datos a volcar en el formulario en el próximo render().
+// Estructura: {sportId, subtype, runType, duration, result, distance, hrAvg, hrMax, notes}
+var _pendingPrefill=null;
+// Vínculo pendiente entre el día de la programación y el próximo registro creado.
+// {dayId, photoRef} -> lo consume addActivity para asociar día + copiar la foto.
+var _pendingDayLink=null;
+
+// Mapa de sinónimos para detectar el deporte a partir de texto libre.
+function guessSportId(text){
+  if(!text)return null;
+  var t=text.toLowerCase();
+  // Primero, intenta casar con los deportes definidos por el usuario.
+  for(var i=0;i<store.sports.length;i++){
+    var sp=store.sports[i];
+    if(t.indexOf(sp.name.toLowerCase())>=0)return sp.id;
+  }
+  // Después, sinónimos comunes hacia los ids por defecto.
+  if(/wod|crossfit|amrap|emom|for time|hero|benchmark|metcon|box jump|thruster|snatch|clean|jerk|burpee/.test(t))return 'crossfit';
+  if(/carrera|correr|running|run|trote|rodaje|series|km|maratón|maraton|trail/.test(t))return 'carrera';
+  if(/piscina|natación|natacion|swim|nadar|crol|braza|espalda|mariposa|largos/.test(t))return 'piscina';
+  return null;
+}
+
+// Detecta el subtipo de CrossFit a partir de texto.
+function guessCrossfitSubtype(text){
+  if(!text)return '';
+  var t=text.toLowerCase();
+  if(/amrap/.test(t))return 'AMRAP';
+  if(/emom/.test(t))return 'EMOM';
+  if(/for ?time|por tiempo/.test(t))return 'For Time';
+  if(/hero/.test(t))return 'Hero WOD';
+  if(/benchmark|girl|fran|cindy|murph|helen|grace/.test(t))return 'Benchmark';
+  if(/strength|fuerza|1rm|3rm|5rm/.test(t))return 'Strength';
+  if(/skill|técnica|tecnica/.test(t))return 'Skill';
+  if(/olympic|olímpico|olimpico|snatch|clean.*jerk/.test(t))return 'Olympic';
+  if(/gymnastics|gimnásticos|gimnasticos|muscle.?up|handstand/.test(t))return 'Gymnastics';
+  return '';
+}
+
+// Extrae un primer número entero (minutos, etc.) de un texto.
+function firstNumber(text){
+  if(!text)return '';
+  var m=String(text).match(/\d{1,4}/);
+  return m?m[0]:'';
+}
+
+// Construye el buffer de precarga a partir del texto del día (heurístico, sin red).
+// Elimina del texto las secciones de calentamiento/warm-up para que no entren en el WOD.
+function stripWarmup(text){
+  if(!text)return '';
+  var lines=String(text).split(/\r?\n/);
+  var out=[];
+  var skipping=false;
+  var warmRe=/(calentamiento|warm\s*-?\s*up|movilidad|activaci[oó]n|estiramientos?|mobility|warmup)/i;
+  // Cabeceras que marcan el inicio de la parte principal (fin del calentamiento).
+  var mainRe=/(wod|metcon|amrap|emom|for\s*time|parte\s*principal|principal|strength|fuerza|t[ée]cnica|skill|workout|serie\s*principal)/i;
+  for(var i=0;i<lines.length;i++){
+    var ln=lines[i];
+    if(warmRe.test(ln)&&!mainRe.test(ln)){skipping=true;continue;} // cabecera de calentamiento -> saltar
+    if(skipping){
+      if(mainRe.test(ln)||ln.trim()===''){skipping=false;} // una línea principal o vacía corta el bloque
+      if(skipping)continue; // seguimos dentro del calentamiento
+    }
+    out.push(ln);
+  }
+  var res=out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  return res||String(text).trim(); // si nos quedamos sin nada, devolvemos el original
+}
+function buildPrefillFromText(text){
+  var sportId=guessSportId(text)||(store.sports[0]||{}).id||'crossfit';
+  // Igual que la IA: solo deporte, tipo, tiempo. Sin notas ni FC.
+  // El WOD realizado es el propio texto del día (lo que el usuario planificó).
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',wod:stripWarmup(text),aiOnly:true};
+  if(sportId==='crossfit'){
+    pre.subtype=guessCrossfitSubtype(text);
+    // Tiempo: primero "MM:SS" (formato reloj, sin espacios), si no, "NN min".
+    var mc=text.match(/\b(\d{1,3}):([0-5]\d)\b/);
+    if(mc){pre.time=normalizeTimeStr(mc[0]);}
+    else{var md=text.match(/(\d{1,3})\s*('|min|minutos)/i);if(md)pre.time=md[1];}
+  }else if(sportId==='carrera'){
+    if(/series|x\s*\d{2,4}\s*m/i.test(text))pre.runType='series';
+    var mt=text.match(/(\d{1,3})\s*(min|')/i);
+    if(mt)pre.time=mt[1];
+  }else if(sportId==='piscina'){
+    var mpt=text.match(/(\d{1,3})\s*(min|minutos|')/i);
+    if(mpt)pre.time=mpt[1];
+  }else{
+    var mn=text.match(/(\d{1,3})\s*(min|minutos|')/i);
+    if(mn)pre.time=mn[1];
+  }
+  return pre;
+}
+
+// Normaliza la respuesta JSON de Gemini al buffer de precarga.
+function buildPrefillFromAI(obj,fallbackText){
+  var rawSport=(obj.deporte||obj.sport||'').toString();
+  var sportId=guessSportId(rawSport)||guessSportId(fallbackText)||(store.sports[0]||{}).id||'crossfit';
+  // La IA SOLO rellena: deporte, tipo y tiempo.
+  // Nunca toca repeticiones, notas, FC media ni FC máx (esos quedan manuales).
+  var pre={sportId:sportId,subtype:'',runType:'continua',time:'',wod:'',aiOnly:true};
+  function pick(){for(var i=0;i<arguments.length;i++){var v=arguments[i];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return '';}
+  pre.subtype=pick(obj.tipo,obj.subtype,obj.subtipo);
+  // Tiempo: aceptamos "MM:SS" tal cual, o minutos sueltos.
+  var rawTime=pick(obj.tiempo,obj.duracion,obj.duración,obj.duration,obj.tiempo_total,obj.time);
+  pre.time=normalizeTimeStr(rawTime);
+  // WOD realizado: descripción de ejercicios/reps que la IA lee de la pizarra.
+  var ejArr=obj.ejercicios||obj.exercises||obj.movimientos;
+  if(Array.isArray(ejArr))ejArr=ejArr.join('\n');
+  pre.wod=pick(obj.wod,obj.descripcion,obj.descripción,ejArr,obj.workout);
+  // Para CrossFit, normaliza el subtipo a uno de los valores del desplegable.
+  if(sportId==='crossfit'&&pre.subtype){
+    var ej=obj.ejercicios||obj.exercises||obj.movimientos;if(Array.isArray(ej))ej=ej.join(' ');
+    var norm=guessCrossfitSubtype(pre.subtype)||guessCrossfitSubtype(String(ej||''));
+    if(norm)pre.subtype=norm;
+  }
+  return pre;
+}
+// Normaliza un texto de tiempo a "MM:SS" si trae ":", o lo deja como minutos sueltos.
+function normalizeTimeStr(v){
+  if(!v)return '';
+  var str=String(v).trim();
+  var mc=str.match(/(\d{1,3})\s*:\s*(\d{1,2})/);
+  if(mc){var mm=parseInt(mc[1])||0,ss=parseInt(mc[2])||0;return (mm<10?'0'+mm:mm)+':'+(ss<10?'0'+ss:ss);}
+  var mn=str.match(/\d{1,3}/);
+  return mn?mn[0]:'';   // minutos sueltos
+}
+
+// Llama a la API de Gemini con la imagen (dataURL) y devuelve una Promesa con el buffer.
+function analyzeImageWithGemini(dataUrl,fallbackText){
+  return new Promise(function(resolve,reject){
+    var apiKey=getGeminiKey();
+    if(!apiKey){reject(new Error('Falta la clave de Gemini. Ve a Ajustes → Análisis con IA para introducirla.'));return;}
+    // dataUrl = "data:image/jpeg;base64,...." -> separamos mime y datos.
+    var m=/^data:(.*?);base64,(.*)$/.exec(dataUrl||'');
+    if(!m){reject(new Error('Imagen no válida'));return;}
+    var mime=m[1]||'image/jpeg';
+    var b64=m[2];
+    var prompt='Esta es la foto de la pizarra o pantalla de un entrenamiento (posible WOD de CrossFit, '+
+      'carrera, natación u otro deporte). Extrae los datos y responde SOLO con un '+
+      'objeto JSON válido, sin texto adicional ni markdown, con estas claves (deja "" si el dato no aparece): '+
+      '{"deporte":"crossfit|carrera|piscina u otro nombre del deporte",'+
+      '"tipo":"AMRAP/EMOM/For Time/Strength/Skill/Olympic/Gymnastics/Hero WOD/Benchmark/continua/series...",'+
+      '"tiempo":"duración o cap de tiempo en formato MM:SS, o minutos como número si no hay segundos",'+
+      '"wod":"descripción del WOD principal tal y como aparece en la pizarra: ejercicios, repeticiones y pesos, usa saltos de línea si hace falta"}. '+
+      'No inventes datos: si un campo no se ve en la imagen, déjalo como "". El campo wod debe reflejar SOLO la parte principal del entrenamiento (el METCON/WOD/serie principal). '+
+      'NUNCA incluyas en el wod el calentamiento, warm-up, warm up, movilidad, activación, parte inicial ni los estiramientos; ignora por completo esas secciones aunque aparezcan en la foto o el texto. No incluyas frecuencia cardíaca ni notas personales.';
+    var body={contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
+      generationConfig:{temperature:0.1,response_mime_type:'application/json'}};
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent?key='+encodeURIComponent(apiKey);
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){
+        if(!r.ok)return r.text().then(function(t){throw new Error('Gemini '+r.status+': '+t.slice(0,160));});
+        return r.json();
+      })
+      .then(function(data){
+        var txt='';
+        try{txt=data.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');}catch(e){}
+        if(!txt)throw new Error('Respuesta vacía de Gemini');
+        // Limpia posibles vallas ```json
+        txt=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+        var obj;
+        try{obj=JSON.parse(txt);}catch(e){
+          var jm=txt.match(/\{[\s\S]*\}/);
+          if(jm){obj=JSON.parse(jm[0]);}else{throw new Error('JSON no parseable');}
+        }
+        resolve(buildPrefillFromAI(obj,fallbackText));
+      })
+      .catch(reject);
+  });
+}
+
+// Abre el bloque de registro y vuelca el buffer en los campos (tras el render()).
+function openRegistroWithPrefill(pre){
+  _pendingPrefill=pre;
+  if(pre&&pre.sportId)actType=pre.sportId;
+  if(pre&&pre.runType)runType=pre.runType;
+  store.collapsed.sport=false;
+  saveCollapsed();
+  if(currentTab!=='actividad'){showTab('actividad');}else{render();}
+  setTimeout(function(){
+    var el=document.getElementById('sportBlockTitle');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  },180);
+}
+
+// Aplica el buffer pendiente a los inputs del formulario. Llamada desde render().
+function applyPendingPrefill(){
+  if(!_pendingPrefill)return;
+  var pre=_pendingPrefill;
+  _pendingPrefill=null;
+  function setVal(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null&&String(v)!=='')el.value=v;}
+  // La IA y el parser de texto rellenan: deporte, tipo, tiempo y WOD realizado.
+  // Nunca escriben en REPETICIONES, NOTAS, FC MEDIA ni FC MÁX (todos manuales).
+  setVal('actSubtype',pre.subtype);
+  setVal('actWod',pre.wod);
+  if(pre.sportId==='crossfit'){
+    // Tiempo va en la ruleta MM:SS. Las repeticiones quedan manuales.
+    setTimeWheel('actDur',pre.time);
+  }else{
+    // Otros deportes mantienen su campo de duración en minutos.
+    setVal('actDuration',pre.time);
+  }
+}
+
+// Orquesta la precarga al marcar un día como hecho.
+function prefillFromDay(dayId){
+  var rec=store.weeklyPlan[dayId]||{};
+  var hasImage=!!rec.image;
+  var hasText=!!(rec.text&&rec.text.trim());
+  if(!hasImage&&!hasText){
+    // Sin datos: marcamos el enlace al día igualmente (sin foto) por si se registra a mano luego.
+    return;
+  }
+  // Guardamos el vínculo al día para asociarlo al registro cuando se cree.
+  _pendingDayLink={dayId:dayId,photoRef:rec.image||null};
+  if(hasImage){
+    // Si no hay clave de Gemini configurada, avisamos y caemos al texto si existe.
+    if(!getGeminiKey()){
+      if(hasText){
+        openRegistroWithPrefill(buildPrefillFromText(rec.text));
+      }else{
+        alert('Para analizar la foto con IA necesitas introducir tu clave de Gemini en Ajustes → 🤖 Análisis con IA.\n\nEl entrenamiento queda marcado igualmente.');
+        render();
+      }
+      return;
+    }
+    // Marca el botón como ocupado mientras Gemini procesa.
+    var heroBtn=document.getElementById('wdayDoneHero');
+    if(heroBtn){
+      heroBtn.classList.add('busy');
+      heroBtn.innerHTML='<span class="wday-done-spin"></span> Leyendo…';
+    }
+    getPhotoData(rec.image).then(function(dataUrl){
+      if(!dataUrl||dataUrl.indexOf('data:')!==0){
+        // Sin bytes utilizables (p.ej. solo referencia remota); cae a texto si hay.
+        if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
+        else{alert('No se pudo leer la foto para analizarla.');render();}
+        return;
+      }
+      analyzeImageWithGemini(dataUrl,rec.text||'')
+        .then(function(pre){openRegistroWithPrefill(pre);})
+        .catch(function(err){
+          console.warn('Gemini',err);
+          // Fallback: si falla la IA, usamos el texto del día si existe.
+          if(hasText){
+            alert('No se pudo analizar la foto con IA ('+(err.message||'error')+').\nSe precargará con el texto del día.');
+            openRegistroWithPrefill(buildPrefillFromText(rec.text));
+          }else{
+            alert('No se pudo analizar la foto con IA: '+(err.message||'error')+'\n\nRevisa tu conexión o la clave de Gemini. El entrenamiento queda marcado igualmente.');
+            render();
+          }
+        });
+    }).catch(function(){
+      if(hasText){openRegistroWithPrefill(buildPrefillFromText(rec.text));}
+      else{render();}
+    });
+  }else{
+    // Solo texto: precarga heurística instantánea.
+    openRegistroWithPrefill(buildPrefillFromText(rec.text));
+  }
+}
+
+// Formatea la duración de un entreno para mostrar: "MM:SS" se muestra tal cual,
+// un número suelto se interpreta como minutos.
+function fmtActivityDuration(d){
+  if(d===undefined||d===null||d==='')return '';
+  var str=String(d).trim();
+  if(str.indexOf(':')>=0)return str;            // ya es MM:SS
+  if(/^\d+(\.\d+)?$/.test(str))return str+'min';// número = minutos
+  return str;                                    // cualquier otro texto, tal cual
+}
+
+// Genera una ruleta de tiempo MM:SS (mismo estilo que las ruletas de la app).
+// idBase -> crea idBase+'Min' y idBase+'Sec'. selMin/selSec opcionales (números).
+function timeWheelHTML(idBase,selMin,selSec){
+  selMin=parseInt(selMin)||0;selSec=parseInt(selSec)||0;
+  var minOpts='';for(var m=0;m<=120;m++){minOpts+='<option value="'+m+'"'+(m===selMin?' selected':'')+'>'+(m<10?'0'+m:m)+'</option>';}
+  var secOpts='';for(var s=0;s<=59;s++){secOpts+='<option value="'+s+'"'+(s===selSec?' selected':'')+'>'+(s<10?'0'+s:s)+'</option>';}
+  return '<div class="sport-time-wheel">'+
+    '<select id="'+idBase+'Min" aria-label="minutos">'+minOpts+'</select>'+
+    '<span class="stw-colon">:</span>'+
+    '<select id="'+idBase+'Sec" aria-label="segundos">'+secOpts+'</select>'+
+  '</div>';
+}
+// Lee una ruleta de tiempo y devuelve "MM:SS" (o "" si está a 00:00).
+function readTimeWheel(idBase){
+  var mEl=document.getElementById(idBase+'Min');
+  var sEl=document.getElementById(idBase+'Sec');
+  if(!mEl||!sEl)return '';
+  var m=parseInt(mEl.value)||0;var s=parseInt(sEl.value)||0;
+  if(m===0&&s===0)return '';
+  return (m<10?'0'+m:m)+':'+(s<10?'0'+s:s);
+}
+// Coloca un valor "MM:SS" o un número de minutos en una ruleta de tiempo.
+function setTimeWheel(idBase,val){
+  var mEl=document.getElementById(idBase+'Min');
+  var sEl=document.getElementById(idBase+'Sec');
+  if(!mEl||!sEl||val===undefined||val===null||val==='')return;
+  var mm=0,ss=0;var str=String(val).trim();
+  if(str.indexOf(':')>=0){var p=str.split(':');mm=parseInt(p[0])||0;ss=parseInt(p[1])||0;}
+  else{mm=parseInt(str)||0;ss=0;}                 // número suelto = minutos
+  if(mm>120)mm=120;if(ss>59)ss=59;
+  mEl.value=mm;sEl.value=ss;
+}
+
 function setActType(t){actType=t;render();}
-function addActivity(){const a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,subtype:(document.getElementById('actSubtype')||{}).value||'',duration:(document.getElementById('actDuration')||{}).value||'',result:(document.getElementById('actResult')||{}).value||'',distance:(document.getElementById('actDistance')||{}).value||'',hrAvg:(document.getElementById('actHRavg')||{}).value||'',hrMax:(document.getElementById('actHRmax')||{}).value||'',notes:(document.getElementById('actNotes')||{}).value||''};if(!a.date)return alert('Selecciona fecha');store.activity.push(a);save('activity',store.activity);openRegistro('activity');render();}
+function addActivity(){
+  var durVal;
+  if(actType==='crossfit'){durVal=readTimeWheel('actDur');}else{durVal=(document.getElementById('actDuration')||{}).value||'';}
+  var a={id:Date.now(),type:actType,date:document.getElementById('actDate').value,
+    subtype:(document.getElementById('actSubtype')||{}).value||'',
+    duration:durVal,
+    result:(document.getElementById('actResult')||{}).value||'',
+    distance:(document.getElementById('actDistance')||{}).value||'',
+    hrAvg:(document.getElementById('actHRavg')||{}).value||'',
+    hrMax:(document.getElementById('actHRmax')||{}).value||'',
+    wod:(document.getElementById('actWod')||{}).value||'',
+    notes:(document.getElementById('actNotes')||{}).value||''};
+  if(!a.date)return alert('Selecciona fecha');
+  // Asociación con el día de la programación (si el registro vino de "marcar día").
+  var link=_pendingDayLink;_pendingDayLink=null;
+  function finish(){
+    store.activity.push(a);
+    save('activity',store.activity);
+    openRegistro('activity');
+    render();
+  }
+  if(link&&link.dayId){
+    a.dayId=link.dayId;
+    if(link.photoRef){
+      // Copiamos la foto del día a una entrada propia del registro, con marca temporal
+      // para conservarla 4 meses (luego se purga). Así sobrevive aunque se edite el día.
+      getPhotoData(link.photoRef).then(function(dataUrl){
+        if(dataUrl&&typeof dataUrl==='string'&&dataUrl.indexOf('data:')===0){
+          savePhotoData(dataUrl).then(function(newRef){
+            a.photo=newRef;a.photoSavedAt=Date.now();finish();
+          }).catch(function(){finish();});
+        }else if(dataUrl&&typeof dataUrl==='string'){
+          // Legacy/URL: guardamos la referencia directamente.
+          a.photo=dataUrl;a.photoSavedAt=Date.now();finish();
+        }else{finish();}
+      }).catch(function(){finish();});
+      return;
+    }
+  }
+  finish();
+}
 function addWod(){const name=document.getElementById('wodName').value;const desc=document.getElementById('wodDesc').value;if(!name||!desc)return alert('Completa');store.wods.push({name:name,desc:desc});save('wods',store.wods);render();}
 function addRecord(){const name=document.getElementById('recName').value;const value=document.getElementById('recValue').value;const date=document.getElementById('recDate').value;if(!name||!value)return alert('Completa');store.records.push({id:Date.now(),name:name,value:value,date:date,video:recVideoData||null});recVideoData=null;save('records',store.records);openRegistro('records');render();}
 let recVideoData=null;
@@ -4548,9 +5309,16 @@ function toggleCalendarSync(el){store.weeklyPlan.calendarSync=!store.weeklyPlan.
 
 function toggleDayDone(dayId){
   if(!store.weeklyPlan[dayId])store.weeklyPlan[dayId]={text:'',image:null,done:false};
-  store.weeklyPlan[dayId].done=!store.weeklyPlan[dayId].done;
+  var wasDone=store.weeklyPlan[dayId].done===true;
+  store.weeklyPlan[dayId].done=!wasDone;
   saveWeekly();
-  render();
+  // Solo al marcar (no al desmarcar) intentamos precargar el registro de entrenamiento.
+  if(!wasDone){
+    render();
+    prefillFromDay(dayId);
+  }else{
+    render();
+  }
 }
 
 function clearDayText(dayId){
@@ -4947,11 +5715,15 @@ function renderMeditacion(c){
   '</div>';
 
   if(store.meditation.length){
-    h+='<div class="card" style="padding:12px">'+
-      renderRegistros('meditation','SESIONES',function(m){
-        return '<div style="font-size:11.5px">'+fmtTime(m.duration)+' · Inh '+m.inhale+'s / Exh '+m.exhale+'s</div>';
-      },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc',
-         searchFields:[{key:'duration',label:'Duración',aliases:['duracion','tiempo','segundos','min']},{key:'date',label:'Fecha',aliases:['fecha','día']}]})+
+    var medHistCollapsed=store.collapsed.medhistory!==false; // plegada por defecto
+    h+='<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'medhistory\')"><div class="card-title-text"><span>📜 HISTÓRICO SESIONES <span class="registros-count">('+store.meditation.length+')</span></span></div><button class="collapse-btn">'+(medHistCollapsed?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(medHistCollapsed?' collapsed':'')+'">'+
+        renderRegistros('meditation','SESIONES',function(m){
+          return '<div style="font-size:11.5px">'+fmtTime(m.duration)+' · Inh '+m.inhale+'s / Exh '+m.exhale+'s</div>';
+        },{chartLabel:'Meditación (s)',chartKey:'duration',chartColor:'#c084fc',noCollapse:true,
+           searchFields:[{key:'duration',label:'Duración',aliases:['duracion','tiempo','segundos','min']},{key:'date',label:'Fecha',aliases:['fecha','día']}]})+
+      '</div>'+
     '</div>';
   }
 
@@ -6016,6 +6788,26 @@ function renderAjustes(c){
         '<p style="font-size:9.5px;color:var(--text-dim);margin-top:6px;line-height:1.45;font-family:var(--serif);font-style:italic">Tus datos se guardan solo en este dispositivo (localStorage). Vaciar la caché del navegador <b>puede</b> borrarlos; exporta una copia antes. Esta app pedirá confirmación antes de borrar nada.</p>'+
       '</div>'+
     '</div>'+
+    // AI analysis (Gemini key)
+    '<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'setai\')"><div class="card-title-text"><span>🤖 ANÁLISIS CON IA</span></div><button class="collapse-btn">'+(store.collapsed.setai?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(store.collapsed.setai?' collapsed':'')+'">'+
+        '<div style="font-size:11px;color:var(--text-muted);margin:6px 0 8px;font-family:var(--sans);line-height:1.5">Al marcar un entrenamiento con foto, la app puede leer la pizarra del WOD con IA (Google Gemini) y precargar deporte, tipo, tiempo y repeticiones.</div>'+
+        (getGeminiKey()?
+          '<div style="display:flex;align-items:center;gap:8px;background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:9px 11px;margin-bottom:8px">'+
+            '<span style="font-size:15px">✓</span>'+
+            '<div style="font-family:var(--sans);font-size:12px;font-weight:600;color:#6ee7b7">Clave de Gemini configurada</div>'+
+          '</div>'+
+          '<button class="btn btn-secondary" onclick="testGeminiKey()" style="margin-bottom:6px;font-size:12px">🔌 Probar conexión</button>'+
+          '<button class="btn btn-secondary" onclick="clearGeminiKey()" style="font-size:11px;padding:6px">Quitar clave</button>'
+          :
+          '<p style="font-size:10px;color:var(--text-muted);line-height:1.5;font-family:var(--sans);margin-bottom:6px">Necesitas una clave de API de Google Gemini (gratuita). <span class="fast-time-set-btn" onclick="showGeminiHelp()">Ver cómo →</span></p>'+
+          '<input type="password" id="geminiKeyInput" placeholder="Pega aquí tu clave de Gemini" autocomplete="off" style="font-size:12px;margin-bottom:6px">'+
+          '<button class="btn btn-primary" onclick="saveGeminiKey()" style="background:rgba(192,132,252,0.15);border-color:rgba(192,132,252,0.4);color:#c084fc">✨ Guardar clave</button>'
+        )+
+        '<p style="font-size:9px;color:var(--text-dim);margin-top:8px;line-height:1.45;font-family:var(--serif);font-style:italic">Por seguridad, la clave se guarda <b>solo en este dispositivo</b> y no se sincroniza ni se incluye en las copias de seguridad. Si usas la app en otro dispositivo, tendrás que introducirla allí también.</p>'+
+      '</div>'+
+    '</div>'+
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setloc\')"><div class="card-title-text"><span>📍 UBICACIÓN</span></div><button class="collapse-btn">'+(store.collapsed.setloc?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setloc?' collapsed':'')+'">'+
@@ -6091,7 +6883,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 19.1</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 25.2</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -6717,6 +7509,9 @@ function migrateLegacyPhotos(){
 }
 
 renderNav();
+// Limpia análisis de Maestro caducados (>1 semana) y fotos de registros (>4 meses).
+try{purgeOldAnalyses();}catch(e){}
+try{purgeOldActivityPhotos();}catch(e){}
 showTab('panel');
 // Move old inline photos to IndexedDB (frees localStorage), then init cloud sync.
 migrateLegacyPhotos();
