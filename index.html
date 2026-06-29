@@ -40,8 +40,15 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;min-width:0}
 html,body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;letter-spacing:-0.005em;width:100%;max-width:100vw;font-weight:400}
+/* Fondo dinámico "seda en movimiento": gradiente verde oscuro que fluye muy despacio,
+   fijo detrás de toda la app. CSS puro (sin JS), suave para no estorbar la lectura. */
+.app-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(120deg,#000,#0a1f17,#06281e,#0a0a1a,#000);background-size:300% 300%;animation:appBgFlow 22s ease infinite}
+.app-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 35%,rgba(167,243,208,0.10),transparent 50%);animation:appBgGlow 16s ease-in-out infinite}
+@keyframes appBgFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes appBgGlow{0%,100%{opacity:0.35}50%{opacity:0.85}}
+@media(prefers-reduced-motion:reduce){.app-bg,.app-bg::after{animation:none}}
 body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
-.app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 14px;width:100%;overflow-x:hidden;position:relative;box-sizing:border-box}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 14px;width:100%;overflow-x:hidden;position:relative;z-index:1;box-sizing:border-box}
 
 /* HEADER */
 .header{padding:9px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:linear-gradient(180deg,rgba(13,18,14,0.96) 0%,rgba(11,15,11,0.9) 100%);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);z-index:50;margin-top:4px;gap:8px;border-radius:0 0 20px 20px;border-bottom:1px solid rgba(167,243,208,0.08);box-shadow:0 6px 24px -10px rgba(0,0,0,0.7);overflow:visible}
@@ -59,8 +66,14 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .settings-btn:active{transform:scale(0.92) rotate(40deg)}
 
 /* CONTENT */
-.content{padding:14px 0;animation:fadeIn 0.3s ease;overflow:hidden}
+.content{padding:14px 0;overflow:hidden}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* Transiciones direccionales al cambiar de apartado */
+@keyframes slideInLeft{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+.content.slide-in-left{animation:slideInLeft 0.28s cubic-bezier(0.22,0.61,0.36,1)}
+.content.slide-in-right{animation:slideInRight 0.28s cubic-bezier(0.22,0.61,0.36,1)}
+.content.slide-in-up{animation:fadeIn 0.3s ease}
 
 /* TYPOGRAPHY */
 .section-title{font-family:var(--display);font-size:34px;font-weight:800;margin-bottom:2px;letter-spacing:-1px;color:#fff;line-height:1;font-style:normal;text-transform:uppercase}
@@ -84,7 +97,11 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .card-title-text{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* CARDS */
-.card{background:var(--grad-card);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;position:relative;transition:background 0.2s,border-color 0.2s}
+.card{background:var(--grad-card);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;margin-bottom:9px;width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;position:relative;transition:background 0.2s,border-color 0.2s,box-shadow 0.2s}
+/* Cerrado: la tarjeta se disimula con el fondo de la app (sin fondo, sin borde, sin sombra). */
+.card:has(>.collapsible.collapsed){background:transparent;border-color:transparent;box-shadow:none}
+/* Tarjetas fijas que se muestran sin fondo de cuadro (sol en panel/Sol, meditación). */
+.card.card-bare{background:transparent;border-color:transparent;box-shadow:none;padding-left:0;padding-right:0}
 /* Slight highlight for cards with an EXPANDED collapsible (easier to distinguish from background) */
 .card:has(>.collapsible:not(.collapsed)){background:linear-gradient(160deg,rgba(52,90,72,0.32),rgba(22,40,33,0.40));border-color:rgba(167,243,208,0.4);box-shadow:0 0 36px rgba(167,243,208,0.08) inset,0 6px 22px -6px rgba(0,0,0,0.6)}
 /* Inside an expanded (greenish) card, give inner controls a DARKER base so green accents stand out */
@@ -435,6 +452,11 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .week-range{font-family:var(--sans);font-size:12px;font-weight:600;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .week-tag{font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.6px;color:var(--accent);text-transform:uppercase}
 .week-nav-label.other .week-tag{color:var(--text-muted)}
+.week-view-wrap{will-change:transform,opacity}
+@keyframes wkSlideLeft{from{opacity:0.3;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes wkSlideRight{from{opacity:0.3;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+.week-view-wrap.wk-slide-left{animation:wkSlideLeft 0.3s cubic-bezier(0.22,0.61,0.36,1)}
+.week-view-wrap.wk-slide-right{animation:wkSlideRight 0.3s cubic-bezier(0.22,0.61,0.36,1)}
 .wday-view-btn.hist{background:rgba(96,165,250,0.14);border-color:rgba(96,165,250,0.4);color:#60a5fa}
 .wday-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 0 3px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);position:relative}
 .wday-chip:active{transform:scale(0.96)}
@@ -1086,6 +1108,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 </style>
 </head>
 <body>
+<div class="app-bg" aria-hidden="true"></div>
 <div class="app">
 <div class="header">
 <div class="logo-wrap"><span class="logo-dot"></span><div class="logo">HEALTH</div></div>
@@ -2044,7 +2067,7 @@ function selectWeekDay(dayId){
   render();
 }
 // Cambia la semana visible (dir=-1 anterior, dir=+1 siguiente). Límite: -4 .. +1.
-function changeWeek(dir){
+function changeWeek(dir,animate){
   if(dir==='reset'){if(weekViewOffset!==0){weekViewOffset=0;selectedWeekDay=todayDayId();render();}return;}
   var next=weekViewOffset+dir;
   if(next<-4||next>1)return;
@@ -2052,6 +2075,15 @@ function changeWeek(dir){
   // Al cambiar de semana, seleccionamos un día sensato: hoy si es la semana actual.
   if(next===0)selectedWeekDay=todayDayId();
   render();
+  // Animación de deslizamiento de la vista semanal.
+  if(animate){
+    var wrap=document.getElementById('weekViewWrap');
+    if(wrap){
+      var cls=dir>0?'wk-slide-left':'wk-slide-right';
+      wrap.classList.add(cls);
+      setTimeout(function(){wrap.classList.remove(cls);},320);
+    }
+  }
 }
 // Etiqueta del rango de la semana visible (p.ej. "12 – 18 may" + "ESTA SEMANA").
 function weekRangeLabel(off){
@@ -2311,7 +2343,7 @@ function renderNav(){
   }).join('');
 }
 
-function showTab(tab,btn){
+function showTab(tab,btn,dir){
   // Al entrar a Maestro desde otra pestaña, siempre empezamos en la vista de chat.
   if(tab==='maestro'&&currentTab!=='maestro')maestroView='chat';
   currentTab=tab;
@@ -2331,6 +2363,15 @@ function showTab(tab,btn){
     ha.appendChild(set);
   }
   render();
+  // Animación direccional al cambiar de apartado (deslizamiento profesional).
+  var contentEl=document.getElementById('content');
+  if(contentEl){
+    contentEl.classList.remove('slide-in-left','slide-in-right','slide-in-up');
+    void contentEl.offsetWidth; // reinicia la animación
+    if(dir==='left')contentEl.classList.add('slide-in-left');
+    else if(dir==='right')contentEl.classList.add('slide-in-right');
+    else contentEl.classList.add('slide-in-up');
+  }
   window.scrollTo(0,0);
 }
 
@@ -2851,7 +2892,7 @@ function renderSunPanel(times,hour,uv,isDay){
   const phase=getCurrentPhase(hour,times);
   const uva=uvaIndex(hour,times,true);
   const uvb=uvbIndex(hour,times,true);
-  return '<div class="card" style="padding:10px;position:relative">'+
+  return '<div class="card card-bare" style="padding:10px;position:relative">'+
     '<div class="sun-container" style="max-width:210px;margin:0 auto;position:relative">'+
       renderSunSVG(times,hour,uv,isDay,210,false)+
       '<div class="sun-center-text" style="width:72%;pointer-events:none">'+
@@ -2878,7 +2919,7 @@ function renderSunDashboard(times,hour,uv,isDay){
   const phase=getCurrentPhase(hour,times);
   const uvaL=uvaIndex(hour,times,true);
   const uvbL=uvbIndex(hour,times,true);
-  return '<div class="card" style="padding:14px 10px;position:relative">'+
+  return '<div class="card card-bare" style="padding:14px 10px;position:relative">'+
     // Floating "Volver a en vivo" top-right (only when not live)
     (!sunLive?'<button class="live-mini-btn-floating" onclick="resetSunLive()" title="Volver a en vivo">⚡ EN VIVO</button>':'')+
     '<div class="sun-container" id="sunContainer" style="max-width:340px">'+
@@ -4633,13 +4674,12 @@ function renderActividad(c){
     '<div class="collapsible'+(weeklyCollapsed?' collapsed':'')+'">'+
       (activeWeekdays.length?
         '<div class="week-nav" id="weekNavBar">'+
-          '<button class="week-nav-arrow" '+(weekViewOffset<=-4?'disabled':'')+' onclick="changeWeek(-1)" title="Semana anterior">‹</button>'+
+          '<button class="week-nav-arrow" '+(weekViewOffset<=-4?'disabled':'')+' onclick="changeWeek(-1,true)" title="Semana anterior">‹</button>'+
           '<div class="week-nav-label'+(weekViewOffset!==0?' other':'')+'" onclick="changeWeek(\'reset\')">'+weekRangeLabel(weekViewOffset)+'</div>'+
-          '<button class="week-nav-arrow" '+(weekViewOffset>=1?'disabled':'')+' onclick="changeWeek(1)" title="Semana siguiente">›</button>'+
+          '<button class="week-nav-arrow" '+(weekViewOffset>=1?'disabled':'')+' onclick="changeWeek(1,true)" title="Semana siguiente">›</button>'+
         '</div>'+
-        '<div class="wday-strip" id="wdayStrip">'+chips+'</div>'
+        '<div class="week-view-wrap" id="weekViewWrap"><div class="wday-strip" id="wdayStrip">'+chips+'</div>'+viewer+'</div>'
         :'<div class="wday-empty-note">No hay días activos. Usa ⚙ para configurarlos.</div>')+
-      viewer+
     '</div>'+
   '</div>';
   actBlocks.weekly=h.slice(_bs);h=h.slice(0,_bs);
@@ -6235,7 +6275,7 @@ function renderMeditacion(c){
   const secs=medConfig.total%60;
   const inExhale=medOrbState==='exhale';
   let h='<div class="med-header-row"><div class="section-title-inline">MEDITACIÓN <span class="section-subtitle-inline">Respiración guiada</span></div><button class="med-save-preset-btn" onclick="saveMedPreset()" title="Guardar esta configuración como predeterminada">💾 Guardar</button></div>'+
-    '<div class="card card-glow" style="padding:12px;position:relative;overflow:visible">'+
+    '<div class="card card-glow card-bare" style="padding:12px;position:relative;overflow:visible">'+
       // Audio controls column on the LEFT of orb (toggles + type switchers)
       '<div class="med-audio-controls">'+
         '<button class="med-actrl-btn '+(store.settings.music?'on':'off')+'" onclick="toggleMusic(this)" title="Música on/off">🎵</button>'+
@@ -7533,7 +7573,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.2</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -8255,8 +8295,8 @@ fbInit();
       var idx=tabs.indexOf(currentTab);
       if(idx<0)return;
       // Maestro está en modo pantalla fija; permitimos salir de él con swipe igualmente.
-      if(dx<0 && idx<tabs.length-1){showTab(tabs[idx+1]);}
-      else if(dx>0 && idx>0){showTab(tabs[idx-1]);}
+      if(dx<0 && idx<tabs.length-1){showTab(tabs[idx+1],null,'left');}
+      else if(dx>0 && idx>0){showTab(tabs[idx-1],null,'right');}
     }
   }
   function onEnd(){tracking=false;}
@@ -8281,7 +8321,7 @@ fbInit();
     if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.6){
       tracking=false;
       // Deslizar a la izquierda -> semana siguiente; a la derecha -> anterior.
-      if(typeof changeWeek==='function')changeWeek(dx<0?1:-1);
+      if(typeof changeWeek==='function')changeWeek(dx<0?1:-1,true);
     }
   },{passive:true});
   document.addEventListener('touchend',function(){tracking=false;onStrip=false;},{passive:true});
