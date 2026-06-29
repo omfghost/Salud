@@ -62,8 +62,8 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .icon-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.2)}
 .back-btn{background:transparent !important;border:none !important;color:var(--accent);font-size:13px;font-weight:600;padding:0 10px;width:auto;letter-spacing:0.3px;font-family:var(--sans);text-shadow:0 0 10px rgba(167,243,208,0.6);height:32px;cursor:pointer;display:flex;align-items:center}
 .back-btn:active{transform:scale(0.95)}
-.settings-btn{background:linear-gradient(135deg,rgba(167,243,208,0.22),rgba(110,231,183,0.12));border-color:rgba(167,243,208,0.45);color:#a7f3d0;box-shadow:0 0 14px rgba(167,243,208,0.25);font-size:16px}
-.settings-btn:active{transform:scale(0.92) rotate(40deg)}
+.settings-btn{background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;color:#c6f7e2;font-size:19px;text-shadow:0 0 10px rgba(167,243,208,0.9),0 0 20px rgba(110,231,183,0.6),0 0 30px rgba(52,211,153,0.35);filter:drop-shadow(0 0 6px rgba(167,243,208,0.5))}
+.settings-btn:active{transform:scale(0.9) rotate(45deg)}
 
 /* CONTENT */
 .content{padding:14px 0;overflow:hidden}
@@ -736,6 +736,8 @@ input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width
 
 /* Registros block - last 5 visible with scroll + search */
 .registros-block{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:11px;padding:9px 10px;width:100%;box-sizing:border-box}
+/* Histórico cerrado: solo el título sobre el fondo, sin recuadro. */
+.registros-block.reg-collapsed,.card:has(>.collapsible:not(.collapsed)) .registros-block.reg-collapsed{background:transparent;border-color:transparent;padding-top:2px;padding-bottom:2px}
 .registros-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
 .registros-title{font-size:10.5px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1.4px;font-family:var(--sans);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .registros-count{color:var(--text-dim);font-weight:500;text-transform:none;letter-spacing:0;margin-left:3px;font-size:10px}
@@ -934,6 +936,12 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 
 /* Fasting compact input row with inline duration box */
 .fast-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
+.fast-days-group{flex:0 0 auto;max-width:48px}
+.fast-days-select{height:38px;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:600;text-align:center;padding:0 4px;box-sizing:border-box;width:100%;outline:none;-webkit-appearance:none;appearance:none}
+.fast-stats-line{margin-top:10px;text-align:center;font-family:var(--sans);font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.fast-stat-lbl{color:var(--text-dim);text-transform:uppercase;letter-spacing:0.4px;font-size:9.5px}
+.fast-stat-val{color:var(--accent);font-weight:600;font-size:12.5px}
+.fast-stat-sep{color:var(--text-dim);opacity:0.5}
 .fast-input-row .input-group{margin-bottom:0;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
 .fast-input-row .input-group.date-compact{flex:0 0 92px}
 .fast-input-row .input-group label{margin-bottom:4px;line-height:1.1;min-height:13px;font-size:8.5px}
@@ -1000,6 +1008,11 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .sleep-row2 .input-group label{margin-bottom:5px;line-height:1.1;font-size:9px}
 .sleep-row2 .input-group input{height:38px!important;box-sizing:border-box;text-align:center;padding:0 6px!important;font-size:13px}
 .sleep-row2 .add-btn{height:38px!important;width:38px;align-self:flex-end}
+.sleep-row2 .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
+.sleep-row2 .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.num-wheel{background:rgba(0,0,0,0.32);border:1px solid rgba(167,243,208,0.2)}
+.hrv-note{margin-top:9px;padding:9px 11px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.18);border-radius:9px;font-family:var(--sans);font-size:10.5px;line-height:1.5;color:#9db8d4}
+.hrv-note strong{color:#bcd4ee;font-weight:600}
 
 /* Image/video viewer topbar with inline buttons */
 .image-viewer-topbar{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;padding:14px;padding-top:calc(env(safe-area-inset-top, 20px) + 64px);z-index:10}
@@ -3676,7 +3689,7 @@ function renderRegistros(key,label,itemRenderer,opts){
     '</div>';
     return hn;
   }
-  let h='<div class="registros-block" style="margin-top:10px">'+
+  let h='<div class="registros-block'+(collapsed?' reg-collapsed':'')+'" style="margin-top:10px">'+
     '<div class="registros-header" onclick="toggleRegistro(\''+key+'\')">'+
       '<span class="registros-title">📋 '+label+' <span class="registros-count" id="regcount_'+key+'">('+total+')</span></span>'+
       '<div style="display:flex;align-items:center;gap:4px">'+
@@ -3906,16 +3919,19 @@ function renderFastingBlock(){
           '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
           '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'start\')" title="Poner hora actual">ÚLTIMA</span>'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
           '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'end\')" title="Poner hora actual">FIN</span></label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
+          '<div class="input-group fast-days-group"><label title="Para ayunos de más de 24h, indica los días completos transcurridos">+DÍAS</label><select id="fastDays" class="fast-days-select" onchange="updateFastDur()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select></div>'+
           '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-inline fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-box" id="fastDurDisplay">19h:00m</div></div>'+
           '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
         '</div>';
       })();
   if(store.fasting.length){
     const maxF=Math.max.apply(null,store.fasting.map(function(f){return parseFloat(f.duration);}));
-    h+='<div class="grid-3" style="margin-top:8px">'+
-      '<div class="stat"><div class="stat-label">MEDIA</div><div class="stat-value" style="font-size:15px">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</div></div>'+
-      '<div class="stat"><div class="stat-label">HISTÓRICO</div><div class="stat-value" style="font-size:15px">'+fmtDuration(avg(store.fasting,'duration'))+'</div></div>'+
-      '<div class="stat"><div class="stat-label">MÁXIMO</div><div class="stat-value" style="font-size:15px">'+fmtDuration(maxF)+'</div></div>'+
+    h+='<div class="fast-stats-line">'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Media mes</span> <span class="fast-stat-val">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</span></span>'+
+      '<span class="fast-stat-sep">·</span>'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Histórico</span> <span class="fast-stat-val">'+fmtDuration(avg(store.fasting,'duration'))+'</span></span>'+
+      '<span class="fast-stat-sep">·</span>'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Máximo</span> <span class="fast-stat-val">'+fmtDuration(maxF)+'</span></span>'+
     '</div>';
     h+=renderRegistros('fasting','AYUNOS',function(f){
       const dur=parseFloat(f.duration)||0;
@@ -4047,10 +4063,11 @@ function renderSleepBlock(){
       '</div>'+
       // Row 2: HR nocturno + HRV + (+)
       '<div class="sleep-row2">'+
-        '<div class="input-group"><label>HR NOCT.</label><input type="number" id="sleepHR" placeholder="52"></div>'+
-        '<div class="input-group"><label>HRV</label><input type="number" id="sleepHRV" placeholder="55"></div>'+
+        '<div class="input-group"><label>HR NOCT.</label>'+numWheelHTML('sleepHR',30,60,42)+'</div>'+
+        '<div class="input-group"><label>HRV</label>'+numWheelHTML('sleepHRV',40,140,70)+'</div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
-      '</div>';
+      '</div>'+
+      '<div class="hrv-note">ℹ️ <strong>Sobre el HRV:</strong> cada marca lo mide de forma distinta (durante toda la noche, en la fase de sueño profundo o al despertar) y por eso los rangos varían. Orientativos: <strong>Garmin</strong> ~20–70 ms · <strong>Whoop</strong> ~30–100 ms · <strong>Oura</strong> ~20–80 ms · <strong>Apple Watch</strong> ~20–100 ms. Lo importante no es el número absoluto, sino tu propia tendencia con el tiempo.</div>';
   if(store.sleep.length){
     h+=renderRegistros('sleep','SUEÑO',function(s){
       const ev=evalSleep(s);
@@ -4151,8 +4168,8 @@ function clearFastLast(){
   localStorage.removeItem('h_fastLastTime');
   render();
 }
-function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const durDec=(e-s)/60;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
-function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;const duration=((e-s)/60).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration});save('fasting',store.fasting);localStorage.removeItem('h_fastLastTime');openRegistro('fasting');render();}
+function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const durDec=(e-s)/60+days*24;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
+function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const duration=((e-s)/60+days*24).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration,days:days});save('fasting',store.fasting);localStorage.removeItem('h_fastLastTime');openRegistro('fasting');render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
   if(!m.waist&&!m.chest&&!m.thigh&&!m.bicep&&!m.hip&&!m.neck&&!m.photo)return alert('Introduce al menos una medida');
@@ -5770,6 +5787,11 @@ function fmtActivityDuration(d){
 
 // Genera una ruleta de tiempo MM:SS (mismo estilo que las ruletas de la app).
 // idBase -> crea idBase+'Min' y idBase+'Sec'. selMin/selSec opcionales (números).
+// Ruleta de un solo número (min..max) con valor por defecto. Para HR nocturno, HRV, etc.
+function numWheelHTML(id,min,max,def){
+  var opts='';for(var v=min;v<=max;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>'+v+'</option>';}
+  return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="valor">'+opts+'</select></div>';
+}
 function timeWheelHTML(idBase,selMin,selSec){
   selMin=parseInt(selMin)||0;selSec=parseInt(selSec)||0;
   var minOpts='';for(var m=0;m<=120;m++){minOpts+='<option value="'+m+'"'+(m===selMin?' selected':'')+'>'+(m<10?'0'+m:m)+'</option>';}
@@ -7573,7 +7595,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.5</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -8277,29 +8299,65 @@ fbInit();
 
 // --- Deslizamiento lateral entre pestañas (swipe horizontal cambia de sección) ---
 (function initTabSwipe(){
-  var startX=0,startY=0,tracking=false,swiped=false;
+  var startX=0,startY=0,tracking=false,decided=false,horizontal=false,el=null,w=0;
+  function contentEl(){return document.getElementById('content');}
   function onStart(e){
     if(e.touches.length!==1)return;
-    // No interferir si el gesto empieza sobre elementos deslizables propios.
     var t=e.target;
-    if(t.closest&&t.closest('.med-vol-slider, input[type=range], .weekly-week-track, .maestro-thread, .modal, .header-quote, .wday-strip, .week-nav'))return;
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;swiped=false;
+    if(t.closest&&t.closest('.med-vol-slider, input[type=range], .weekly-week-track, .maestro-thread, .modal, .header-quote, .wday-strip, .week-nav, .week-view-wrap'))return;
+    if(document.body.classList.contains('maestro-mode'))return; // Maestro: pantalla fija
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;decided=false;horizontal=false;
+    el=contentEl();w=window.innerWidth||360;
   }
   function onMove(e){
-    if(!tracking||swiped||e.touches.length!==1)return;
+    if(!tracking||e.touches.length!==1)return;
     var dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
-    // Debe ser claramente horizontal y de recorrido suficiente.
-    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.8){
-      swiped=true;tracking=false;
-      var tabs=navTabs().map(function(t){return t.id;});
-      var idx=tabs.indexOf(currentTab);
-      if(idx<0)return;
-      // Maestro está en modo pantalla fija; permitimos salir de él con swipe igualmente.
-      if(dx<0 && idx<tabs.length-1){showTab(tabs[idx+1],null,'left');}
-      else if(dx>0 && idx>0){showTab(tabs[idx-1],null,'right');}
+    if(!decided){
+      if(Math.abs(dx)<6&&Math.abs(dy)<6)return;
+      decided=true;
+      horizontal=Math.abs(dx)>Math.abs(dy)*1.3;
+      if(horizontal&&el){el.style.transition='none';}
     }
+    if(!horizontal||!el)return;
+    // Resistencia en los extremos (primera/última pestaña).
+    var tabs=navTabs().map(function(t){return t.id;});
+    var idx=tabs.indexOf(currentTab);
+    var atStart=(idx<=0&&dx>0), atEnd=(idx>=tabs.length-1&&dx<0);
+    var move=dx*((atStart||atEnd)?0.32:1);
+    el.style.transform='translateX('+move+'px)';
+    el.style.opacity=String(Math.max(0.45,1-Math.abs(move)/(w*1.6)));
   }
-  function onEnd(){tracking=false;}
+  function onEnd(){
+    if(!tracking){return;}
+    tracking=false;
+    if(!horizontal||!el){return;}
+    var endX=(window.event&&window.event.changedTouches)?0:0;
+    // Calculamos el desplazamiento final a partir del transform aplicado.
+    var m=/translateX\(([-0-9.]+)px\)/.exec(el.style.transform||'');
+    var dx=m?parseFloat(m[1]):0;
+    var tabs=navTabs().map(function(t){return t.id;});
+    var idx=tabs.indexOf(currentTab);
+    var threshold=(window.innerWidth||360)*0.22;
+    var goNext=dx<-threshold&&idx<tabs.length-1;
+    var goPrev=dx>threshold&&idx>0;
+    var elRef=el;
+    if(goNext||goPrev){
+      // Completa el deslizamiento hacia fuera y luego cambia de pestaña.
+      elRef.style.transition='transform 0.2s ease-out,opacity 0.2s ease-out';
+      elRef.style.transform='translateX('+(goNext?-w:w)+'px)';
+      elRef.style.opacity='0';
+      setTimeout(function(){
+        showTab(goNext?tabs[idx+1]:tabs[idx-1],null,goNext?'left':'right');
+      },150);
+    }else{
+      // No supera el umbral: vuelve a su sitio.
+      elRef.style.transition='transform 0.25s cubic-bezier(0.16,1,0.3,1),opacity 0.25s ease';
+      elRef.style.transform='translateX(0)';
+      elRef.style.opacity='1';
+      setTimeout(function(){if(elRef){elRef.style.transition='';elRef.style.transform='';elRef.style.opacity='';}},260);
+    }
+    el=null;
+  }
   document.addEventListener('touchstart',onStart,{passive:true});
   document.addEventListener('touchmove',onMove,{passive:true});
   document.addEventListener('touchend',onEnd,{passive:true});
@@ -8307,24 +8365,43 @@ fbInit();
 
 // --- Deslizamiento sobre la tira de días para cambiar de SEMANA ---
 (function initWeekSwipe(){
-  var sx=0,sy=0,tracking=false,onStrip=false;
+  var sx=0,sy=0,tracking=false,decided=false,horizontal=false,wrap=null,w=0;
   document.addEventListener('touchstart',function(e){
     if(e.touches.length!==1)return;
     var t=e.target;
-    onStrip=!!(t.closest&&(t.closest('.wday-strip')||t.closest('.week-nav')));
-    if(!onStrip)return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;
+    var on=!!(t.closest&&(t.closest('.wday-strip')||t.closest('.week-nav')||t.closest('.week-view-wrap')));
+    if(!on)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;decided=false;horizontal=false;
+    wrap=document.getElementById('weekViewWrap');w=window.innerWidth||360;
   },{passive:true});
   document.addEventListener('touchmove',function(e){
-    if(!tracking||!onStrip||e.touches.length!==1)return;
+    if(!tracking||e.touches.length!==1)return;
     var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
-    if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.6){
-      tracking=false;
-      // Deslizar a la izquierda -> semana siguiente; a la derecha -> anterior.
-      if(typeof changeWeek==='function')changeWeek(dx<0?1:-1,true);
+    if(!decided){
+      if(Math.abs(dx)<6&&Math.abs(dy)<6)return;
+      decided=true;horizontal=Math.abs(dx)>Math.abs(dy)*1.3;
+      if(horizontal&&wrap)wrap.style.transition='none';
     }
+    if(!horizontal||!wrap)return;
+    // Resistencia en los extremos del rango permitido (-4 .. +1).
+    var atStart=(weekViewOffset>=1&&dx>0), atEnd=(weekViewOffset<=-4&&dx<0);
+    var move=dx*((atStart||atEnd)?0.3:0.85);
+    wrap.style.transform='translateX('+move+'px)';
+    wrap.style.opacity=String(Math.max(0.5,1-Math.abs(move)/(w*1.5)));
   },{passive:true});
-  document.addEventListener('touchend',function(){tracking=false;onStrip=false;},{passive:true});
+  document.addEventListener('touchend',function(){
+    if(!tracking)return;tracking=false;
+    if(!horizontal||!wrap){return;}
+    var m=/translateX\(([-0-9.]+)px\)/.exec(wrap.style.transform||'');
+    var dx=m?parseFloat(m[1]):0;
+    var threshold=(window.innerWidth||360)*0.18;
+    var wrapRef=wrap;wrap=null;
+    // Recolocamos (el render reconstruye); el cambio de semana dispara su propia animación.
+    wrapRef.style.transition='transform 0.2s ease-out,opacity 0.2s ease';
+    wrapRef.style.transform='';wrapRef.style.opacity='';
+    if(dx<-threshold&&weekViewOffset<1){if(typeof changeWeek==='function')changeWeek(1,true);}
+    else if(dx>threshold&&weekViewOffset>-4){if(typeof changeWeek==='function')changeWeek(-1,true);}
+  },{passive:true});
 })();
 </script>
 </body>
