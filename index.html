@@ -69,10 +69,10 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .content{padding:14px 0;overflow:hidden}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* Transiciones direccionales al cambiar de apartado */
-@keyframes slideInLeft{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
-.content.slide-in-left{animation:slideInLeft 0.28s cubic-bezier(0.22,0.61,0.36,1)}
-.content.slide-in-right{animation:slideInRight 0.28s cubic-bezier(0.22,0.61,0.36,1)}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+.content.slide-in-left{animation:slideInLeft 0.55s cubic-bezier(0.16,1,0.3,1)}
+.content.slide-in-right{animation:slideInRight 0.55s cubic-bezier(0.16,1,0.3,1)}
 .content.slide-in-up{animation:fadeIn 0.3s ease}
 
 /* TYPOGRAPHY */
@@ -103,7 +103,7 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 /* Tarjetas fijas que se muestran sin fondo de cuadro (sol en panel/Sol, meditación). */
 .card.card-bare{background:transparent;border-color:transparent;box-shadow:none;padding-left:0;padding-right:0}
 /* Slight highlight for cards with an EXPANDED collapsible (easier to distinguish from background) */
-.card:has(>.collapsible:not(.collapsed)){background:linear-gradient(160deg,rgba(52,90,72,0.32),rgba(22,40,33,0.40));border-color:rgba(167,243,208,0.4);box-shadow:0 0 36px rgba(167,243,208,0.08) inset,0 6px 22px -6px rgba(0,0,0,0.6)}
+.card:has(>.collapsible:not(.collapsed)){background:linear-gradient(160deg,rgba(46,76,62,0.26),rgba(20,34,28,0.34));border-color:rgba(167,243,208,0.3);box-shadow:0 0 36px rgba(167,243,208,0.06) inset,0 6px 22px -6px rgba(0,0,0,0.6)}
 /* Inside an expanded (greenish) card, give inner controls a DARKER base so green accents stand out */
 .card:has(>.collapsible:not(.collapsed)) .toggle{background:rgba(0,0,0,0.4);border-color:rgba(255,255,255,0.18)}
 .card:has(>.collapsible:not(.collapsed)) .toggle.active{background:linear-gradient(135deg,#34d399,#10b981);border-color:transparent;box-shadow:0 0 14px rgba(52,211,153,0.5)}
@@ -453,10 +453,10 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .week-tag{font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.6px;color:var(--accent);text-transform:uppercase}
 .week-nav-label.other .week-tag{color:var(--text-muted)}
 .week-view-wrap{will-change:transform,opacity}
-@keyframes wkSlideLeft{from{opacity:0.3;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
-@keyframes wkSlideRight{from{opacity:0.3;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
-.week-view-wrap.wk-slide-left{animation:wkSlideLeft 0.3s cubic-bezier(0.22,0.61,0.36,1)}
-.week-view-wrap.wk-slide-right{animation:wkSlideRight 0.3s cubic-bezier(0.22,0.61,0.36,1)}
+@keyframes wkSlideLeft{from{opacity:0.4;transform:translateX(34px)}to{opacity:1;transform:translateX(0)}}
+@keyframes wkSlideRight{from{opacity:0.4;transform:translateX(-34px)}to{opacity:1;transform:translateX(0)}}
+.week-view-wrap.wk-slide-left{animation:wkSlideLeft 0.5s cubic-bezier(0.16,1,0.3,1)}
+.week-view-wrap.wk-slide-right{animation:wkSlideRight 0.5s cubic-bezier(0.16,1,0.3,1)}
 .wday-view-btn.hist{background:rgba(96,165,250,0.14);border-color:rgba(96,165,250,0.4);color:#60a5fa}
 .wday-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 0 3px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);position:relative}
 .wday-chip:active{transform:scale(0.96)}
@@ -2081,7 +2081,7 @@ function changeWeek(dir,animate){
     if(wrap){
       var cls=dir>0?'wk-slide-left':'wk-slide-right';
       wrap.classList.add(cls);
-      setTimeout(function(){wrap.classList.remove(cls);},320);
+      setTimeout(function(){wrap.classList.remove(cls);},520);
     }
   }
 }
@@ -7573,7 +7573,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.4</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.5</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
