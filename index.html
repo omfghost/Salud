@@ -7408,6 +7408,8 @@ function renderAjustes(c){
       '<div class="collapsible'+(store.collapsed.setdata?' collapsed':'')+'">'+
         '<div class="sub-section-label" style="margin-top:2px">📦 COPIA DE SEGURIDAD</div>'+
         '<button class="btn btn-primary" onclick="exportData()" style="margin:6px 0">📤 EXPORTAR AHORA</button>'+
+        '<button class="btn btn-secondary" id="btnExportFull" onclick="exportDataFull()" style="margin-bottom:6px;background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.35);color:#60a5fa">🖼️ Exportar todo + fotos</button>'+
+        '<div style="font-size:10.5px;color:var(--text-muted);margin:-2px 0 8px;font-family:var(--sans);line-height:1.5">El export normal no incluye las fotos (solo los datos). Usa «Exportar todo + fotos» para una copia completa que también restaure las imágenes al importarla. El archivo será más grande.</div>'+
         '<label class="btn btn-secondary" style="display:block;text-align:center;cursor:pointer;margin-bottom:6px">📥 IMPORTAR DATOS<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>'+
         // Google Drive backup
         '<div class="env-divider"></div>'+
@@ -7595,7 +7597,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.1</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7892,6 +7894,74 @@ function exportData(){
   }
 }
 
+// Recopila todas las referencias de foto ("img:") usadas en cualquier parte de los datos.
+function collectPhotoRefs(){
+  var refs={};
+  function scan(obj){
+    if(!obj||typeof obj!=='object')return;
+    Object.keys(obj).forEach(function(k){
+      var v=obj[k];
+      if(typeof v==='string'&&v.indexOf('img:')===0){refs[v]=true;}
+      else if(v&&typeof v==='object'){scan(v);}
+    });
+  }
+  scan(store.weeklyPlan);
+  scan(store.weekArchive);
+  if(Array.isArray(store.measurements))store.measurements.forEach(scan);
+  if(Array.isArray(store.activity))store.activity.forEach(scan);
+  return Object.keys(refs);
+}
+
+// Exportación COMPLETA: incluye los bytes de las fotos (base64) dentro del JSON, para
+// poder restaurarlas en otro dispositivo o tras vaciar la app. El archivo será más grande.
+function exportDataFull(){
+  var btn=document.getElementById('btnExportFull');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Preparando fotos…';}
+  var data=buildExportData();
+  var refs=collectPhotoRefs();
+  // Resolvemos cada referencia a sus bytes desde IndexedDB.
+  Promise.all(refs.map(function(ref){
+    return getPhotoData(ref).then(function(d){return {ref:ref,data:d};}).catch(function(){return {ref:ref,data:null};});
+  })).then(function(results){
+    var photos={};var count=0;
+    results.forEach(function(r){
+      if(r.data&&typeof r.data==='string'&&r.data.indexOf('data:')===0){photos[r.ref]=r.data;count++;}
+    });
+    data._photos=photos; // adjuntamos las fotos al backup
+    data._meta.hasPhotos=true;
+    data._meta.photoCount=count;
+    var blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='health-backup-COMPLETO-'+today()+'.json';a.click();
+    URL.revokeObjectURL(url);
+    if(btn){btn.disabled=false;btn.textContent='🖼️ Exportar todo + fotos';}
+    alert('Backup completo creado con '+count+' foto'+(count===1?'':'s')+' incluida'+(count===1?'':'s')+'.\n\nEste archivo es más grande de lo normal porque contiene las imágenes.');
+  }).catch(function(err){
+    if(btn){btn.disabled=false;btn.textContent='🖼️ Exportar todo + fotos';}
+    alert('No se pudo crear el backup completo: '+(err&&err.message||'error'));
+  });
+}
+
+// Restaura en IndexedDB las fotos incluidas en un backup completo (_photos).
+function restorePhotosFromBackup(photosObj){
+  if(!photosObj||typeof photosObj!=='object')return Promise.resolve(0);
+  var entries=Object.keys(photosObj);
+  if(!entries.length)return Promise.resolve(0);
+  return openPhotoDB().then(function(db){
+    return new Promise(function(resolve){
+      var tx=db.transaction('photos','readwrite');
+      var store_=tx.objectStore('photos');
+      entries.forEach(function(ref){
+        var d=photosObj[ref];
+        if(typeof d==='string'&&d.indexOf('data:')===0){store_.put(d,ref);}
+      });
+      tx.oncomplete=function(){resolve(entries.length);};
+      tx.onerror=function(){resolve(0);};
+    });
+  });
+}
+
 // ---------- Google Drive backup (Google Identity Services + Drive REST) ----------
 let _gdriveToken=null,_gdriveTokenExp=0,_gisLoaded=false,_gisClient=null;
 
@@ -8028,7 +8098,7 @@ function applyImportedData(d){
   const localMeas=Array.isArray(store.measurements)?store.measurements:[];
   _pendingPhotoChecks=[];   // verificaciones diferidas de fotos (caso 2 abajo)
   Object.keys(d).forEach(function(k){
-    if(k==='_meta')return;
+    if(k==='_meta'||k==='_photos')return;
     if(d[k]!==undefined){
       // --- photo preservation for weeklyPlan ---
       if(k==='weeklyPlan'&&d[k]&&typeof d[k]==='object'){
@@ -8103,6 +8173,8 @@ function importData(e){
   reader.onload=function(ev){
     try{
       const d=JSON.parse(ev.target.result);
+      // Si el backup incluye fotos (_photos), las restauramos en IndexedDB primero.
+      var photosToRestore=(d&&d._photos&&typeof d._photos==='object')?d._photos:null;
       // Detect whether the imported data already uses the v32 VitD formula.
       const importedFormula=applyImportedData(d);
       // Convert imported sun records to the current formula depending on their version.
@@ -8118,14 +8190,21 @@ function importData(e){
           }
         });
         save('sun',store.sun);
-        alert('✅ Datos importados. Los registros de sol antiguos se han recalculado a la fórmula actual de vitamina D.');
-      }else{
-        alert('✅ Datos importados — widgets, bloques y orden restaurados.');
       }
       // Keep device flags set so the startup migrations won't double-convert.
       localStorage.setItem('h_vitdRecalc_v32','1');
       localStorage.setItem('h_vitdGeometry_v64','1');
-      render();
+      // Restauramos las fotos (si las hay) y luego avisamos y refrescamos.
+      var finish=function(restored){
+        // Limpiamos el estado de "foto faltante" para que se vuelvan a intentar cargar.
+        _photoMissing={};_photoCache={};
+        render();
+        if(restored>0){alert('✅ Datos importados, incluidas '+restored+' foto'+(restored===1?'':'s')+' restaurada'+(restored===1?'':'s')+'.');}
+        else if(importedFormula!=='v64'&&Array.isArray(store.sun)&&store.sun.length){alert('✅ Datos importados. Los registros de sol antiguos se han recalculado a la fórmula actual de vitamina D.');}
+        else{alert('✅ Datos importados — widgets, bloques y orden restaurados.');}
+      };
+      if(photosToRestore){restorePhotosFromBackup(photosToRestore).then(finish);}
+      else{finish(0);}
     }catch(err){alert('❌ Archivo inválido');}
   };
   reader.readAsText(file);
