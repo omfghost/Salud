@@ -853,6 +853,8 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .vitd-accum-card,.vitd-estim-card{margin-top:8px;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;width:100%;box-sizing:border-box}
 .vitd-expo-wrap .registros-block{margin-top:8px!important;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;box-sizing:border-box}
 .card:has(>.collapsible:not(.collapsed)) .vitd-expo-wrap .registros-block{background:rgba(251,191,36,0.06)!important;border-color:rgba(251,191,36,0.22)!important}
+/* Histórico de exposición al sol cerrado: sin fondo (solo el título). */
+.vitd-expo-wrap .registros-block.reg-collapsed,.card:has(>.collapsible:not(.collapsed)) .vitd-expo-wrap .registros-block.reg-collapsed{background:transparent!important;border-color:transparent!important;padding-top:2px!important;padding-bottom:2px!important}
 .vitd-expo-wrap .registros-title{color:#fbbf24}
 .vitd-accum-header,.vitd-estim-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
 .vitd-accum-title,.vitd-estim-title{font-size:10.5px;font-weight:600;color:#fbbf24;text-transform:uppercase;letter-spacing:1.4px;font-family:var(--sans);flex:1;min-width:0;display:flex;align-items:center;gap:5px}
@@ -1747,6 +1749,23 @@ function openModal(id){const m=document.getElementById('modal-'+id);if(m)m.class
 function closeModal(id){const m=document.getElementById('modal-'+id);if(m)m.classList.remove('active');}
 
 // Show specific glossary term as modal popup
+// Muestra la información sobre el HRV en una ventana (modal) al pulsar la interrogación.
+function showHrvInfo(){
+  var titleEl=document.getElementById('termTitle');
+  var contentEl=document.getElementById('termContent');
+  if(!titleEl||!contentEl){return;}
+  titleEl.textContent='Sobre el HRV';
+  contentEl.innerHTML='<p style="margin-bottom:10px">La <strong>variabilidad de la frecuencia cardíaca (HRV)</strong> mide la variación de tiempo entre latidos. Suele asociarse a recuperación y estado del sistema nervioso: valores más altos indican, en general, mejor recuperación.</p>'+
+    '<p style="margin-bottom:8px">Cada marca lo mide de forma distinta (durante toda la noche, solo en sueño profundo, o al despertar), por eso los rangos <strong>no son comparables entre dispositivos</strong>. Rangos orientativos:</p>'+
+    '<ul style="margin:0 0 10px 18px;padding:0;line-height:1.7">'+
+      '<li><strong>Garmin</strong>: ~20–70 ms</li>'+
+      '<li><strong>Whoop</strong>: ~30–100 ms</li>'+
+      '<li><strong>Oura</strong>: ~20–80 ms</li>'+
+      '<li><strong>Apple Watch</strong>: ~20–100 ms</li>'+
+    '</ul>'+
+    '<p style="color:var(--accent)">Lo importante no es el número absoluto, sino <strong>tu propia tendencia</strong> a lo largo del tiempo con tu mismo dispositivo.</p>';
+  openModal('term');
+}
 function showTerm(key){
   if(!key)return;
   let t=GLOSSARY[key];
@@ -4064,10 +4083,9 @@ function renderSleepBlock(){
       // Row 2: HR nocturno + HRV + (+)
       '<div class="sleep-row2">'+
         '<div class="input-group"><label>HR NOCT.</label>'+numWheelHTML('sleepHR',30,60,42)+'</div>'+
-        '<div class="input-group"><label>HRV</label>'+numWheelHTML('sleepHRV',40,140,70)+'</div>'+
+        '<div class="input-group"><label>HRV <button class="help-icon" onclick="event.stopPropagation();showHrvInfo()">?</button></label>'+numWheelHTML('sleepHRV',40,140,70)+'</div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
-      '</div>'+
-      '<div class="hrv-note">ℹ️ <strong>Sobre el HRV:</strong> cada marca lo mide de forma distinta (durante toda la noche, en la fase de sueño profundo o al despertar) y por eso los rangos varían. Orientativos: <strong>Garmin</strong> ~20–70 ms · <strong>Whoop</strong> ~30–100 ms · <strong>Oura</strong> ~20–80 ms · <strong>Apple Watch</strong> ~20–100 ms. Lo importante no es el número absoluto, sino tu propia tendencia con el tiempo.</div>';
+      '</div>';
   if(store.sleep.length){
     h+=renderRegistros('sleep','SUEÑO',function(s){
       const ev=evalSleep(s);
@@ -7597,7 +7615,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.1</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.2</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -8378,65 +8396,28 @@ fbInit();
 
 // --- Deslizamiento lateral entre pestañas (swipe horizontal cambia de sección) ---
 (function initTabSwipe(){
-  var startX=0,startY=0,tracking=false,decided=false,horizontal=false,el=null,w=0;
-  function contentEl(){return document.getElementById('content');}
+  var startX=0,startY=0,tracking=false,swiped=false;
   function onStart(e){
     if(e.touches.length!==1)return;
     var t=e.target;
     if(t.closest&&t.closest('.med-vol-slider, input[type=range], .weekly-week-track, .maestro-thread, .modal, .header-quote, .wday-strip, .week-nav, .week-view-wrap'))return;
     if(document.body.classList.contains('maestro-mode'))return; // Maestro: pantalla fija
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;decided=false;horizontal=false;
-    el=contentEl();w=window.innerWidth||360;
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;swiped=false;
   }
   function onMove(e){
-    if(!tracking||e.touches.length!==1)return;
+    if(!tracking||swiped||e.touches.length!==1)return;
     var dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
-    if(!decided){
-      if(Math.abs(dx)<6&&Math.abs(dy)<6)return;
-      decided=true;
-      horizontal=Math.abs(dx)>Math.abs(dy)*1.3;
-      if(horizontal&&el){el.style.transition='none';}
+    // Gesto claramente horizontal y de recorrido suficiente: cambia de pestaña al detectarlo.
+    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.8){
+      swiped=true;tracking=false;
+      var tabs=navTabs().map(function(t){return t.id;});
+      var idx=tabs.indexOf(currentTab);
+      if(idx<0)return;
+      if(dx<0 && idx<tabs.length-1){showTab(tabs[idx+1],null,'left');}
+      else if(dx>0 && idx>0){showTab(tabs[idx-1],null,'right');}
     }
-    if(!horizontal||!el)return;
-    // Resistencia en los extremos (primera/última pestaña).
-    var tabs=navTabs().map(function(t){return t.id;});
-    var idx=tabs.indexOf(currentTab);
-    var atStart=(idx<=0&&dx>0), atEnd=(idx>=tabs.length-1&&dx<0);
-    var move=dx*((atStart||atEnd)?0.32:1);
-    el.style.transform='translateX('+move+'px)';
-    el.style.opacity=String(Math.max(0.45,1-Math.abs(move)/(w*1.6)));
   }
-  function onEnd(){
-    if(!tracking){return;}
-    tracking=false;
-    if(!horizontal||!el){return;}
-    var endX=(window.event&&window.event.changedTouches)?0:0;
-    // Calculamos el desplazamiento final a partir del transform aplicado.
-    var m=/translateX\(([-0-9.]+)px\)/.exec(el.style.transform||'');
-    var dx=m?parseFloat(m[1]):0;
-    var tabs=navTabs().map(function(t){return t.id;});
-    var idx=tabs.indexOf(currentTab);
-    var threshold=(window.innerWidth||360)*0.22;
-    var goNext=dx<-threshold&&idx<tabs.length-1;
-    var goPrev=dx>threshold&&idx>0;
-    var elRef=el;
-    if(goNext||goPrev){
-      // Completa el deslizamiento hacia fuera y luego cambia de pestaña.
-      elRef.style.transition='transform 0.2s ease-out,opacity 0.2s ease-out';
-      elRef.style.transform='translateX('+(goNext?-w:w)+'px)';
-      elRef.style.opacity='0';
-      setTimeout(function(){
-        showTab(goNext?tabs[idx+1]:tabs[idx-1],null,goNext?'left':'right');
-      },150);
-    }else{
-      // No supera el umbral: vuelve a su sitio.
-      elRef.style.transition='transform 0.25s cubic-bezier(0.16,1,0.3,1),opacity 0.25s ease';
-      elRef.style.transform='translateX(0)';
-      elRef.style.opacity='1';
-      setTimeout(function(){if(elRef){elRef.style.transition='';elRef.style.transform='';elRef.style.opacity='';}},260);
-    }
-    el=null;
-  }
+  function onEnd(){tracking=false;}
   document.addEventListener('touchstart',onStart,{passive:true});
   document.addEventListener('touchmove',onMove,{passive:true});
   document.addEventListener('touchend',onEnd,{passive:true});
@@ -8444,43 +8425,24 @@ fbInit();
 
 // --- Deslizamiento sobre la tira de días para cambiar de SEMANA ---
 (function initWeekSwipe(){
-  var sx=0,sy=0,tracking=false,decided=false,horizontal=false,wrap=null,w=0;
+  var sx=0,sy=0,tracking=false,swiped=false;
   document.addEventListener('touchstart',function(e){
     if(e.touches.length!==1)return;
     var t=e.target;
     var on=!!(t.closest&&(t.closest('.wday-strip')||t.closest('.week-nav')||t.closest('.week-view-wrap')));
     if(!on)return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;decided=false;horizontal=false;
-    wrap=document.getElementById('weekViewWrap');w=window.innerWidth||360;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;swiped=false;
   },{passive:true});
   document.addEventListener('touchmove',function(e){
-    if(!tracking||e.touches.length!==1)return;
+    if(!tracking||swiped||e.touches.length!==1)return;
     var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
-    if(!decided){
-      if(Math.abs(dx)<6&&Math.abs(dy)<6)return;
-      decided=true;horizontal=Math.abs(dx)>Math.abs(dy)*1.3;
-      if(horizontal&&wrap)wrap.style.transition='none';
+    if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.6){
+      swiped=true;tracking=false;
+      // Deslizar a la izquierda -> semana siguiente; a la derecha -> anterior.
+      if(typeof changeWeek==='function')changeWeek(dx<0?1:-1,true);
     }
-    if(!horizontal||!wrap)return;
-    // Resistencia en los extremos del rango permitido (-4 .. +1).
-    var atStart=(weekViewOffset>=1&&dx>0), atEnd=(weekViewOffset<=-4&&dx<0);
-    var move=dx*((atStart||atEnd)?0.3:0.85);
-    wrap.style.transform='translateX('+move+'px)';
-    wrap.style.opacity=String(Math.max(0.5,1-Math.abs(move)/(w*1.5)));
   },{passive:true});
-  document.addEventListener('touchend',function(){
-    if(!tracking)return;tracking=false;
-    if(!horizontal||!wrap){return;}
-    var m=/translateX\(([-0-9.]+)px\)/.exec(wrap.style.transform||'');
-    var dx=m?parseFloat(m[1]):0;
-    var threshold=(window.innerWidth||360)*0.18;
-    var wrapRef=wrap;wrap=null;
-    // Recolocamos (el render reconstruye); el cambio de semana dispara su propia animación.
-    wrapRef.style.transition='transform 0.2s ease-out,opacity 0.2s ease';
-    wrapRef.style.transform='';wrapRef.style.opacity='';
-    if(dx<-threshold&&weekViewOffset<1){if(typeof changeWeek==='function')changeWeek(1,true);}
-    else if(dx>threshold&&weekViewOffset>-4){if(typeof changeWeek==='function')changeWeek(-1,true);}
-  },{passive:true});
+  document.addEventListener('touchend',function(){tracking=false;},{passive:true});
 })();
 </script>
 </body>
