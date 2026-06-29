@@ -42,10 +42,10 @@
 html,body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;letter-spacing:-0.005em;width:100%;max-width:100vw;font-weight:400}
 /* Fondo dinámico "seda en movimiento": gradiente verde oscuro que fluye muy despacio,
    fijo detrás de toda la app. CSS puro (sin JS), suave para no estorbar la lectura. */
-.app-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(120deg,#000,#0a1f17,#06281e,#0a0a1a,#000);background-size:300% 300%;animation:appBgFlow 22s ease infinite}
-.app-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 35%,rgba(167,243,208,0.10),transparent 50%);animation:appBgGlow 16s ease-in-out infinite}
+.app-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(120deg,#000,#06120d,#041811,#070710,#000);background-size:300% 300%;animation:appBgFlow 15s ease infinite}
+.app-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 35%,rgba(167,243,208,0.05),transparent 55%);animation:appBgGlow 11s ease-in-out infinite}
 @keyframes appBgFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes appBgGlow{0%,100%{opacity:0.35}50%{opacity:0.85}}
+@keyframes appBgGlow{0%,100%{opacity:0.25}50%{opacity:0.55}}
 @media(prefers-reduced-motion:reduce){.app-bg,.app-bg::after{animation:none}}
 body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 14px;width:100%;overflow-x:hidden;position:relative;z-index:1;box-sizing:border-box}
@@ -7573,7 +7573,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28.3</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
