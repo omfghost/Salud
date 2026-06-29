@@ -55,7 +55,8 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .icon-btn:active{transform:scale(0.92);background:rgba(167,243,208,0.2)}
 .back-btn{background:transparent !important;border:none !important;color:var(--accent);font-size:13px;font-weight:600;padding:0 10px;width:auto;letter-spacing:0.3px;font-family:var(--sans);text-shadow:0 0 10px rgba(167,243,208,0.6);height:32px;cursor:pointer;display:flex;align-items:center}
 .back-btn:active{transform:scale(0.95)}
-.settings-btn{background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));border-color:rgba(255,255,255,0.12)}
+.settings-btn{background:linear-gradient(135deg,rgba(167,243,208,0.22),rgba(110,231,183,0.12));border-color:rgba(167,243,208,0.45);color:#a7f3d0;box-shadow:0 0 14px rgba(167,243,208,0.25);font-size:16px}
+.settings-btn:active{transform:scale(0.92) rotate(40deg)}
 
 /* CONTENT */
 .content{padding:14px 0;animation:fadeIn 0.3s ease;overflow:hidden}
@@ -258,6 +259,14 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .nav-btn.active::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:18px;height:2px;border-radius:2px;background:var(--grad-primary);box-shadow:0 0 8px rgba(134,239,172,0.6)}
 /* Icons-only nav mode (toggle in Ajustes) */
 .nav-inner.nav-icons-only{padding:0 10px}
+.nav-order-list{display:flex;flex-direction:column;gap:6px}
+.nav-order-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:8px 11px}
+.nav-order-icon{font-size:16px;flex-shrink:0}
+.nav-order-name{flex:1;font-size:13px;color:#ddd;font-family:var(--sans);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-order-btns{display:flex;gap:5px;flex-shrink:0}
+.nav-order-arrow{width:30px;height:30px;border-radius:8px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);color:#bbb;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s}
+.nav-order-arrow:active{transform:scale(0.9)}
+.nav-order-arrow:disabled{opacity:0.3;cursor:default}
 .nav-inner.nav-icons-only .nav-btn{padding:8px 6px}
 .nav-btn-icon{font-size:22px;line-height:1;display:block;filter:grayscale(0.15)}
 .nav-btn.active .nav-btn-icon{filter:none;transform:translateY(-1px)}
@@ -418,6 +427,15 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 
 /* === Weekly calendar strip (one-line day chips) === */
 .wday-strip{display:flex;gap:4px;margin-top:8px;width:100%}
+.week-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.week-nav-arrow{flex:0 0 auto;width:32px;height:32px;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);color:#bbb;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:all 0.15s}
+.week-nav-arrow:active{transform:scale(0.9)}
+.week-nav-arrow:disabled{opacity:0.25;cursor:default}
+.week-nav-label{flex:1;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:1px;min-width:0}
+.week-range{font-family:var(--sans);font-size:12px;font-weight:600;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.week-tag{font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.6px;color:var(--accent);text-transform:uppercase}
+.week-nav-label.other .week-tag{color:var(--text-muted)}
+.wday-view-btn.hist{background:rgba(96,165,250,0.14);border-color:rgba(96,165,250,0.4);color:#60a5fa}
 .wday-chip{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 0 3px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);position:relative}
 .wday-chip:active{transform:scale(0.96)}
 .wday-chip-name{font-size:8.5px;font-weight:700;letter-spacing:0.4px;color:var(--text-muted);text-transform:uppercase;line-height:1.2}
@@ -536,7 +554,10 @@ body.maestro-mode .content{overflow:hidden}
 .panel-weekly-preview .day-chip{flex:1 1 0;min-width:0}
 .panel-weekly-preview .day-chip-extra{flex:0 0 auto!important;padding-left:6px;padding-right:6px;white-space:nowrap;border-color:rgba(251,191,36,0.25)!important;color:rgba(251,191,36,0.65)!important;background:rgba(251,191,36,0.04)!important}
 .panel-weekly-preview .day-chip-extra.has-content{background:rgba(251,191,36,0.2)!important;border-color:rgba(251,191,36,0.6)!important;color:#fde047!important;font-weight:700!important;box-shadow:0 0 8px rgba(251,191,36,0.25)}
-.day-chip{text-align:center;padding:6px 2px;background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:6px;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);font-weight:500;overflow:hidden;cursor:pointer}
+.day-chip{text-align:center;padding:6px 2px;background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:6px;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);font-weight:500;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+.day-chip-short{display:block}
+.day-chip-num{display:block;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0}
+.day-chip.has-content .day-chip-num,.day-chip.today-chip .day-chip-num,.day-chip.day-completed-chip .day-chip-num{color:inherit}
 .day-chip-extra{border-color:rgba(251,191,36,0.35);color:#fbbf24;background:rgba(251,191,36,0.06)}
 .panel-go-arrow{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);transition:all 0.15s;font-weight:600;white-space:nowrap;flex-shrink:0;line-height:1}
 .panel-go-arrow:active{background:rgba(167,243,208,0.18)}
@@ -1320,6 +1341,8 @@ const store={
 };
 // Ensure extra slot exists in older saved data
 if(!store.weeklyPlan.extra)store.weeklyPlan.extra={text:'',image:null,done:false};
+// Archivo de semanas anteriores/próxima (indexado por lunes YYYY-MM-DD).
+if(!store.weekArchive)store.weekArchive=JSON.parse(localStorage.getItem('h_weekArchive')||'{}');
 
 // Weekly plan in panel/activity stays open by default
 if(store.collapsed.weekly===undefined)store.collapsed.weekly=false;
@@ -1821,6 +1844,16 @@ function bellVol(){
 function startBgMusic(){
   stopBgMusic();
   const ctx=getAudioCtx();if(!ctx)return;
+  // El AudioContext puede quedar suspendido tras pausar (sobre todo en móvil). Si es así,
+  // lo reanudamos y arrancamos la música cuando vuelva a estar activo.
+  if(ctx.state==='suspended'){
+    var p=ctx.resume();
+    if(p&&p.then){p.then(function(){_buildBgMusic(ctx);}).catch(function(){_buildBgMusic(ctx);});return;}
+  }
+  _buildBgMusic(ctx);
+}
+// Construye y arranca los osciladores de la música de fondo sobre un contexto ya activo.
+function _buildBgMusic(ctx){
   try{
     const now=ctx.currentTime;
     const vol=(store.settings.musicVolume!=null?store.settings.musicVolume:0.5);
@@ -1918,6 +1951,76 @@ function mondayOfThisWeek(){
   d.setDate(d.getDate()+diff);
   return d;
 }
+// ----- Navegación por semanas (archivo de hasta 4 semanas atrás + 1 adelante) -----
+// Offset de la semana que se está viendo: 0=actual, -1..-4=anteriores, +1=siguiente.
+var weekViewOffset=0;
+// Offset por defecto al abrir: los domingos a partir de las 13h mostramos ya la semana
+// siguiente para poder ir cargando sus entrenamientos.
+function defaultWeekOffset(){
+  var now=new Date();
+  if(now.getDay()===0 && now.getHours()>=13)return 1; // domingo tarde -> semana próxima
+  return 0;
+}
+// Lunes (Date) de una semana dada por offset respecto a la actual.
+function mondayForOffset(off){
+  var mon=mondayOfThisWeek();
+  mon.setDate(mon.getDate()+off*7);
+  return mon;
+}
+// Clave de archivo (YYYY-MM-DD del lunes) para un offset.
+function weekKeyForOffset(off){
+  var mon=mondayForOffset(off);
+  return mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0');
+}
+// Devuelve el objeto de datos de la semana en el offset indicado. La semana ACTUAL
+// (offset 0) vive en store.weeklyPlan; las demás en store.weekArchive[clave].
+function weekDataForOffset(off){
+  if(off===0)return store.weeklyPlan;
+  var key=weekKeyForOffset(off);
+  if(!store.weekArchive)store.weekArchive={};
+  if(!store.weekArchive[key]){
+    store.weekArchive[key]={monday:{text:'',image:null},tuesday:{text:'',image:null},
+      wednesday:{text:'',image:null},thursday:{text:'',image:null},friday:{text:'',image:null},
+      saturday:{text:'',image:null},sunday:{text:'',image:null},extra:{text:'',image:null,done:false}};
+  }
+  return store.weekArchive[key];
+}
+// Datos de la semana que se está viendo ahora mismo.
+function currentWeekData(){return weekDataForOffset(weekViewOffset);}
+// Guarda la semana visible (en weeklyPlan si es la actual, o en el archivo).
+function saveCurrentWeek(){
+  if(weekViewOffset===0){saveWeekly();}
+  else{save('weekArchive',store.weekArchive||{});}
+}
+// Date para un día de la semana, teniendo en cuenta el offset de la vista.
+function dateForWeekdayOffset(dayId,off){
+  var idx=WEEKDAY_IDS.indexOf(dayId);
+  if(idx<0)return null;
+  var mon=mondayForOffset(off||0);
+  mon.setDate(mon.getDate()+idx);
+  return mon;
+}
+// Limpia del archivo las semanas con más de 4 semanas de antigüedad y borra sus fotos
+// de IndexedDB para no saturar el espacio.
+function purgeOldWeeks(){
+  if(!store.weekArchive)return;
+  var changed=false;
+  var minKey=weekKeyForOffset(-4); // límite: 4 semanas atrás
+  Object.keys(store.weekArchive).forEach(function(key){
+    // Conservamos de -4 hasta +1; lo que esté por debajo de -4 se elimina.
+    if(key<minKey){
+      var wk=store.weekArchive[key];
+      WEEKDAY_IDS.concat(['extra']).forEach(function(did){
+        var img=wk[did]&&wk[did].image;
+        if(img&&typeof img==='string'&&img.indexOf('img:')===0){
+          if(!photoRefInUse(img,null,null)){try{deletePhotoData(img);}catch(e){}}
+        }
+      });
+      delete store.weekArchive[key];changed=true;
+    }
+  });
+  if(changed)save('weekArchive',store.weekArchive);
+}
 // Returns the calendar Date for a given weekday id within the current week.
 function dateForWeekday(dayId){
   var idx=WEEKDAY_IDS.indexOf(dayId);
@@ -1928,9 +2031,40 @@ function dateForWeekday(dayId){
 }
 // Currently selected weekday in the weekly plan (defaults to today).
 var selectedWeekDay=todayDayId();
+// Inicializamos el offset de semana según el momento (domingo tarde -> semana próxima).
+weekViewOffset=defaultWeekOffset();
 function selectWeekDay(dayId){
+  // Si pulsas un día que YA está seleccionado, está hecho y tiene registro asociado,
+  // abrimos directamente su histórico (atajo pedido por el usuario).
+  if(dayId===selectedWeekDay){
+    var d=currentWeekData()[dayId];
+    if(d&&d.done===true&&d.actId){openDayHistory(dayId);return;}
+  }
   selectedWeekDay=dayId;
   render();
+}
+// Cambia la semana visible (dir=-1 anterior, dir=+1 siguiente). Límite: -4 .. +1.
+function changeWeek(dir){
+  if(dir==='reset'){if(weekViewOffset!==0){weekViewOffset=0;selectedWeekDay=todayDayId();render();}return;}
+  var next=weekViewOffset+dir;
+  if(next<-4||next>1)return;
+  weekViewOffset=next;
+  // Al cambiar de semana, seleccionamos un día sensato: hoy si es la semana actual.
+  if(next===0)selectedWeekDay=todayDayId();
+  render();
+}
+// Etiqueta del rango de la semana visible (p.ej. "12 – 18 may" + "ESTA SEMANA").
+function weekRangeLabel(off){
+  var mon=mondayForOffset(off);
+  var sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  var fmt=function(d){return d.getDate()+' '+['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];};
+  var range=fmt(mon)+' – '+fmt(sun);
+  var tag='';
+  if(off===0)tag=' · ESTA SEMANA';
+  else if(off===1)tag=' · PRÓXIMA';
+  else if(off===-1)tag=' · ANTERIOR';
+  else tag=' · HACE '+(-off)+' SEM';
+  return '<span class="week-range">'+range+'</span><span class="week-tag">'+tag.replace(' · ','')+'</span>';
 }
 function filterByRange(data,range){if(range==='all')return data;const days={'1w':7,'2w':14,'1m':30,'2m':60,'6m':180,'1y':365}[range]||30;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);return data.filter(function(d){return new Date(d.date)>=cutoff;});}
 function avg(arr,key){if(!arr.length)return 0;const vals=arr.map(function(d){return parseFloat(d[key]||0);}).filter(function(v){return !isNaN(v);});if(!vals.length)return 0;return(vals.reduce(function(s,v){return s+v;},0)/vals.length).toFixed(1);}
@@ -2098,10 +2232,11 @@ let reorderMode=false;
 
 // Shows a rotating quote in the header on all sections.
 let _headerQuoteCache=null;
+let _headerQuoteIdx=-1;
 function updateHeaderQuote(forceNew){
   const hq=document.getElementById('headerQuote');
   if(!hq)return;
-  if(forceNew||!_headerQuoteCache)_headerQuoteCache=getRandomQuote();
+  if(forceNew||!_headerQuoteCache){_headerQuoteCache=getRandomQuote();_headerQuoteIdx=HEALTH_QUOTES.indexOf(_headerQuoteCache);}
   const q=_headerQuoteCache;
   // Scale the font down for longer quotes so they fit fully in the header
   const len=(q.text||'').length;
@@ -2111,23 +2246,63 @@ function updateHeaderQuote(forceNew){
   else if(len>50)sizeClass='hq-len-m';
   hq.className='header-quote '+sizeClass;
   hq.innerHTML='<div class="header-quote-text">"'+escapeHTML(q.text)+'"</div><div class="header-quote-author">— '+escapeHTML(q.author)+'</div>';
+  // Activar el gesto de deslizar para cambiar de frase (solo una vez).
+  if(!hq._swipeBound){bindQuoteSwipe(hq);hq._swipeBound=true;}
+}
+// Muestra otra frase (dir=1 siguiente, dir=-1 anterior). Recorre todo el pool.
+function cycleHeaderQuote(dir){
+  if(_headerQuoteIdx<0)_headerQuoteIdx=0;
+  _headerQuoteIdx=(_headerQuoteIdx+dir+HEALTH_QUOTES.length)%HEALTH_QUOTES.length;
+  _headerQuoteCache=HEALTH_QUOTES[_headerQuoteIdx];
+  const hq=document.getElementById('headerQuote');
+  if(hq){hq.style.opacity='0';setTimeout(function(){updateHeaderQuote(false);hq.style.opacity='1';},120);}
+}
+// Gesto de deslizamiento horizontal sobre la frase de cabecera.
+function bindQuoteSwipe(el){
+  var sx=0,sy=0,tracking=false;
+  el.style.transition='opacity 0.12s ease';
+  el.addEventListener('touchstart',function(e){if(e.touches.length!==1)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;},{passive:true});
+  el.addEventListener('touchmove',function(e){
+    if(!tracking||e.touches.length!==1)return;
+    var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.5){
+      tracking=false;
+      cycleHeaderQuote(dx<0?1:-1);
+    }
+  },{passive:true});
+  el.addEventListener('touchend',function(){tracking=false;},{passive:true});
+  // En escritorio, un clic también pasa a la siguiente frase.
+  el.style.cursor='pointer';
+  el.addEventListener('click',function(){cycleHeaderQuote(1);});
 }
 
 // Bottom-nav tabs (label + emoji icon). Display mode set by store.settings.navStyle.
-var NAV_TABS=[
-  {id:'panel',label:'Panel',icon:'🏠'},
-  {id:'estado',label:'Estado',icon:'❤️'},
-  {id:'actividad',label:'Actividad',icon:'🏋️'},
-  {id:'maestro',label:'Maestro',icon:'🧙'},
-  {id:'meditacion',label:'Meditar',icon:'🧘'},
-  {id:'sol',label:'Sol',icon:'☀️'}
-];
+// El orden es configurable; el orden por defecto es el siguiente.
+var NAV_TAB_DEFS={
+  panel:{id:'panel',label:'Panel',icon:'🏠'},
+  estado:{id:'estado',label:'Estado',icon:'❤️'},
+  actividad:{id:'actividad',label:'Actividad',icon:'🏋️'},
+  maestro:{id:'maestro',label:'Maestro',icon:'🧙'},
+  meditacion:{id:'meditacion',label:'Meditar',icon:'🧘'},
+  sol:{id:'sol',label:'Sol',icon:'☀️'}
+};
+var NAV_DEFAULT_ORDER=['panel','actividad','estado','sol','meditacion','maestro'];
+// Devuelve la lista de pestañas en el orden configurado por el usuario (o el por defecto).
+function navTabs(){
+  var order=(store.settings&&Array.isArray(store.settings.navOrder)&&store.settings.navOrder.length)
+    ? store.settings.navOrder : NAV_DEFAULT_ORDER;
+  // Aseguramos que estén todas (por si se añade alguna nueva en el futuro).
+  var seen={},out=[];
+  order.forEach(function(id){if(NAV_TAB_DEFS[id]&&!seen[id]){seen[id]=1;out.push(NAV_TAB_DEFS[id]);}});
+  NAV_DEFAULT_ORDER.forEach(function(id){if(!seen[id]){seen[id]=1;out.push(NAV_TAB_DEFS[id]);}});
+  return out;
+}
 function renderNav(){
   var inner=document.getElementById('navInner');
   if(!inner)return;
   var iconsOnly=(store.settings.navStyle==='icons');
   inner.className='nav-inner'+(iconsOnly?' nav-icons-only':'');
-  inner.innerHTML=NAV_TABS.map(function(t){
+  inner.innerHTML=navTabs().map(function(t){
     var active=(currentTab===t.id)?' active':'';
     var content=iconsOnly
       ? '<span class="nav-btn-icon">'+t.icon+'</span>'
@@ -2347,7 +2522,34 @@ const HEALTH_QUOTES=[
   {text:"El ayuno es el primer principio de la medicina.",author:"Rumi"},
   {text:"Quien tiene salud tiene esperanza, y quien tiene esperanza lo tiene todo.",author:"Proverbio árabe"},
   {text:"El sueño es la cadena dorada que une salud y cuerpo.",author:"Thomas Dekker"},
-  {text:"La primera riqueza es la salud.",author:"Ralph W. Emerson"}
+  {text:"La primera riqueza es la salud.",author:"Ralph W. Emerson"},
+  {text:"El cuerpo logra lo que la mente cree.",author:"Proverbio"},
+  {text:"No cuentes los días, haz que los días cuenten.",author:"Muhammad Ali"},
+  {text:"La disciplina es el puente entre las metas y los logros.",author:"Jim Rohn"},
+  {text:"Cuida tu cuerpo con la misma devoción con que cuidas tu alma.",author:"Proverbio"},
+  {text:"El dolor que sientes hoy será la fuerza que sientas mañana.",author:"Proverbio"},
+  {text:"La constancia vence lo que la dicha no alcanza.",author:"Proverbio"},
+  {text:"Quien quiera mover el mundo, que se mueva primero a sí mismo.",author:"Sócrates"},
+  {text:"La fuerza no viene de la capacidad física, sino de una voluntad indomable.",author:"Gandhi"},
+  {text:"Empieza donde estás, usa lo que tienes, haz lo que puedas.",author:"Arthur Ashe"},
+  {text:"El descanso es parte del entrenamiento, no su ausencia.",author:"Proverbio"},
+  {text:"Respira hondo: el aire es el primer alimento del día.",author:"Proverbio"},
+  {text:"La salud es la corona que solo el enfermo sabe ver.",author:"Proverbio árabe"},
+  {text:"Lo que se hace por costumbre, el cuerpo lo agradece toda la vida.",author:"Proverbio"},
+  {text:"Pequeños hábitos diarios construyen grandes transformaciones.",author:"Proverbio"},
+  {text:"El agua, el sueño y el movimiento curan más que mil remedios.",author:"Proverbio"},
+  {text:"Mente tranquila, cuerpo fuerte, vida larga.",author:"Proverbio oriental"},
+  {text:"No es el cuerpo el que se rinde, es la mente.",author:"Proverbio"},
+  {text:"La salud se cultiva cada día, no se compra ningún día.",author:"Proverbio"},
+  {text:"El sol, el aire y el ejercicio son médicos que no cobran.",author:"Proverbio"},
+  {text:"Quien tiene paciencia con su cuerpo, recoge años de salud.",author:"Proverbio"},
+  {text:"La verdadera fortuna es despertar sin dolor y dormir sin culpa.",author:"Proverbio"},
+  {text:"El movimiento es vida; la quietud prolongada, óxido.",author:"Proverbio"},
+  {text:"Honra tu cuerpo, pues es el templo de tu consciencia.",author:"Proverbio"},
+  {text:"La moderación es la llave que abre la puerta de la longevidad.",author:"Proverbio"},
+  {text:"Cada gota de sudor riega la semilla de tu mejor versión.",author:"Proverbio"},
+  {text:"La calma de la respiración es la raíz de la serenidad.",author:"Thich Nhat Hanh"},
+  {text:"Sé constante: el río labra la roca no por su fuerza, sino por su persistencia.",author:"Proverbio"}
 ];
 
 function getRandomQuote(){
@@ -2367,17 +2569,43 @@ function getCurrentWeekStart(){
   d.setHours(0,0,0,0);
   return d.toISOString().split('T')[0];
 }
+// Devuelve el número del día del mes (1-31) para un día de la semana de la semana ACTUAL.
+// weekdayId: 'monday'..'sunday'. weekOffset: 0=esta semana, -1=anterior, etc.
+function dayOfMonthFor(weekdayId,weekOffset){
+  weekOffset=weekOffset||0;
+  var idx=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].indexOf(weekdayId);
+  if(idx<0)return '';
+  var base=new Date(getCurrentWeekStart()+'T00:00:00');
+  base.setDate(base.getDate()+weekOffset*7+idx);
+  return base.getDate();
+}
 
 // Check if a new week started since last seen weekStart - if so, reset all 'done' flags
 function checkWeeklyReset(){
   const current=getCurrentWeekStart();
   const last=localStorage.getItem('h_weekStart');
-  if(last!==current){
-    // New week - reset done flags but keep texts/images
-    DAY_NAMES.forEach(function(d){
-      if(store.weeklyPlan[d.id])store.weeklyPlan[d.id].done=false;
+  if(last && last!==current){
+    // Empezó una semana nueva. ARCHIVAMOS la semana anterior completa (con sus textos,
+    // fotos y marcas) bajo su clave de lunes, para poder consultarla deslizando atrás.
+    if(!store.weekArchive)store.weekArchive={};
+    // Copia profunda de la semana que termina.
+    var snapshot={};
+    WEEKDAY_IDS.concat(['extra']).forEach(function(did){
+      var src=store.weeklyPlan[did]||{text:'',image:null};
+      snapshot[did]={text:src.text||'',image:src.image||null,done:src.done===true};
+      if(src.actId)snapshot[did].actId=src.actId; // vínculo al registro, si existe
+    });
+    store.weekArchive[last]=snapshot;
+    // La semana en curso se reinicia: si el plan se repite cada semana, conservamos los
+    // textos/fotos base pero quitamos las marcas; los vínculos a registros se limpian.
+    WEEKDAY_IDS.concat(['extra']).forEach(function(did){
+      if(store.weeklyPlan[did]){store.weeklyPlan[did].done=false;delete store.weeklyPlan[did].actId;}
     });
     saveWeekly();
+    save('weekArchive',store.weekArchive);
+    purgeOldWeeks();
+    localStorage.setItem('h_weekStart',current);
+  }else if(!last){
     localStorage.setItem('h_weekStart',current);
   }
 }
@@ -2984,7 +3212,7 @@ function renderPanel(c){
     '</div>'+
   '</div>'+
   '<div class="collapsible'+(weeklyCollapsed?' collapsed':'')+'">'+
-    '<div class="card" style="padding:12px">'+
+    '<div style="padding:4px 0 0">'+
       '<div class="panel-weekly-preview">'+
         DAY_NAMES.filter(function(d){return store.activeDays[d.id]!==false;}).map(function(d){
           const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
@@ -2993,7 +3221,8 @@ function renderPanel(c){
           const highlighted=hasContent&&!completed;
           const isToday=d.id===todayId;
           const onClickHandler=data.image?'openImageViewer(\''+d.id+'\',\'panel\')':'openDayEditor(\''+d.id+'\')';
-          return '<div class="day-chip '+(highlighted?'has-content':'')+' '+(isToday?'today-chip':'')+' '+(completed?'day-completed-chip':'')+'" onclick="'+onClickHandler+'" title="'+d.name+(completed?' (completado)':'')+'">'+d.short+(completed?' ✓':'')+'</div>';
+          const dnum=dayOfMonthFor(d.id,0);
+          return '<div class="day-chip '+(highlighted?'has-content':'')+' '+(isToday?'today-chip':'')+' '+(completed?'day-completed-chip':'')+'" onclick="'+onClickHandler+'" title="'+d.name+(completed?' (completado)':'')+'"><span class="day-chip-short">'+d.short+(completed?' ✓':'')+'</span><span class="day-chip-num">'+dnum+'</span></div>';
         }).join('')+
         (function(){
           if(store.activeDays.extra===false)return '';
@@ -4321,15 +4550,17 @@ function renderActividad(c){
     selectedWeekDay=activeWeekdays.some(function(d){return d.id===todayId;})?todayId:activeWeekdays[0].id;
   }
   const SHORT_DAY={monday:'L',tuesday:'M',wednesday:'X',thursday:'J',friday:'V',saturday:'S',sunday:'D'};
+  const wkData=currentWeekData();
+  const isCurrentWeek=(weekViewOffset===0);
 
   // Build the day-chips strip
   let chips=activeWeekdays.map(function(d){
-    const data=store.weeklyPlan[d.id]||{text:'',image:null,done:false};
+    const data=wkData[d.id]||{text:'',image:null,done:false};
     const completed=data.done===true;
     const has=!!((data.text&&data.text.trim())||data.image);
-    const isToday=d.id===todayId;
+    const isToday=isCurrentWeek&&d.id===todayId;
     const isSel=d.id===selectedWeekDay;
-    const dt=dateForWeekday(d.id);
+    const dt=dateForWeekdayOffset(d.id,weekViewOffset);
     const dayNum=dt?dt.getDate():'';
     return '<button class="wday-chip'+(isSel?' sel':'')+(isToday?' today':'')+(completed?' done':'')+'" onclick="selectWeekDay(\''+d.id+'\')">'+
       '<span class="wday-chip-name">'+SHORT_DAY[d.id]+'</span>'+
@@ -4342,11 +4573,12 @@ function renderActividad(c){
   let viewer='';
   if(activeWeekdays.length){
     const sd=DAY_NAMES.find(function(d){return d.id===selectedWeekDay;})||activeWeekdays[0];
-    const sdData=store.weeklyPlan[sd.id]||{text:'',image:null,done:false};
+    const sdData=wkData[sd.id]||{text:'',image:null,done:false};
     const sdCompleted=sdData.done===true;
     const sdHasText=!!(sdData.text&&sdData.text.trim());
     const sdHasImage=!!sdData.image;
-    const sdDate=dateForWeekday(sd.id);
+    const sdDate=dateForWeekdayOffset(sd.id,weekViewOffset);
+    const sdIsToday=isCurrentWeek&&sd.id===todayId;
     const sdDateLabel=sdDate?sdDate.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}):sd.name;
     let body;
     if(sdHasImage){
@@ -4364,9 +4596,12 @@ function renderActividad(c){
     }
     viewer='<div class="wday-viewer">'+
       '<div class="wday-view-head">'+
-        '<span class="wday-view-date'+(sd.id===todayId?' is-today':'')+'">'+sdDateLabel+(sd.id===todayId?' · HOY':'')+'</span>'+
+        '<span class="wday-view-date'+(sdIsToday?' is-today':'')+'">'+sdDateLabel+(sdIsToday?' · HOY':'')+'</span>'+
         '<div class="wday-view-actions">'+
           '<button class="wday-view-btn add" onclick="openDayEditor(\''+sd.id+'\')" title="Añadir o editar">＋ '+(sdHasText||sdHasImage?'Editar':'Añadir')+'</button>'+
+          (sdCompleted&&sdData.actId?
+            '<button class="wday-view-btn hist" onclick="openDayHistory(\''+sd.id+'\')" title="Ver el entrenamiento registrado">📜 Registro</button>'
+          :'')+
           '<button class="wday-view-btn done'+(sdCompleted?' active':'')+'" id="wdayDoneHero" onclick="toggleDayDone(\''+sd.id+'\')" title="Marcar como realizado y precargar registro">'+(sdCompleted?'✓ Hecho':'○ Marcar')+
             (!sdCompleted&&sdHasImage?'<span class="wday-ai-badge">✨ IA</span>':'')+
           '</button>'+
@@ -4396,7 +4631,14 @@ function renderActividad(c){
       '<button class="collapse-btn" onclick="event.stopPropagation();toggleEstadoBlock(\'weekly\')">'+(weeklyCollapsed?'▼':'▲')+'</button>'+
     '</div>'+
     '<div class="collapsible'+(weeklyCollapsed?' collapsed':'')+'">'+
-      (activeWeekdays.length?'<div class="wday-strip">'+chips+'</div>':'<div class="wday-empty-note">No hay días activos. Usa ⚙ para configurarlos.</div>')+
+      (activeWeekdays.length?
+        '<div class="week-nav" id="weekNavBar">'+
+          '<button class="week-nav-arrow" '+(weekViewOffset<=-4?'disabled':'')+' onclick="changeWeek(-1)" title="Semana anterior">‹</button>'+
+          '<div class="week-nav-label'+(weekViewOffset!==0?' other':'')+'" onclick="changeWeek(\'reset\')">'+weekRangeLabel(weekViewOffset)+'</div>'+
+          '<button class="week-nav-arrow" '+(weekViewOffset>=1?'disabled':'')+' onclick="changeWeek(1)" title="Semana siguiente">›</button>'+
+        '</div>'+
+        '<div class="wday-strip" id="wdayStrip">'+chips+'</div>'
+        :'<div class="wday-empty-note">No hay días activos. Usa ⚙ para configurarlos.</div>')+
       viewer+
     '</div>'+
   '</div>';
@@ -5392,15 +5634,15 @@ function applyPendingPrefill(){
 
 // Orquesta la precarga al marcar un día como hecho.
 function prefillFromDay(dayId){
-  var rec=store.weeklyPlan[dayId]||{};
+  var rec=currentWeekData()[dayId]||{};
   var hasImage=!!rec.image;
   var hasText=!!(rec.text&&rec.text.trim());
   if(!hasImage&&!hasText){
     // Sin datos: marcamos el enlace al día igualmente (sin foto) por si se registra a mano luego.
     return;
   }
-  // Guardamos el vínculo al día para asociarlo al registro cuando se cree.
-  _pendingDayLink={dayId:dayId};
+  // Guardamos el vínculo al día (y a la semana visible) para asociarlo al registro.
+  _pendingDayLink={dayId:dayId,weekOffset:weekViewOffset};
   if(hasImage){
     // Si no hay clave de Gemini configurada, avisamos y caemos al texto si existe.
     if(!getGeminiKey()){
@@ -5468,9 +5710,10 @@ function handleAiFailureNoText(dayId,shortMsg){
     openRegistroWithPrefill({sportId:(store.sports[0]||{}).id||'crossfit',subtype:'',runType:'continua',time:'',wod:'',aiOnly:true});
   }else{
     // Desmarcamos el día y descartamos el vínculo pendiente.
-    if(store.weeklyPlan[dayId])store.weeklyPlan[dayId].done=false;
+    var wkF=currentWeekData();
+    if(wkF[dayId])wkF[dayId].done=false;
     _pendingDayLink=null;
-    saveWeekly();
+    saveCurrentWeek();
     render();
   }
 }
@@ -5535,7 +5778,14 @@ function addActivity(){
   // Asociamos el día de la programación (si el registro vino de "marcar día"), pero
   // NO copiamos la foto: el histórico guarda solo el texto del WOD para no duplicar peso.
   var link=_pendingDayLink;_pendingDayLink=null;
-  if(link&&link.dayId)a.dayId=link.dayId;
+  if(link&&link.dayId){
+    a.dayId=link.dayId;
+    // Guardamos el id del registro en el día correspondiente de su semana, para poder
+    // abrir su histórico al volver a pulsar el día ya marcado.
+    var wk=weekDataForOffset(link.weekOffset||0);
+    if(wk[link.dayId]){wk[link.dayId].actId=a.id;}
+    if((link.weekOffset||0)===0)saveWeekly(); else save('weekArchive',store.weekArchive);
+  }
   store.activity.push(a);
   save('activity',store.activity);
   openRegistro('activity');
@@ -5613,37 +5863,52 @@ function setSportParam(sportId,idx,value){
 function toggleCalendarSync(el){store.weeklyPlan.calendarSync=!store.weeklyPlan.calendarSync;el.classList.toggle('active');saveWeekly();}
 
 function toggleDayDone(dayId){
-  if(!store.weeklyPlan[dayId])store.weeklyPlan[dayId]={text:'',image:null,done:false};
-  var wasDone=store.weeklyPlan[dayId].done===true;
-  store.weeklyPlan[dayId].done=!wasDone;
-  saveWeekly();
+  var wk=currentWeekData();
+  if(!wk[dayId])wk[dayId]={text:'',image:null,done:false};
+  var wasDone=wk[dayId].done===true;
+  wk[dayId].done=!wasDone;
+  saveCurrentWeek();
   // Solo al marcar (no al desmarcar) intentamos precargar el registro de entrenamiento.
   if(!wasDone){
     render();
     prefillFromDay(dayId);
   }else{
+    // Al desmarcar, deshacemos el vínculo con el registro (no borramos el registro en sí).
+    delete wk[dayId].actId;
+    saveCurrentWeek();
     render();
   }
+}
+// Abre el detalle del entrenamiento registrado asociado a un día (si existe).
+function openDayHistory(dayId){
+  var wk=currentWeekData();
+  var d=wk[dayId];
+  if(!d||!d.actId){alert('Este día no tiene un entrenamiento registrado asociado.');return;}
+  var act=store.activity.find(function(a){return a.id===d.actId;});
+  if(!act){alert('No se encontró el registro asociado (puede haberse borrado).');return;}
+  showActivityDetail(d.actId);
 }
 
 function clearDayText(dayId){
   if(!confirm('¿Borrar el texto de este día?'))return;
-  if(!store.weeklyPlan[dayId])return;
-  store.weeklyPlan[dayId].text='';
-  saveWeekly();
+  var wk=currentWeekData();
+  if(!wk[dayId])return;
+  wk[dayId].text='';
+  saveCurrentWeek();
   render();
 }
 
 function clearAllWeeklyDays(){
-  if(!confirm('¿Limpiar todos los días? Se borrarán textos, imágenes y marcas de completado.'))return;
-  // Remove every attached photo from IndexedDB too.
+  if(!confirm('¿Limpiar todos los días de esta semana? Se borrarán textos, imágenes y marcas de completado.'))return;
+  var wk=currentWeekData();
+  // Remove every attached photo from IndexedDB too (si no la usa otra semana/registro).
   DAY_NAMES.concat([{id:'extra'}]).forEach(function(d){
-    var rec=store.weeklyPlan[d.id];
-    if(rec&&rec.image)deletePhotoData(rec.image);
+    var rec=wk[d.id];
+    if(rec&&rec.image&&!photoRefInUse(rec.image,d.id,null))deletePhotoData(rec.image);
   });
-  DAY_NAMES.forEach(function(d){store.weeklyPlan[d.id]={text:'',image:null,done:false};});
-  store.weeklyPlan.extra={text:'',image:null,done:false};
-  saveWeekly();
+  DAY_NAMES.forEach(function(d){wk[d.id]={text:'',image:null,done:false};});
+  wk.extra={text:'',image:null,done:false};
+  saveCurrentWeek();
   render();
 }
 function toggleActiveDay(id){
@@ -5668,8 +5933,10 @@ function renderManageDays(){
 // Day editor modal
 let editingDayId=null;
 let editingImageData=null;
+let editingWeekOffset=0;
 function openDayEditor(dayId){
   editingDayId=dayId;
+  editingWeekOffset=weekViewOffset; // recordamos la semana que se está editando
   let dayName;
   if(dayId==='extra'){
     dayName='T. EXTRA';
@@ -5677,7 +5944,7 @@ function openDayEditor(dayId){
     const day=DAY_NAMES.find(function(d){return d.id===dayId;});
     dayName=day?day.name.toUpperCase():dayId.toUpperCase();
   }
-  const data=store.weeklyPlan[dayId]||{text:'',image:null};
+  const data=currentWeekData()[dayId]||{text:'',image:null};
   editingImageData=data.image;
   if(editingImageData)ensurePhotoCached(editingImageData);
   document.getElementById('dayEditorTitle').textContent=dayName;
@@ -5729,16 +5996,20 @@ function clearDayImage(){
   refreshDayImagePreview();
   document.getElementById('dayImageInput').value='';
 }
-function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;const prev=store.weeklyPlan[editingDayId]||{};
+function saveDayPlan(){if(!editingDayId)return;const text=document.getElementById('dayEditorText').value;var wk=weekDataForOffset(editingWeekOffset);const prev=wk[editingDayId]||{};
   // If the photo was replaced with a different one, delete the previous from IndexedDB,
   // but only if it isn't still referenced by another day or an activity record.
   if(prev.image&&prev.image!==editingImageData&&prev.image.indexOf&&prev.image.indexOf('img:')===0){
     if(!photoRefInUse(prev.image,editingDayId,editingImageData))deletePhotoData(prev.image);
   }
-  store.weeklyPlan[editingDayId]={text:text,image:editingImageData,done:prev.done===true};saveWeekly();closeDayEditor();render();}
+  wk[editingDayId]={text:text,image:editingImageData,done:prev.done===true};
+  if(prev.actId)wk[editingDayId].actId=prev.actId; // conservamos el vínculo al registro
+  if(editingWeekOffset===0)saveWeekly(); else save('weekArchive',store.weekArchive);
+  closeDayEditor();render();}
 
 // === Quick fill: edit text/photo for several days at once ===
 var quickFillBuf={};   // {dayId:{text,image}} staged edits, applied on save
+var quickFillWeekOffset=0;  // semana sobre la que opera el quick fill
 function quickFillDays(){
   // Active weekdays + T. Extra (if active)
   var list=DAY_NAMES.filter(function(d){return store.activeDays[d.id]!==false;}).slice();
@@ -5747,11 +6018,13 @@ function quickFillDays(){
 }
 function openQuickFill(){
   quickFillBuf={};
+  var wk=currentWeekData();
   quickFillDays().forEach(function(d){
-    var data=store.weeklyPlan[d.id]||{text:'',image:null};
+    var data=wk[d.id]||{text:'',image:null};
     // Guardamos también la imagen original para saber si el usuario la cambia de verdad.
     quickFillBuf[d.id]={text:data.text||'',image:data.image||null,originalImage:data.image||null};
   });
+  quickFillWeekOffset=weekViewOffset;
   renderQuickFill();
   document.getElementById('modal-quickFill').classList.add('active');
 }
@@ -5814,22 +6087,24 @@ function handleQfImage(e){
 }
 function qfClearImage(dayId){if(quickFillBuf[dayId])quickFillBuf[dayId].image=null;renderQuickFill();}
 function saveQuickFill(){
+  var wk=weekDataForOffset(quickFillWeekOffset||0);
   Object.keys(quickFillBuf).forEach(function(id){
-    var prev=store.weeklyPlan[id]||{};
+    var prev=wk[id]||{};
     var buf=quickFillBuf[id];
     // SOLO borramos la foto anterior si el usuario la cambió EXPLÍCITAMENTE en este modal
     // (es decir, la imagen que el modal tenía al abrirse difiere de la que se guarda).
     // Nunca comparamos contra prev.image directamente, porque la sincronización en la nube
-    // puede haber modificado store.weeklyPlan mientras el modal estaba abierto, y eso
+    // puede haber modificado los datos mientras el modal estaba abierto, y eso
     // provocaría borrar por error fotos que el usuario no tocó.
     var original=(buf.originalImage!==undefined)?buf.originalImage:prev.image;
     if(original&&original!==buf.image&&original.indexOf&&original.indexOf('img:')===0){
       // Además, solo borramos si esa referencia ya no está en uso por ningún día.
       if(!photoRefInUse(original,id,buf.image))deletePhotoData(original);
     }
-    store.weeklyPlan[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
+    wk[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
+    if(prev.actId)wk[id].actId=prev.actId;
   });
-  saveWeekly();
+  if((quickFillWeekOffset||0)===0)saveWeekly(); else save('weekArchive',store.weekArchive);
   closeQuickFill();
   render();
 }
@@ -5855,8 +6130,8 @@ var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:
 function openImageViewer(srcOrDayId,origin){
   let ref=srcOrDayId;
   // If a weekday/extra id was passed, pull its stored image reference.
-  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&srcOrDayId.indexOf('img:')!==0&&store.weeklyPlan[srcOrDayId]){
-    ref=store.weeklyPlan[srcOrDayId].image||'';
+  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&srcOrDayId.indexOf('img:')!==0&&currentWeekData()[srcOrDayId]){
+    ref=currentWeekData()[srcOrDayId].image||'';
   }
   if(!ref){alert('Sin imagen para mostrar');return;}
   imageViewerOrigin=origin||null;
@@ -6830,6 +7105,25 @@ function setNavStyle(style){
   renderNav();
   render();
 }
+// Mueve una pestaña de la barra inferior arriba/abajo (dir=-1 sube, dir=1 baja).
+function moveNavTab(id,dir){
+  var order=navTabs().map(function(t){return t.id;});
+  var i=order.indexOf(id);
+  if(i<0)return;
+  var j=i+dir;
+  if(j<0||j>=order.length)return;
+  var tmp=order[i];order[i]=order[j];order[j]=tmp;
+  store.settings.navOrder=order;
+  saveSettings();
+  renderNav();
+  render();
+}
+function resetNavOrder(){
+  store.settings.navOrder=NAV_DEFAULT_ORDER.slice();
+  saveSettings();
+  renderNav();
+  render();
+}
 function setClothing(c){store.settings.clothing=c;saveSettings();render();}
 function setAge(a){
   const n=parseInt(a);
@@ -7219,12 +7513,27 @@ function renderAjustes(c){
           '<div class="radio-cell '+((store.settings.navStyle||'text')==='text'?'active':'')+'" onclick="setNavStyle(\'text\')">TEXTO<div class="radio-cell-desc">Panel · Estado…</div></div>'+
           '<div class="radio-cell '+(store.settings.navStyle==='icons'?'active':'')+'" onclick="setNavStyle(\'icons\')"><span class="radio-cell-icon" style="font-size:17px">🏠</span>ICONOS<div class="radio-cell-desc">Más visual</div></div>'+
         '</div>'+
+        '<div class="sub-section-label" style="margin-top:14px">↕️ ORDEN DE LOS BOTONES</div>'+
+        '<div style="font-size:11px;color:var(--text-muted);margin:2px 0 8px;font-family:var(--sans);line-height:1.5">Usa las flechas para cambiar el orden de las secciones en la barra inferior.</div>'+
+        '<div class="nav-order-list">'+
+          navTabs().map(function(t,i,arr){
+            return '<div class="nav-order-row">'+
+              '<span class="nav-order-icon">'+t.icon+'</span>'+
+              '<span class="nav-order-name">'+t.label+'</span>'+
+              '<span class="nav-order-btns">'+
+                '<button class="nav-order-arrow" '+(i===0?'disabled':'')+' onclick="moveNavTab(\''+t.id+'\',-1)">▲</button>'+
+                '<button class="nav-order-arrow" '+(i===arr.length-1?'disabled':'')+' onclick="moveNavTab(\''+t.id+'\',1)">▼</button>'+
+              '</span>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+        '<button class="btn btn-secondary" onclick="resetNavOrder()" style="margin-top:8px;font-size:11px">↩️ Restaurar orden por defecto</button>'+
       '</div>'+
     '</div>'+
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 27.4</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 28</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -7501,7 +7810,7 @@ function buildExportData(){
     maestroSaved:store.maestroSaved,
     sports:store.sports,sportParams:store.sportParams,settings:store.settings,
     // ALL layout/order/position state
-    widgets:store.widgets,weeklyPlan:store.weeklyPlan,activeDays:store.activeDays,
+    widgets:store.widgets,weeklyPlan:store.weeklyPlan,weekArchive:store.weekArchive,activeDays:store.activeDays,
     estadoOrder:store.estadoOrder,solOrder:store.solOrder,activityOrder:store.activityOrder,panelOrder:store.panelOrder,
     lightLog:store.lightLog,
     panelCollapsed:store.panelCollapsed,collapsed:store.collapsed
@@ -7925,6 +8234,58 @@ showTab('panel');
 migrateLegacyPhotos();
 // Firebase config is embedded; initialise so the session/sync restores automatically.
 fbInit();
+
+// --- Deslizamiento lateral entre pestañas (swipe horizontal cambia de sección) ---
+(function initTabSwipe(){
+  var startX=0,startY=0,tracking=false,swiped=false;
+  function onStart(e){
+    if(e.touches.length!==1)return;
+    // No interferir si el gesto empieza sobre elementos deslizables propios.
+    var t=e.target;
+    if(t.closest&&t.closest('.med-vol-slider, input[type=range], .weekly-week-track, .maestro-thread, .modal, .header-quote, .wday-strip, .week-nav'))return;
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;tracking=true;swiped=false;
+  }
+  function onMove(e){
+    if(!tracking||swiped||e.touches.length!==1)return;
+    var dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
+    // Debe ser claramente horizontal y de recorrido suficiente.
+    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.8){
+      swiped=true;tracking=false;
+      var tabs=navTabs().map(function(t){return t.id;});
+      var idx=tabs.indexOf(currentTab);
+      if(idx<0)return;
+      // Maestro está en modo pantalla fija; permitimos salir de él con swipe igualmente.
+      if(dx<0 && idx<tabs.length-1){showTab(tabs[idx+1]);}
+      else if(dx>0 && idx>0){showTab(tabs[idx-1]);}
+    }
+  }
+  function onEnd(){tracking=false;}
+  document.addEventListener('touchstart',onStart,{passive:true});
+  document.addEventListener('touchmove',onMove,{passive:true});
+  document.addEventListener('touchend',onEnd,{passive:true});
+})();
+
+// --- Deslizamiento sobre la tira de días para cambiar de SEMANA ---
+(function initWeekSwipe(){
+  var sx=0,sy=0,tracking=false,onStrip=false;
+  document.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    var t=e.target;
+    onStrip=!!(t.closest&&(t.closest('.wday-strip')||t.closest('.week-nav')));
+    if(!onStrip)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!tracking||!onStrip||e.touches.length!==1)return;
+    var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
+    if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.6){
+      tracking=false;
+      // Deslizar a la izquierda -> semana siguiente; a la derecha -> anterior.
+      if(typeof changeWeek==='function')changeWeek(dx<0?1:-1);
+    }
+  },{passive:true});
+  document.addEventListener('touchend',function(){tracking=false;onStrip=false;},{passive:true});
+})();
 </script>
 </body>
 </html>
