@@ -1050,7 +1050,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .meas-actions-row .meas-toggle-btn{flex:1 1 auto;margin-top:0}
 .meas-actions-row .weight-photo-btn{align-self:stretch;height:auto}
 .weight-input-row .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
-.weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:10.5px;font-weight:400;color:var(--text);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:10.5px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
 .weight-result-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
 .weight-photo-btn{height:38px;width:38px;flex:0 0 auto;align-self:flex-end;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s}
 .weight-photo-btn:active{transform:scale(0.92)}
@@ -4038,9 +4038,9 @@ function renderBodyBlock(){
       // First row: FECHA + PESO (kg wheel + decimal wheel) + peso resultante + + button
       '<div class="weight-input-row">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="bodyDate" value="'+today()+'"></div>'+
-        '<div class="input-group weight-kg-group"><label>KG</label>'+kgWheelHTML('bodyWeightKg',60,120,75)+'</div>'+
-        '<div class="input-group weight-dec-group"><label>DEC.</label>'+decWheelHTML('bodyWeightDec',5)+'</div>'+
-        '<div class="input-group weight-result-group"><label>PESO</label><div class="weight-result-text" id="bodyWeightDisplay">75.5</div></div>'+
+        '<div class="input-group weight-kg-group"><label>KG</label>'+kgWheelHTML('bodyWeightKg',60,120,parseInt(localStorage.getItem('h_lastWeightKg'))||84)+'</div>'+
+        '<div class="input-group weight-dec-group"><label>DEC.</label>'+decWheelHTML('bodyWeightDec',(localStorage.getItem('h_lastWeightDec')!=null?parseInt(localStorage.getItem('h_lastWeightDec')):5))+'</div>'+
+        '<div class="input-group weight-result-group"><label>PESO</label><div class="weight-result-text" id="bodyWeightDisplay">'+(parseInt(localStorage.getItem('h_lastWeightKg'))||84)+'.'+(localStorage.getItem('h_lastWeightDec')!=null?parseInt(localStorage.getItem('h_lastWeightDec')):5)+'</div></div>'+
         '<button class="add-btn" onclick="addBody()" title="Registrar">+</button>'+
       '</div>'+
       // Fila de acciones: toggle de medidas + botón de foto
@@ -5918,6 +5918,9 @@ function onWeightWheelChange(){
   var dec=document.getElementById('bodyWeightDec');
   var disp=document.getElementById('bodyWeightDisplay');
   if(kg&&dec&&disp){disp.textContent=kg.value+'.'+dec.value;}
+  // Recordamos la última selección hasta que se vuelva a cambiar.
+  if(kg)localStorage.setItem('h_lastWeightKg',kg.value);
+  if(dec)localStorage.setItem('h_lastWeightDec',dec.value);
 }
 function timeWheelHTML(idBase,selMin,selSec){
   selMin=parseInt(selMin)||0;selSec=parseInt(selSec)||0;
@@ -7744,7 +7747,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.13</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.15</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
