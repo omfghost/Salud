@@ -3986,15 +3986,18 @@ function renderFastingBlock(){
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
       // Single row: fecha, última, fin, tiempo (compact), + button
       (function(){
-        // Persistent "Última" pre-load: kept in localStorage until registered or cleared.
-        const savedLast=localStorage.getItem('h_fastLastTime')||'';
-        const startVal=savedLast||'17:00';
-        const startActive=!!savedLast;
+        // Valores recordados (se mantienen tras registrar, hasta que se cambien).
+        const savedStart=localStorage.getItem('h_fastStartTime')||localStorage.getItem('h_fastLastTime')||'';
+        const startVal=savedStart||'17:00';
+        const startActive=!!savedStart;
+        const savedEnd=localStorage.getItem('h_fastEndTime')||'12:00';
+        const savedDays=parseInt(localStorage.getItem('h_fastDays'))||0;
+        const daysOpts=function(){var o='';for(var v=0;v<=7;v++){o+='<option value="'+v+'"'+(v===savedDays?' selected':'')+'>'+v+'</option>';}return o;}();
         return '<div class="fast-input-row">'+
           '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="fastDate" value="'+today()+'"></div>'+
           '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'start\')" title="Poner hora actual">ÚLTIMA</span>'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
-          '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'end\')" title="Poner hora actual">FIN</span></label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
-          '<div class="input-group fast-days-group"><label title="Para ayunos de más de 24h, indica los días completos transcurridos">+DÍAS</label><select id="fastDays" class="fast-days-select" onchange="updateFastDur()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select></div>'+
+          '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'end\')" title="Poner hora actual">FIN</span></label><input type="time" id="fastEnd" class="fast-time-input active" value="'+savedEnd+'" oninput="onFastEndInput()"></div>'+
+          '<div class="input-group fast-days-group"><label title="Para ayunos de más de 24h, indica los días completos transcurridos">+DÍAS</label><select id="fastDays" class="fast-days-select" onchange="onFastDaysChange()">'+daysOpts+'</select></div>'+
           '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-text fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-text" id="fastDurDisplay">19:00</div></div>'+
           '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
         '</div>';
@@ -4235,7 +4238,8 @@ function onFastStartInput(){
   const el=document.getElementById('fastStart');
   if(el&&el.value){
     el.classList.remove('dimmed');el.classList.add('active');
-    // Persist the "Última" time so it stays loaded until registered or cleared
+    // Recordamos la hora de inicio (se mantiene tras registrar, hasta que se cambie).
+    localStorage.setItem('h_fastStartTime',el.value);
     localStorage.setItem('h_fastLastTime',el.value);
     // show the active dot in the label if not present (keep the clickable button)
     const lbl=el.parentNode.querySelector('label');
@@ -4247,7 +4251,15 @@ function onFastStartInput(){
 }
 function onFastEndInput(){
   const el=document.getElementById('fastEnd');
-  if(el&&el.value){el.classList.remove('dimmed');el.classList.add('active');}
+  if(el&&el.value){el.classList.remove('dimmed');el.classList.add('active');
+    // Recordamos la hora de fin.
+    localStorage.setItem('h_fastEndTime',el.value);
+  }
+  updateFastDur();
+}
+function onFastDaysChange(){
+  var el=document.getElementById('fastDays');
+  if(el)localStorage.setItem('h_fastDays',el.value);
   updateFastDur();
 }
 function clearFastLast(){
@@ -4276,7 +4288,11 @@ function updateFastDur(){
   else badgeHtml='<span class="fast-goal-text fast-goal-pending">Meta 16h</span>';
   const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;
 }
-function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const duration=((e-s)/60+days*24).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration,days:days});save('fasting',store.fasting);localStorage.removeItem('h_fastLastTime');openRegistro('fasting');render();}
+function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const duration=((e-s)/60+days*24).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration,days:days});save('fasting',store.fasting);
+  // Recordamos los valores introducidos para la próxima vez (se mantienen tras registrar).
+  localStorage.setItem('h_fastStartTime',start);localStorage.setItem('h_fastLastTime',start);
+  localStorage.setItem('h_fastEndTime',end);localStorage.setItem('h_fastDays',String(days));
+  openRegistro('fasting');render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
   if(!m.waist&&!m.chest&&!m.thigh&&!m.bicep&&!m.hip&&!m.neck&&!m.photo)return alert('Introduce al menos una medida');
@@ -7747,7 +7763,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.15</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.16</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
