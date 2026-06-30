@@ -1036,12 +1036,22 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .sleep-row2 .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
 /* Fila de peso: fecha + ruleta kg + ruleta decimal + peso + foto + registrar */
 .weight-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
+/* Etiquetas a la misma altura y cuadros alineados en la fila de peso */
+.weight-input-row .input-group{margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end}
+.weight-input-row .input-group label{height:14px;line-height:14px;margin-bottom:5px;white-space:nowrap;overflow:hidden}
+.weight-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end;margin:0}
+.weight-input-row .input-group.date-compact input[type="date"]{height:38px!important;padding:0 2px!important;box-sizing:border-box}
+.weight-input-row .input-group.date-compact{flex:0 0 88px}
 .weight-kg-group{flex:1 1 0;min-width:0}
-.weight-dec-group{flex:1 1 0;min-width:0}
-.weight-result-group{flex:0 0 auto;min-width:50px}
+.weight-dec-group{flex:0 0 58px;min-width:0}
+.weight-result-group{flex:0 0 56px;min-width:0}
+/* Fila de acciones (toggle medidas + foto) */
+.meas-actions-row{display:flex;gap:6px;align-items:stretch;margin-top:8px}
+.meas-actions-row .meas-toggle-btn{flex:1 1 auto;margin-top:0}
+.meas-actions-row .weight-photo-btn{align-self:stretch;height:auto}
 .weight-input-row .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
-.weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
-.weight-result-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
+.weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:10.5px;font-weight:400;color:var(--text);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.weight-result-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
 .weight-photo-btn{height:38px;width:38px;flex:0 0 auto;align-self:flex-end;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s}
 .weight-photo-btn:active{transform:scale(0.92)}
 .weight-photo-btn.has-photo{background:rgba(52,211,153,0.14);border-color:rgba(52,211,153,0.4)}
@@ -4025,17 +4035,19 @@ function renderBodyBlock(){
   let h='<div class="card" id="s-body">'+
     blockHeader('body','📐','PESO Y MEDIDAS','Medidas')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // First row: FECHA + PESO (kg wheel + decimal wheel) + peso resultante + foto + +
+      // First row: FECHA + PESO (kg wheel + decimal wheel) + peso resultante + + button
       '<div class="weight-input-row">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="bodyDate" value="'+today()+'"></div>'+
         '<div class="input-group weight-kg-group"><label>KG</label>'+kgWheelHTML('bodyWeightKg',60,120,75)+'</div>'+
         '<div class="input-group weight-dec-group"><label>DEC.</label>'+decWheelHTML('bodyWeightDec',5)+'</div>'+
         '<div class="input-group weight-result-group"><label>PESO</label><div class="weight-result-text" id="bodyWeightDisplay">75.5</div></div>'+
-        '<button class="weight-photo-btn" id="bodyPhotoBtn" onclick="document.getElementById(\'measPhotoInput\').click()" title="Añadir foto">📷</button>'+
         '<button class="add-btn" onclick="addBody()" title="Registrar">+</button>'+
       '</div>'+
-      // Toggle button to reveal the measurements grid (hidden by default)
-      '<button class="meas-toggle-btn" onclick="toggleMeasFields()">'+(measFieldsOpen?'▲ Ocultar medidas':'▼ Añadir medidas (cintura, pecho, muslo…)')+'</button>'+
+      // Fila de acciones: toggle de medidas + botón de foto
+      '<div class="meas-actions-row">'+
+        '<button class="meas-toggle-btn" onclick="toggleMeasFields()">'+(measFieldsOpen?'▲ Ocultar medidas':'▼ Añadir medidas (cintura, pecho, muslo…)')+'</button>'+
+        '<button class="weight-photo-btn" id="bodyPhotoBtn" onclick="document.getElementById(\'measPhotoInput\').click()" title="Añadir foto">📷</button>'+
+      '</div>'+
       // Measures grid (only when opened)
       (measFieldsOpen?'<div class="grid-3" style="gap:5px;margin-top:8px">'+
         '<div class="input-group"><label>CINTURA</label><input type="number" id="mWaist" step="0.1" placeholder="cm"></div>'+
@@ -7732,7 +7744,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.10</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.13</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
