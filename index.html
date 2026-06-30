@@ -427,6 +427,9 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .vitd-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-family:var(--sans)}
 /* Compact single-row session: stats + play/stop + plus */
 .vitd-sess-row{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(251,146,60,0.05));border:1px solid rgba(251,191,36,0.22);border-radius:12px;padding:8px 10px}
+.sun-sound-toggle{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.3px;padding:5px 11px;border-radius:20px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);color:var(--text-muted);transition:all 0.15s}
+.sun-sound-toggle.on{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.4);color:#fbbf24}
+.sun-sound-toggle:active{transform:scale(0.94)}
 .vitd-sess-stat{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.05}
 .vitd-sess-num{font-family:var(--sans);font-size:19px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px}
 .vitd-sess-unit{font-size:8.5px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);margin-top:1px}
@@ -777,7 +780,7 @@ input[type="date"],input[type="time"]{box-sizing:border-box;width:100%;max-width
 .add-btn:active{background:rgba(167,243,208,0.2);transform:scale(0.95)}
 
 /* Compact date input - smaller font, narrower */
-.date-compact input[type="date"]{font-size:11px;padding:8px 6px;text-align:center;-webkit-appearance:none}
+.date-compact input[type="date"]{font-size:10.5px;padding:8px 2px;text-align:center;-webkit-appearance:none}
 .input-group.date-compact label{font-size:9px}
 
 /* Smaller all date/time inputs globally */
@@ -939,10 +942,19 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 /* Fasting compact input row with inline duration box */
 .fast-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
 .fast-days-group{flex:0 0 auto;max-width:48px}
+/* Sumatorio del ayuno como texto, sin recuadro (formato 19:45) */
+.fast-dur-group{flex:0 0 auto;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.fast-dur-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
+/* Chip del objetivo como texto, sin recuadro */
+.fast-goal-text{display:block;text-align:center;font-size:9px;font-weight:600;font-family:var(--sans);letter-spacing:0.2px;white-space:nowrap;line-height:1.1;width:100%;background:none!important;border:none!important;padding:0!important}
+.fast-goal-text.fast-goal-met{color:#34d399}
+.fast-goal-text.fast-goal-extended{color:#fbbf24}
+.fast-goal-text.fast-goal-pending{color:var(--text-dim)}
 .fast-days-select{height:38px;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:600;text-align:center;padding:0 4px;box-sizing:border-box;width:100%;outline:none;-webkit-appearance:none;appearance:none}
-.fast-stats-line{margin-top:10px;text-align:center;font-family:var(--sans);font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
-.fast-stat-lbl{color:var(--text-dim);text-transform:uppercase;letter-spacing:0.4px;font-size:9.5px}
-.fast-stat-val{color:var(--accent);font-weight:600;font-size:12.5px}
+.fast-stats-line{margin-top:10px;text-align:center;font-family:var(--sans);font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:nowrap;white-space:nowrap}
+.fast-stat-item{display:inline-flex;align-items:baseline;gap:3px}
+.fast-stat-lbl{color:var(--text-dim);text-transform:uppercase;letter-spacing:0.3px;font-size:9px}
+.fast-stat-val{color:var(--accent);font-weight:600;font-size:11.5px}
 .fast-stat-sep{color:var(--text-dim);opacity:0.5}
 .fast-input-row .input-group{margin-bottom:0;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
 .fast-input-row .input-group.date-compact{flex:0 0 92px}
@@ -953,8 +965,6 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-preload-dot{color:#34d399;font-size:7px;vertical-align:middle}
 .fast-time-set-btn{color:var(--accent);font-weight:700;cursor:pointer;border:none;background:none;padding:0;text-decoration:none;-webkit-tap-highlight-color:transparent}
 .fast-time-set-btn:active{opacity:0.6}
-.fast-dur-group{flex:0 0 64px}
-.fast-dur-box{height:38px;display:flex;align-items:center;justify-content:center;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent);font-style:normal;letter-spacing:-0.2px;white-space:nowrap;box-sizing:border-box}
 .fast-input-row .add-btn{height:38px!important;width:38px;align-self:flex-end}
 
 /* Panel sun UVA/UVB mini chips bottom-right of graph */
@@ -2275,10 +2285,12 @@ function saveEditRecord(){
     if(oldVideo&&oldVideo!==newVideo)deleteVideoBlob(oldVideo);
     item.video=newVideo;
   }
-  // recompute fasting duration if needed
+  // recompute fasting duration if needed (teniendo en cuenta los días para ayunos >24h)
   if(type==='fasting'&&item.start&&item.end){
     const sp=item.start.split(':').map(Number),ep=item.end.split(':').map(Number);
-    let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;item.duration=((e-s)/60).toFixed(2);
+    let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;
+    var fdays=parseInt(item.days||0,10)||0;
+    item.duration=((e-s)/60+fdays*24).toFixed(2);
   }
   save(type,store[type]);
   editVideoData=null;
@@ -3941,18 +3953,18 @@ function renderFastingBlock(){
           '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'start\')" title="Poner hora actual">ÚLTIMA</span>'+(startActive?' <span class="fast-preload-dot" title="Hora preguardada activa">●</span>':'')+'</label><input type="time" id="fastStart" class="fast-time-input '+(startActive?'active':'dimmed')+'" value="'+startVal+'" oninput="onFastStartInput()"></div>'+
           '<div class="input-group"><label><span class="fast-time-set-btn" onclick="setFastNow(\'end\')" title="Poner hora actual">FIN</span></label><input type="time" id="fastEnd" class="fast-time-input dimmed" value="12:00" oninput="onFastEndInput()"></div>'+
           '<div class="input-group fast-days-group"><label title="Para ayunos de más de 24h, indica los días completos transcurridos">+DÍAS</label><select id="fastDays" class="fast-days-select" onchange="updateFastDur()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select></div>'+
-          '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-inline fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-box" id="fastDurDisplay">19h:00m</div></div>'+
+          '<div class="input-group fast-dur-group"><label id="fastBadgeWrap" style="display:block;width:100%"><span class="fast-goal-text fast-goal-extended">🎯 +16h</span></label><div class="fast-dur-text" id="fastDurDisplay">19:00</div></div>'+
           '<button class="add-btn" onclick="addFast()" title="Registrar ayuno">+</button>'+
         '</div>';
       })();
   if(store.fasting.length){
     const maxF=Math.max.apply(null,store.fasting.map(function(f){return parseFloat(f.duration);}));
     h+='<div class="fast-stats-line">'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Media mes</span> <span class="fast-stat-val">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</span></span>'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Media</span> <span class="fast-stat-val">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</span></span>'+
       '<span class="fast-stat-sep">·</span>'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Histórico</span> <span class="fast-stat-val">'+fmtDuration(avg(store.fasting,'duration'))+'</span></span>'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Hist.</span> <span class="fast-stat-val">'+fmtDuration(avg(store.fasting,'duration'))+'</span></span>'+
       '<span class="fast-stat-sep">·</span>'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Máximo</span> <span class="fast-stat-val">'+fmtDuration(maxF)+'</span></span>'+
+      '<span class="fast-stat-item"><span class="fast-stat-lbl">Máx</span> <span class="fast-stat-val">'+fmtDuration(maxF)+'</span></span>'+
     '</div>';
     h+=renderRegistros('fasting','AYUNOS',function(f){
       const dur=parseFloat(f.duration)||0;
@@ -4188,7 +4200,28 @@ function clearFastLast(){
   localStorage.removeItem('h_fastLastTime');
   render();
 }
-function updateFastDur(){const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');if(!start||!end||!start.value||!end.value)return;const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const durDec=(e-s)/60+days*24;const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDuration(durDec);}const f=durDec;let badgeHtml='';if(f>16)badgeHtml='<span class="fast-goal-inline fast-goal-extended">🎯 +16h</span>';else if(f>=12)badgeHtml='<span class="fast-goal-inline fast-goal-met">✓ 12-16h</span>';else badgeHtml='<span class="fast-goal-inline fast-goal-pending">Meta 16h</span>';const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;}
+// Formatea una duración decimal en horas como "19:45" (sin 'h' ni 'm').
+function fmtDurationClock(decH){
+  var v=parseFloat(decH);if(isNaN(v))return '—';
+  var hours=Math.floor(v);
+  var mins=Math.round((v-hours)*60);
+  if(mins===60){hours++;mins=0;}
+  return hours+':'+(mins<10?'0':'')+mins;
+}
+function updateFastDur(){
+  const start=document.getElementById('fastStart');const end=document.getElementById('fastEnd');
+  if(!start||!end||!start.value||!end.value)return;
+  const sp=start.value.split(':').map(Number);const ep=end.value.split(':').map(Number);
+  let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;
+  var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;
+  const durDec=(e-s)/60+days*24;
+  const d=document.getElementById('fastDurDisplay');if(d){d.textContent=fmtDurationClock(durDec);}
+  const f=durDec;let badgeHtml='';
+  if(f>16)badgeHtml='<span class="fast-goal-text fast-goal-extended">🎯 +16h</span>';
+  else if(f>=12)badgeHtml='<span class="fast-goal-text fast-goal-met">✓ 12-16h</span>';
+  else badgeHtml='<span class="fast-goal-text fast-goal-pending">Meta 16h</span>';
+  const bw=document.getElementById('fastBadgeWrap');if(bw)bw.innerHTML=badgeHtml;
+}
 function addFast(){const date=document.getElementById('fastDate').value;if(!date)return alert('Selecciona fecha');if(dateExists('fasting',date))return warnDuplicate('ayuno');const start=document.getElementById('fastStart').value;const end=document.getElementById('fastEnd').value;const sp=start.split(':').map(Number);const ep=end.split(':').map(Number);let s=sp[0]*60+sp[1],e=ep[0]*60+ep[1];if(e<=s)e+=24*60;var days=parseInt((document.getElementById('fastDays')||{}).value||'0',10)||0;const duration=((e-s)/60+days*24).toFixed(1);store.fasting.push({id:Date.now(),date:date,start:start,end:end,duration:duration,days:days});save('fasting',store.fasting);localStorage.removeItem('h_fastLastTime');openRegistro('fasting');render();}
 function addMeasure(){
   const m={id:Date.now(),date:document.getElementById('mDate').value,waist:document.getElementById('mWaist').value,chest:document.getElementById('mChest').value,thigh:document.getElementById('mThigh').value,bicep:document.getElementById('mBicep').value,hip:document.getElementById('mHip').value,neck:(document.getElementById('mNeck')||{}).value||'',photo:measPhotoData||null};
@@ -6962,6 +6995,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           }
           return ''+
             '<div class="timer-display" id="sunTimerDisplay" style="font-size:36px;margin:8px 0 6px">'+fmtClock(elapsed)+'</div>'+
+            '<div style="text-align:center;margin:-2px 0 6px"><button class="sun-sound-toggle'+(store.settings.sunSound!==false?' on':'')+'" onclick="toggleSunSound()" title="Aviso sonoro cada 5 min desde el minuto 10">'+(store.settings.sunSound!==false?'🔔 Aviso sonoro: ON':'🔕 Aviso sonoro: OFF')+'</button></div>'+
             (paused?'<div style="text-align:center;font-size:9.5px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-2px 0 6px;text-transform:uppercase">⏸ En pausa · reanuda o guarda</div>':'')+
             '<div class="vitd-sess-row">'+
               '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdValue">'+vitdNow+'</span><span class="vitd-sess-unit">IU sesión</span></div>'+
@@ -7312,6 +7346,14 @@ function sunTick(){
   const uvb=uvbIndex(hour,times,true);
   sess.vitd=(sess.vitd||0)+vitDPerMinute(uvb)*(delta/60000);
   sess.lastActive=now;
+  // Aviso sonoro cada 5 minutos a partir del minuto 10 (10, 15, 20…), si está activado.
+  if(store.settings.sunSound!==false){
+    var totalMin=Math.floor((sess.elapsedMs||0)/60000);
+    if(totalMin>=10 && totalMin%5===0 && sess.lastBeepMin!==totalMin){
+      sess.lastBeepMin=totalMin;
+      try{playChime(0.5);}catch(e){}
+    }
+  }
   saveSunSession(sess);
   sunSessionVitD=sess.vitd;
   refreshSunTimerUI();
@@ -7360,6 +7402,15 @@ function resumeSunSession(){
   }else{
     sunSessionVitD=sess.vitd||0;
   }
+}
+
+// Activa/desactiva el aviso sonoro del temporizador de sol.
+function toggleSunSound(){
+  store.settings.sunSound=(store.settings.sunSound===false)?true:false;
+  saveSettings();
+  // Al activar, damos un pequeño chime de confirmación (también desbloquea el audio).
+  if(store.settings.sunSound){try{unlockAudio&&unlockAudio();playChime(0.5);}catch(e){}}
+  render();
 }
 
 function toggleSunTimer(){
@@ -7617,7 +7668,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.3</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.5</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
