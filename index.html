@@ -51,7 +51,7 @@ body{padding-bottom:calc(82px + var(--safe-bottom));padding-top:var(--safe-top)}
 .app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 14px;width:100%;overflow-x:hidden;position:relative;z-index:1;box-sizing:border-box}
 
 /* HEADER */
-.header{padding:9px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:linear-gradient(180deg,rgba(13,18,14,0.96) 0%,rgba(11,15,11,0.9) 100%);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);z-index:50;margin-top:4px;gap:8px;border-radius:0 0 20px 20px;border-bottom:1px solid rgba(167,243,208,0.08);box-shadow:0 6px 24px -10px rgba(0,0,0,0.7);overflow:visible}
+.header{padding:9px 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;z-index:50;margin-top:4px;gap:8px;border-radius:0;border-bottom:none;box-shadow:none;overflow:visible}
 .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 18% 50%,rgba(167,243,208,0.07) 0%,transparent 65%);pointer-events:none;z-index:0}
 .logo{font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#a7f3d0 0%,#fde047 50%,#a7f3d0 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:0;font-style:normal;text-shadow:0 0 16px rgba(167,243,208,0.4);position:relative;z-index:2;padding-right:2px}
 .logo-wrap{position:relative;display:inline-flex;align-items:center;z-index:1;flex-shrink:1;min-width:0}
@@ -426,10 +426,13 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;background:var(--ac
 .vitd-value{font-family:var(--sans);font-size:27px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px;font-style:normal;line-height:1.15;padding:0 3px}
 .vitd-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-family:var(--sans)}
 /* Compact single-row session: stats + play/stop + plus */
-.vitd-sess-row{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(251,146,60,0.05));border:1px solid rgba(251,191,36,0.22);border-radius:12px;padding:8px 10px}
+.vitd-sess-row{display:flex;align-items:center;gap:8px;background:transparent;border:none;border-radius:0;padding:6px 2px}
 .sun-sound-toggle{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.3px;padding:5px 11px;border-radius:20px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);color:var(--text-muted);transition:all 0.15s}
 .sun-sound-toggle.on{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.4);color:#fbbf24}
 .sun-sound-toggle:active{transform:scale(0.94)}
+.sun-bell-btn{background:none;border:none;font-size:15px;cursor:pointer;padding:2px 4px;margin-right:2px;opacity:0.55;transition:all 0.15s;line-height:1}
+.sun-bell-btn.on{opacity:1;filter:drop-shadow(0 0 5px rgba(251,191,36,0.6))}
+.sun-bell-btn:active{transform:scale(0.85)}
 .vitd-sess-stat{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.05}
 .vitd-sess-num{font-family:var(--sans);font-size:19px;font-weight:600;color:#fbbf24;letter-spacing:-0.5px}
 .vitd-sess-unit{font-size:8.5px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-family:var(--sans);margin-top:1px}
@@ -660,6 +663,16 @@ body.maestro-mode .content{overflow:hidden}
 
 /* === Compact skin/clothing/age block (inside VitD card) === */
 .skinage-compact .radio-cell{padding:5px 4px;font-size:9.5px;line-height:1.2}
+.skinage-select{width:100%;margin-top:4px;height:36px;background:rgba(255,255,255,0.04);border:1px solid var(--border-strong);border-radius:9px;color:#ddd;font-family:var(--sans);font-size:12px;font-weight:500;padding:0 10px;box-sizing:border-box;outline:none;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23a7f3d0\" stroke-width=\"3\"><path d=\"M6 9l6 6 6-6\"/></svg>');background-repeat:no-repeat;background-position:right 10px center}
+/* Piel + ropa en una sola línea */
+.skin-cloth-row{display:flex;flex-direction:column;gap:6px}
+.skin-cloth-row .skinage-select{width:100%;margin-top:0;font-size:12px;padding:0 10px}
+/* Edad con ruleta */
+.age-wheel-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.age-wheel-label{font-family:var(--sans);font-size:11px;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:0.5px;flex:0 0 auto}
+.age-wheel{height:36px;width:64px;flex:0 0 auto;padding:0;border-radius:9px}
+.age-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:13px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.age-synth-label{font-family:var(--sans);font-size:10px;color:#999;font-style:italic;margin-left:auto;flex:0 1 auto}
 .skinage-compact .radio-cell-desc{margin-top:1px;font-size:8px;line-height:1.15}
 /* Clothing icon now sits inline, left of the % — saves vertical space */
 .skinage-compact .clothing-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
@@ -853,7 +866,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .weekly-cal-toggle .toggle.active .toggle-handle{left:18px}
 
 /* Vit D accumulated counters */
-.vitd-accum-card,.vitd-estim-card{margin-top:8px;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;width:100%;box-sizing:border-box}
+.vitd-accum-card,.vitd-estim-card{margin-top:8px;background:transparent;border:none;border-radius:0;padding:6px 2px;width:100%;box-sizing:border-box}
 .vitd-expo-wrap .registros-block{margin-top:8px!important;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.18);border-radius:11px;padding:9px 11px;box-sizing:border-box}
 .card:has(>.collapsible:not(.collapsed)) .vitd-expo-wrap .registros-block{background:rgba(251,191,36,0.06)!important;border-color:rgba(251,191,36,0.22)!important}
 /* Histórico de exposición al sol cerrado: sin fondo (solo el título). */
@@ -862,7 +875,7 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .vitd-accum-header,.vitd-estim-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
 .vitd-accum-title,.vitd-estim-title{font-size:10.5px;font-weight:600;color:#fbbf24;text-transform:uppercase;letter-spacing:1.4px;font-family:var(--sans);flex:1;min-width:0;display:flex;align-items:center;gap:5px}
 .vitd-accum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}
-.vitd-accum-cell{text-align:center;padding:6px 3px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;min-width:0;overflow:hidden}
+.vitd-accum-cell{text-align:center;padding:6px 3px;background:transparent;border:none;border-radius:0;min-width:0;overflow:hidden}
 .vitd-accum-label{font-size:8px;color:#fbbf24;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;font-family:var(--sans)}
 .vitd-accum-val{font-family:var(--sans);font-size:16px;font-weight:600;color:#fde047;font-style:normal;margin-top:1px;line-height:1.1;letter-spacing:-0.5px}
 .vitd-accum-unit{font-size:7.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.4px;font-family:var(--sans);margin-top:0}
@@ -950,9 +963,9 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .fast-goal-text.fast-goal-met{color:#34d399}
 .fast-goal-text.fast-goal-extended{color:#fbbf24}
 .fast-goal-text.fast-goal-pending{color:var(--text-dim)}
-.fast-days-select{height:38px;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:600;text-align:center;padding:0 4px;box-sizing:border-box;width:100%;outline:none;-webkit-appearance:none;appearance:none}
-.fast-stats-line{margin-top:10px;text-align:center;font-family:var(--sans);font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:nowrap;white-space:nowrap}
-.fast-stat-item{display:inline-flex;align-items:baseline;gap:3px}
+.fast-days-select{height:38px;background:var(--grad-soft);border:1px solid rgba(167,243,208,0.2);border-radius:9px;color:var(--text-muted);font-family:var(--sans);font-size:11px;font-weight:400;text-align:center;text-align-last:center;padding:0 4px;box-sizing:border-box;width:100%;outline:none;-webkit-appearance:none;appearance:none}
+.fast-stats-line{margin-top:10px;text-align:center;font-family:var(--sans);font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;width:100%}
+.fast-stat-item{display:inline-flex;align-items:baseline;gap:3px;white-space:nowrap}
 .fast-stat-lbl{color:var(--text-dim);text-transform:uppercase;letter-spacing:0.3px;font-size:9px}
 .fast-stat-val{color:var(--accent);font-weight:600;font-size:11.5px}
 .fast-stat-sep{color:var(--text-dim);opacity:0.5}
@@ -1021,6 +1034,25 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .sleep-row2 .input-group input{height:38px!important;box-sizing:border-box;text-align:center;padding:0 6px!important;font-size:13px}
 .sleep-row2 .add-btn{height:38px!important;width:38px;align-self:flex-end}
 .sleep-row2 .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
+/* Fila de peso: fecha + ruleta kg + ruleta decimal + peso + foto + registrar */
+.weight-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
+.weight-kg-group{flex:1 1 0;min-width:0}
+.weight-dec-group{flex:1 1 0;min-width:0}
+.weight-result-group{flex:0 0 auto;min-width:50px}
+.weight-input-row .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
+.weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.weight-result-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
+.weight-photo-btn{height:38px;width:38px;flex:0 0 auto;align-self:flex-end;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s}
+.weight-photo-btn:active{transform:scale(0.92)}
+.weight-photo-btn.has-photo{background:rgba(52,211,153,0.14);border-color:rgba(52,211,153,0.4)}
+.meas-photo-area.empty{display:none}
+/* Stats de peso como texto pequeño sin recuadro */
+.weight-stats-line{margin-top:11px;text-align:center;font-family:var(--sans);font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:nowrap;white-space:nowrap}
+.wstat-item{display:inline-flex;align-items:baseline;gap:3px}
+.wstat-lbl{color:var(--text-dim);text-transform:uppercase;letter-spacing:0.3px;font-size:9px}
+.wstat-val{color:var(--accent);font-weight:600;font-size:11.5px}
+.wstat-unit{font-size:8px;color:var(--text-dim);margin-left:1px;font-weight:400}
+.wstat-sep{color:var(--text-dim);opacity:0.5}
 .sleep-row2 .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
 .sleep-row1 .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
 .sleep-row1 .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
@@ -1088,8 +1120,8 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .med-vol-num{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--accent);min-width:26px;text-align:center}
 
 /* VitD blood analysis conversion card */
-.vitd-blood-card{margin-top:8px;background:rgba(248,113,113,0.03);border:1px solid rgba(248,113,113,0.12);border-radius:11px;padding:8px 10px}
-.vitd-blood-chip{flex:1;text-align:center;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;padding:6px 3px;min-width:0}
+.vitd-blood-card{margin-top:8px;background:transparent;border:none;border-radius:0;padding:6px 2px}
+.vitd-blood-chip{flex:1;text-align:center;background:transparent;border:none;border-radius:0;padding:4px 3px;min-width:0}
 .vitd-level-table{display:flex;flex-direction:column;gap:7px}
 .vitd-level-row{display:grid;grid-template-columns:84px 78px 1fr;gap:8px;align-items:center;background:rgba(255,255,255,0.03);border-left:3px solid var(--border);border-radius:8px;padding:8px 10px}
 .vitd-level-name{font-family:var(--sans);font-size:12.5px;font-weight:700}
@@ -1736,7 +1768,7 @@ const GLOSSARY={
   'UV':{n:'Índice Ultravioleta',s:'Intensidad UV solar combinada UVA+UVB (0-11+).',o:'Calculado por hora, latitud, altitud, clima.',c:'Fórmulas astronómicas.',i:'0-2 bajo, 3-5 moderado, 6-7 alto, 8-10 muy alto, 11+ extremo.'},
   'UVB':{n:'Radiación UVB',s:'UV (280-315nm) que sintetiza vitamina D en la piel.',o:'Cuando el sol está alto (>30°).',c:'Necesita ángulo solar elevado.',i:'Esencial para vitamina D. 10-20 min sin protección 2-3 veces/semana en zonas expuestas.'},
   'UVA':{n:'Radiación UVA',s:'UV (315-400nm) que penetra profundo en la piel.',o:'Presente todo el día con sol.',c:'Más constante durante el día que UVB.',i:'Causa envejecimiento cutáneo, activa melanina. Atraviesa nubes y cristal.'},
-  'Vitamina D':{n:'Vitamina D',s:'Hormona sintetizada por la piel con UVB.',o:'Exposición a UVB sin protector solar.',c:'Depende de UV, hora, tipo de piel, ropa, edad y clima.',i:'Esencial para huesos, inmunidad, ánimo. Recomendado 1000-4000 UI/día.'},
+  'Vitamina D':{n:'Vitamina D',s:'Hormona sintetizada por la piel con UVB.',o:'Exposición a UVB sin protector solar.',c:'Depende de UV, hora, tipo de piel, ropa, edad y clima.',i:'Esencial para huesos, inmunidad, ánimo. Recomendado 1000-4000 UI/día. La síntesis cutánea disminuye ~13% por década a partir de los 20 años, por la depleción del 7-dehidrocolesterol de la piel.'},
   'Cenit Solar':{n:'Cenit Solar',s:'Sol en su punto más alto del día.',o:'Calculado por hora, latitud, época.',c:'Entre 12:00 y 14:00 hora local.',i:'Máxima radiación UV. Mejor momento para producción de vitamina D.'},
   'Hora Dorada':{n:'Hora Dorada',s:'Período tras el amanecer o antes del ocaso con luz cálida y suave.',o:'Calculado por la posición solar.',c:'Aproximadamente 1h tras amanecer y antes del ocaso.',i:'Luz óptima para fotografía. Activa ritmo circadiano.'},
   'Hora Azul':{n:'Hora Azul',s:'Período crepuscular antes del amanecer y después del ocaso.',o:'Sol bajo el horizonte pero todavía iluminando el cielo.',c:'~30 min alrededor del amanecer/ocaso.',i:'Luz azulada característica. Importante para el ritmo circadiano.'},
@@ -2471,7 +2503,7 @@ function uvLevel(v){
 // Vit D considering skin type, clothing AND age
 // Age factor: synthesis declines ~13% per decade after 20 (7-DHC depletion). 70yo makes ~25% of a 20yo.
 function vitDAgeFactor(){
-  const age=parseInt(store.settings.age||35);
+  const age=parseInt(store.settings.age||36);
   if(age<=20)return 1.0;
   const f=1.0-(age-20)*0.013;
   return Math.max(0.2,f);
@@ -3959,12 +3991,15 @@ function renderFastingBlock(){
       })();
   if(store.fasting.length){
     const maxF=Math.max.apply(null,store.fasting.map(function(f){return parseFloat(f.duration);}));
-    h+='<div class="fast-stats-line">'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Media</span> <span class="fast-stat-val">'+fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'))+'</span></span>'+
-      '<span class="fast-stat-sep">·</span>'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Hist.</span> <span class="fast-stat-val">'+fmtDuration(avg(store.fasting,'duration'))+'</span></span>'+
-      '<span class="fast-stat-sep">·</span>'+
-      '<span class="fast-stat-item"><span class="fast-stat-lbl">Máx</span> <span class="fast-stat-val">'+fmtDuration(maxF)+'</span></span>'+
+    const _med=fmtDuration(avg(filterByRange(store.fasting,'1m'),'duration'));
+    const _his=fmtDuration(avg(store.fasting,'duration'));
+    const _max=fmtDuration(maxF);
+    h+='<div style="display:flex;justify-content:space-around;align-items:center;gap:4px;margin-top:11px;width:100%;font-family:var(--sans)">'+
+      '<div style="text-align:center;flex:1;min-width:0"><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.2px">Media mes</div><div style="font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">'+_med+'</div></div>'+
+      '<div style="width:1px;height:22px;background:var(--border)"></div>'+
+      '<div style="text-align:center;flex:1;min-width:0"><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.2px">Media histórica</div><div style="font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">'+_his+'</div></div>'+
+      '<div style="width:1px;height:22px;background:var(--border)"></div>'+
+      '<div style="text-align:center;flex:1;min-width:0"><div style="font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.2px">Máximo</div><div style="font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">'+_max+'</div></div>'+
     '</div>';
     h+=renderRegistros('fasting','AYUNOS',function(f){
       const dur=parseFloat(f.duration)||0;
@@ -3990,10 +4025,13 @@ function renderBodyBlock(){
   let h='<div class="card" id="s-body">'+
     blockHeader('body','📐','PESO Y MEDIDAS','Medidas')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // First row: FECHA + PESO + + button
-      '<div class="row-with-add">'+
+      // First row: FECHA + PESO (kg wheel + decimal wheel) + peso resultante + foto + +
+      '<div class="weight-input-row">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="bodyDate" value="'+today()+'"></div>'+
-        '<div class="input-group"><label>PESO (KG)</label><input type="number" id="bodyWeight" step="0.1" placeholder="75.5"></div>'+
+        '<div class="input-group weight-kg-group"><label>KG</label>'+kgWheelHTML('bodyWeightKg',60,120,75)+'</div>'+
+        '<div class="input-group weight-dec-group"><label>DEC.</label>'+decWheelHTML('bodyWeightDec',5)+'</div>'+
+        '<div class="input-group weight-result-group"><label>PESO</label><div class="weight-result-text" id="bodyWeightDisplay">75.5</div></div>'+
+        '<button class="weight-photo-btn" id="bodyPhotoBtn" onclick="document.getElementById(\'measPhotoInput\').click()" title="Añadir foto">📷</button>'+
         '<button class="add-btn" onclick="addBody()" title="Registrar">+</button>'+
       '</div>'+
       // Toggle button to reveal the measurements grid (hidden by default)
@@ -4007,10 +4045,9 @@ function renderBodyBlock(){
         '<div class="input-group"><label>CADERA</label><input type="number" id="mHip" step="0.1" placeholder="cm"></div>'+
         '<div class="input-group"><label>CUELLO</label><input type="number" id="mNeck" step="0.1" placeholder="cm"></div>'+
       '</div>':'')+
-      // Photo area (compact)
-      '<div class="meas-photo-area" id="measPhotoArea" onclick="document.getElementById(\'measPhotoInput\').click()" style="margin-top:6px">'+
+      // Photo preview (solo aparece cuando hay foto; el botón está en la fila de arriba)
+      '<div class="meas-photo-area'+(measPhotoData?'':' empty')+'" id="measPhotoArea" onclick="document.getElementById(\'measPhotoInput\').click()" style="margin-top:6px">'+
         '<div id="measPhotoPreview"></div>'+
-        '<div id="measPhotoPlaceholder">📷 Foto (opcional)</div>'+
         '<input type="file" id="measPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleMeasPhoto(event)">'+
       '</div>';
   // Weight stats
@@ -4018,10 +4055,12 @@ function renderBodyBlock(){
     const last=store.weight[store.weight.length-1];
     const minW=Math.min.apply(null,store.weight.map(function(w){return parseFloat(w.value);}));
     const maxW=Math.max.apply(null,store.weight.map(function(w){return parseFloat(w.value);}));
-    h+='<div class="grid-3" style="margin-top:10px">'+
-      '<div class="stat"><div class="stat-label">ACTUAL</div><div class="stat-value">'+last.value+'<span class="stat-unit">kg</span></div></div>'+
-      '<div class="stat"><div class="stat-label">MEDIA MES</div><div class="stat-value">'+avg(filterByRange(store.weight,'1m'),'value')+'<span class="stat-unit">kg</span></div></div>'+
-      '<div class="stat"><div class="stat-label">MÍN/MÁX</div><div class="stat-value" style="font-size:12px">'+minW+'/'+maxW+'</div></div>'+
+    h+='<div class="weight-stats-line">'+
+      '<span class="wstat-item"><span class="wstat-lbl">Actual</span> <span class="wstat-val">'+last.value+'<span class="wstat-unit">kg</span></span></span>'+
+      '<span class="wstat-sep">·</span>'+
+      '<span class="wstat-item"><span class="wstat-lbl">Media mes</span> <span class="wstat-val">'+avg(filterByRange(store.weight,'1m'),'value')+'<span class="wstat-unit">kg</span></span></span>'+
+      '<span class="wstat-sep">·</span>'+
+      '<span class="wstat-item"><span class="wstat-lbl">Mín/Máx</span> <span class="wstat-val">'+minW+'/'+maxW+'</span></span>'+
     '</div>';
     h+=renderRegistros('weight','PESO',function(w){
       return '<div class="history-item-value">'+w.value+' kg</div>';
@@ -4048,7 +4087,10 @@ function renderBodyBlock(){
 // Unified add for body block (saves to both stores if values present)
 function addBody(){
   const date=document.getElementById('bodyDate').value;
-  const weightVal=document.getElementById('bodyWeight').value;
+  // Peso desde las dos ruletas (kg + decimal).
+  var kgEl=document.getElementById('bodyWeightKg');
+  var decEl=document.getElementById('bodyWeightDec');
+  const weightVal=(kgEl&&decEl)?(kgEl.value+'.'+decEl.value):'';
   if(!date)return alert('Selecciona fecha');
   if(weightVal&&dateExists('weight',date))return warnDuplicate('peso');
   // Measure fields may be hidden (collapsed) → read safely.
@@ -4254,6 +4296,9 @@ function handleMeasPhoto(e){
         const ph=document.getElementById('measPhotoPlaceholder');
         if(prev)prev.innerHTML='<img src="'+dataUrl+'" style="max-width:100%;max-height:120px;border-radius:8px;display:block;margin:0 auto">';
         if(ph)ph.style.display='none';
+        // Marcamos el botón de foto y mostramos el área de previsualización.
+        var area=document.getElementById('measPhotoArea');if(area)area.classList.remove('empty');
+        var pbtn=document.getElementById('bodyPhotoBtn');if(pbtn){pbtn.classList.add('has-photo');pbtn.textContent='✓';}
       }).catch(function(err){console.warn('savePhotoData',err);alert('No se pudo guardar la foto. Inténtalo de nuevo.');});
     };
     img.src=ev.target.result;
@@ -5845,6 +5890,23 @@ function numWheelHTML(id,min,max,def){
   var opts='';for(var v=min;v<=max;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>'+v+'</option>';}
   return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="valor">'+opts+'</select></div>';
 }
+// Ruleta de kilos con callback para actualizar el peso mostrado.
+function kgWheelHTML(id,min,max,def){
+  var opts='';for(var v=min;v<=max;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>'+v+'</option>';}
+  return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="kilos" onchange="onWeightWheelChange()">'+opts+'</select></div>';
+}
+// Ruleta de decimales (.0 a .9) para el peso. def = dígito por defecto (0-9).
+function decWheelHTML(id,def){
+  var opts='';for(var v=0;v<=9;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>.'+v+'</option>';}
+  return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="decimal" onchange="onWeightWheelChange()">'+opts+'</select></div>';
+}
+// Recalcula el peso mostrado a partir de las dos ruletas (kg + decimal).
+function onWeightWheelChange(){
+  var kg=document.getElementById('bodyWeightKg');
+  var dec=document.getElementById('bodyWeightDec');
+  var disp=document.getElementById('bodyWeightDisplay');
+  if(kg&&dec&&disp){disp.textContent=kg.value+'.'+dec.value;}
+}
 function timeWheelHTML(idBase,selMin,selSec){
   selMin=parseInt(selMin)||0;selSec=parseInt(selSec)||0;
   var minOpts='';for(var m=0;m<=120;m++){minOpts+='<option value="'+m+'"'+(m===selMin?' selected':'')+'>'+(m<10?'0'+m:m)+'</option>';}
@@ -6800,32 +6862,35 @@ function saveSunSession(obj){
 function skinClothingInner(){
   const curCloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
   const ageFactor=Math.round(vitDAgeFactor()*100);
-  return '<div class="skinage-compact">'+
-    '<div class="sub-section-label">🎨 TIPO DE PIEL</div>'+
-    '<div class="radio-grid" style="margin-top:4px">'+
-      Object.entries(SKIN_TYPES).map(function(e){
-        const k=e[0],s=e[1];
-        const active=(store.settings.skinType||'III')===k;
-        return '<div class="radio-cell '+(active?'active':'')+'" onclick="setSkinType(\''+k+'\')">TIPO '+k+'<div class="radio-cell-desc">'+s.desc+'</div></div>';
-      }).join('')+
+  return '<div class="skinage-compact" style="margin-top:8px">'+
+    // Tipo de piel + Ropa en una sola línea (sin cabeceras de icono).
+    '<div class="skin-cloth-row">'+
+      '<select class="skinage-select" onchange="setSkinType(this.value)" title="Tipo de piel">'+
+        Object.entries(SKIN_TYPES).map(function(e){
+          const k=e[0],s=e[1];
+          const active=(store.settings.skinType||'III')===k;
+          return '<option value="'+k+'"'+(active?' selected':'')+'>Tipo '+k+' — '+s.desc+'</option>';
+        }).join('')+
+      '</select>'+
+      '<select class="skinage-select" onchange="setClothing(this.value)" title="Ropa">'+
+        Object.entries(CLOTHING_LEVELS).map(function(e){
+          const k=e[0],l=e[1];
+          const active=(store.settings.clothing||'shorts')===k;
+          return '<option value="'+k+'"'+(active?' selected':'')+'>'+l.icon+' '+l.name+' — '+l.skinPct+'%</option>';
+        }).join('')+
+      '</select>'+
     '</div>'+
     '<div class="env-divider"></div>'+
-    '<div class="sub-section-label">👕 ROPA <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;margin-left:auto">'+curCloth.skinPct+'% piel expuesta</span></div>'+
-    '<div class="radio-grid" style="margin-top:4px">'+
-      Object.entries(CLOTHING_LEVELS).map(function(e){
-        const k=e[0],l=e[1];
-        const active=(store.settings.clothing||'shorts')===k;
-        return '<div class="radio-cell clothing-cell '+(active?'active':'')+'" onclick="setClothing(\''+k+'\')"><span class="clothing-name">'+l.name+'</span><span class="clothing-row"><span class="radio-cell-icon">'+l.icon+'</span><span class="clothing-pct">'+l.skinPct+'%</span></span></div>';
-      }).join('')+
+    // Edad con ruleta (0-100, por defecto 36).
+    '<div class="age-wheel-row">'+
+      '<div class="sport-time-wheel num-wheel age-wheel">'+
+        '<select id="ageWheel" onchange="commitAge(this.value)">'+
+          (function(){var o='';for(var v=0;v<=100;v++){o+='<option value="'+v+'"'+((store.settings.age||36)===v?' selected':'')+'>'+v+'</option>';}return o;})()+
+        '</select>'+
+      '</div>'+
+      '<span class="age-wheel-label">Edad</span>'+
+      '<span id="ageSynthLabel" class="age-synth-label">síntesis al '+ageFactor+'%</span>'+
     '</div>'+
-    '<div class="env-divider"></div>'+
-    '<div class="sub-section-label">🎂 EDAD '+
-      '<span class="age-label-inline">'+
-        '<span id="ageSynthLabel" style="color:#999;font-weight:400;text-transform:none;letter-spacing:0">síntesis al '+ageFactor+'%</span>'+
-        '<input type="number" min="1" max="100" value="'+(store.settings.age||35)+'" onchange="commitAge(this.value)" oninput="setAge(this.value)" class="age-input-sm" placeholder="35">'+
-      '</span>'+
-    '</div>'+
-    '<div style="font-size:9px;color:#888;font-style:italic;font-family:var(--serif);margin-top:4px;line-height:1.4">La síntesis de vitamina D disminuye ~13% por década a partir de los 20 años (depleción de 7-dehidrocolesterol cutáneo).</div>'+
   '</div>';
 }
 
@@ -6969,7 +7034,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
     const sunBoostNgml=Math.min(60,vitDSunBoostAt(new Date()));
     const estimateActual=avgDaily;
     return '<div class="card">'+
-      '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div>'+todayDot('sun')+'<button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'suntimer\')"><div class="card-title-text"><span>☀️ VITD - EXPOSICIÓN <button class="help-icon" onclick="event.stopPropagation();showTerm(\'Vitamina D\')">?</button></span></div>'+todayDot('sun')+(!store.collapsed.suntimer?'<button class="sun-bell-btn'+(store.settings.sunSound!==false?' on':'')+'" onclick="event.stopPropagation();toggleSunSound()" title="Aviso sonoro cada 5 min (desde el minuto 10)">'+(store.settings.sunSound!==false?'🔔':'🔕')+'</button>':'')+'<button class="collapse-btn">'+(store.collapsed.suntimer?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.suntimer?' collapsed':'')+'">'+
         (function(){
           const sess=loadSunSession();
@@ -6995,7 +7060,6 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
           }
           return ''+
             '<div class="timer-display" id="sunTimerDisplay" style="font-size:36px;margin:8px 0 6px">'+fmtClock(elapsed)+'</div>'+
-            '<div style="text-align:center;margin:-2px 0 6px"><button class="sun-sound-toggle'+(store.settings.sunSound!==false?' on':'')+'" onclick="toggleSunSound()" title="Aviso sonoro cada 5 min desde el minuto 10">'+(store.settings.sunSound!==false?'🔔 Aviso sonoro: ON':'🔕 Aviso sonoro: OFF')+'</button></div>'+
             (paused?'<div style="text-align:center;font-size:9.5px;color:#fbbf24;font-family:var(--sans);letter-spacing:1px;margin:-2px 0 6px;text-transform:uppercase">⏸ En pausa · reanuda o guarda</div>':'')+
             '<div class="vitd-sess-row">'+
               '<div class="vitd-sess-stat"><span class="vitd-sess-num" id="vitdValue">'+vitdNow+'</span><span class="vitd-sess-unit">IU sesión</span></div>'+
@@ -7668,7 +7732,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.5</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.10</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
