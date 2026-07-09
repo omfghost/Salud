@@ -204,7 +204,7 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .history::-webkit-scrollbar{width:3px}
 .history::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 .history-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%}
-.today-dot{color:#34d399;font-size:9px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 4px rgba(52,211,153,0.6))}
+.today-dot{color:#fbbf24;font-size:12px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 5px rgba(251,191,36,0.75))}
 .history-item-today{background:rgba(52,211,153,0.07);border-left:3px solid #34d399;border-radius:0 8px 8px 0;padding-left:8px;margin-left:-2px}
 .history-today-tag{display:inline-block;background:rgba(52,211,153,0.2);color:#34d399;font-family:var(--sans);font-size:8px;font-weight:700;letter-spacing:0.4px;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle}
 .history-item:last-child{border-bottom:none}
@@ -230,7 +230,7 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 
 /* MEDITATION */
 .med-screen{display:flex;flex-direction:column;align-items:center;padding:4px 0 8px;width:100%;position:relative}
-.med-today-dot{position:absolute;top:4px;right:6px;color:#34d399;font-size:11px;line-height:1;z-index:5;filter:drop-shadow(0 0 5px rgba(52,211,153,0.7))}
+.med-today-dot{position:absolute;top:4px;right:6px;color:#fbbf24;font-size:14px;line-height:1;z-index:5;filter:drop-shadow(0 0 6px rgba(251,191,36,0.8))}
 .breath-orb-container{position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center;margin:4px 0 8px;max-width:100%}
 .breath-orb{width:75px;height:75px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#d1fae5,#86efac 50%,#10b981);box-shadow:0 0 30px rgba(167,243,208,0.4),inset 0 -8px 22px rgba(0,0,0,0.25),inset 0 8px 22px rgba(255,255,255,0.15);transition:transform 0.3s ease-out,box-shadow 0.3s ease-out,background 0.3s ease;position:relative;z-index:2}
 .breath-orb.exhale-color{background:radial-gradient(circle at 30% 30%,#e9d5ff,#c084fc 50%,#9333ea);box-shadow:0 0 30px rgba(192,132,252,0.5),inset 0 -8px 22px rgba(0,0,0,0.25),inset 0 8px 22px rgba(255,255,255,0.15)}
@@ -312,6 +312,8 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 
 /* Help/term icon */
 .help-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(167,243,208,0.1);border:1px solid rgba(167,243,208,0.25);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;margin-left:5px;font-family:var(--sans);transition:all 0.15s;flex-shrink:0}
+.hrv-equiv-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(251,191,36,0.14);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:11px;font-weight:700;cursor:pointer;margin-left:3px;font-family:var(--sans);transition:all 0.15s;flex-shrink:0;line-height:1}
+.hrv-equiv-btn:active{transform:scale(0.88)}
 .help-icon:active{background:rgba(167,243,208,0.2);transform:scale(0.9)}
 
 /* SUN */
@@ -361,6 +363,11 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .panel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px;width:100%}
 .panel-card{background:var(--grad-card);border:1px solid var(--border);border-radius:13px;padding:9px 8px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;min-width:0;box-sizing:border-box}
 .panel-card-today{border-color:rgba(52,211,153,0.45);box-shadow:0 0 0 1px rgba(52,211,153,0.25),0 0 14px rgba(52,211,153,0.12)}
+/* Resaltado dorado: valor en el 10% mejor del histórico (tiene prioridad sobre HOY) */
+.panel-card-top{border-color:rgba(251,191,36,0.55)!important;box-shadow:0 0 0 1px rgba(251,191,36,0.3),0 0 16px rgba(251,191,36,0.18)!important;background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(251,146,60,0.03))}
+.panel-card-top .panel-card-value{color:#fbbf24}
+.panel-card-top-badge{position:absolute;bottom:7px;right:7px;background:#fbbf24;color:#3a2c05;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(251,191,36,0.55);z-index:3}
+.panel-card-top.panel-card-today .panel-card-today-badge{display:none}
 .panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
 .panel-card-today-badge{position:absolute;bottom:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
@@ -1034,6 +1041,8 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .sleep-row2 .input-group input{height:38px!important;box-sizing:border-box;text-align:center;padding:0 6px!important;font-size:13px}
 .sleep-row2 .add-btn{height:38px!important;width:38px;align-self:flex-end}
 .sleep-row2 .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
+.hr-wheel{height:38px;width:100%;padding:0;border-radius:9px}
+.hr-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:15px;font-weight:600;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
 /* Fila de peso: fecha + ruleta kg + ruleta decimal + peso + foto + registrar */
 .weight-input-row{display:flex;gap:5px;align-items:flex-end;width:100%;box-sizing:border-box;flex-wrap:nowrap}
 /* Etiquetas a la misma altura y cuadros alineados en la fila de peso */
@@ -1051,6 +1060,12 @@ input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-e
 .meas-actions-row .weight-photo-btn{align-self:stretch;height:auto}
 .weight-input-row .num-wheel{height:38px;width:100%;padding:0;border-radius:9px}
 .weight-input-row .num-wheel select{width:100%;height:100%;text-align:center;text-align-last:center;font-size:10.5px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none}
+/* Cuadro de peso unificado (opción 2): kg . decimal + unidad, todo en una caja */
+.weight-unified-group{flex:1 1 0;min-width:0}
+.weight-input-row .weight-wheel{height:38px;width:100%;display:flex;align-items:center;justify-content:center;gap:0;padding:0 6px;border-radius:9px}
+.weight-input-row .weight-wheel select{flex:0 1 auto;height:100%;text-align:center;text-align-last:center;font-size:16px;font-weight:700;color:var(--accent);background:transparent;border:none;outline:none;-webkit-appearance:none;appearance:none;padding:0}
+.weight-input-row .weight-wheel .stw-colon{color:var(--accent);font-size:16px;font-weight:700;padding:0}
+.weight-wheel-unit{font-size:10px;color:var(--text-dim);font-weight:500;margin-left:3px;flex:0 0 auto}
 .weight-result-text{height:38px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:-0.3px;white-space:nowrap}
 .weight-photo-btn{height:38px;width:38px;flex:0 0 auto;align-self:flex-end;border-radius:9px;border:1px solid var(--border-strong);background:rgba(255,255,255,0.04);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s}
 .weight-photo-btn:active{transform:scale(0.92)}
@@ -1766,7 +1781,7 @@ function toggleSolReorder(){solReorderMode=!solReorderMode;render();}
 const GLOSSARY={
   'HRV':{n:'Variabilidad Frecuencia Cardíaca',s:'Variación en milisegundos entre latidos consecutivos del corazón.',o:'Wearables durante el sueño.',c:'Intervalos RR del ECG.',i:'HRV alto = mejor recuperación. HRV bajo = posible estrés.'},
   'Puntuación Sueño':{n:'Puntuación de Calidad del Sueño',s:'Métrica 0-100 de la calidad general del sueño.',o:'Wearable o autoevaluación.',c:'Combina duración, eficiencia, fases REM/profundo.',i:'>80 excelente, 70-80 bueno, 60-70 regular.'},
-  'HR Nocturno':{n:'Frecuencia Cardíaca Nocturna',s:'BPM durante sueño profundo.',o:'Wearable durante la noche.',c:'Promedio en fases profundas.',i:'HR bajo indica buena recuperación.'},
+  'HR Reposo':{n:'Frecuencia Cardíaca en Reposo',s:'BPM en reposo, típicamente medido durante el sueño.',o:'Wearable durante la noche o en reposo.',c:'Promedio en fases profundas o al despertar.',i:'HR en reposo bajo indica buena recuperación y condición cardiovascular.'},
   'VO2 Max':{n:'Consumo Máximo de Oxígeno',s:'Capacidad máxima de uso de oxígeno (ml/kg/min).',o:'Test de esfuerzo o estimación por wearable.',c:'FC, ritmo y datos personales.',i:'>50 excelente, 40-50 bueno, <30 bajo.'},
   'Ayuno Intermitente':{n:'Ayuno Intermitente',s:'Periodo prolongado sin ingerir calorías para permitir procesos metabólicos.',o:'Registro manual de la última y primera comida.',c:'Hora fin - Hora última comida.',i:'12h: digestivo descansa. 14-16h: empieza la autofagia. 16-20h: máxima autofagia y quema de grasa. Beneficios: mejora sensibilidad a insulina, regulación de glucosa, longevidad.'},
   'Autofagia':{n:'Autofagia',s:'Proceso celular de "limpieza": las células reciclan componentes dañados y proteínas defectuosas.',o:'Se activa con ayuno (>16h), ejercicio intenso o restricción calórica.',c:'No medible directamente sin biopsia.',i:'Premio Nobel 2016 (Yoshinori Ohsumi). Esencial para longevidad, prevención del cáncer y neurodegeneración.'},
@@ -1804,6 +1819,50 @@ function closeModal(id){const m=document.getElementById('modal-'+id);if(m)m.clas
 
 // Show specific glossary term as modal popup
 // Muestra la información sobre el HRV en una ventana (modal) al pulsar la interrogación.
+// Equivalencia de un valor HRV entre marcas. El valor registrado se asume medido en RMSSD
+// (Garmin/Whoop/Oura/Fitbit lo usan); Apple usa SDNN, que NO es la misma métrica.
+// Los factores derivan de estudios comparativos en la misma persona (Terra 93 días, tablas
+// poblacionales agregadas): Oura lee más bajo (promedia toda la noche), Whoop/Garmin más
+// alto (sueño profundo / noche), Fitbit algo más bajo. Apple SDNN ≈ 1.2-1.3× el RMSSD.
+function showHrvEquivalence(rmssd){
+  var titleEl=document.getElementById('termTitle');
+  var contentEl=document.getElementById('termContent');
+  if(!titleEl||!contentEl){return;}
+  rmssd=parseFloat(rmssd)||0;
+  // Referencia: el HRV REAL de la noche que muestra Garmin (no el "Estado de VFC", que es la
+  // media de 7 noches). Garmin tiende a leer BAJO por dos motivos técnicos:
+  //  1) Ventana: promedia TODA la noche en bloques de 5 min, arrastrando sueño ligero y
+  //     microdespertares (HRV más bajo). Fitbit/Whoop se centran en el tramo más estable
+  //     (sueño profundo/REM), lo que infla el número.
+  //  2) Filtrado conservador: recorta variabilidad ante movimiento/extrasístoles para evitar
+  //     falsos positivos; el RMSSD es muy sensible a cómo cada marca rellena esos huecos.
+  // Proporción de referencia dada por el usuario: Garmin 40 ≈ Fitbit 55 ≈ Apple 35.
+  // (Fitbit ~1.375×, Apple SDNN ~0.875×). Las demás se sitúan según su método.
+  var brands=[
+    {name:'Garmin',metric:'RMSSD',factor:1.00,lo:1.00,hi:1.00,note:'referencia: promedia toda la noche, filtrado conservador → lee bajo'},
+    {name:'Fitbit (Google)',metric:'RMSSD',factor:1.375,lo:1.2,hi:1.6,note:'se centra en el sueño más estable → sale más alto'},
+    {name:'Whoop',metric:'RMSSD',factor:1.35,lo:1.15,hi:1.6,note:'mide solo en sueño profundo → lee alto'},
+    {name:'Oura',metric:'RMSSD',factor:1.20,lo:1.05,hi:1.45,note:'media de 5 min toda la noche → algo más alto'},
+    {name:'Samsung',metric:'RMSSD',factor:1.25,lo:1.05,hi:1.5,note:'una noche → tiende alto'},
+    {name:'Apple Watch',metric:'SDNN',factor:0.875,lo:0.75,hi:1.05,note:'⚠ SDNN por muestreos puntuales, otra métrica: no comparable'}
+  ];
+  titleEl.textContent='Equivalencia HRV entre marcas';
+  var rows=brands.map(function(b){
+    var eq=Math.round(rmssd*b.factor);
+    var lo=Math.round(rmssd*b.lo), hi=Math.round(rmssd*b.hi);
+    var isApple=b.metric==='SDNN';
+    var isRef=b.factor===1.00;
+    var rangeTxt=isRef?'tu valor':('~'+lo+'–'+hi);
+    return '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)">'+
+      '<div style="min-width:0"><span style="font-weight:600;color:'+(isRef?'var(--accent)':'#e5e5e5')+'">'+b.name+'</span> <span style="font-size:9px;color:'+(isApple?'#fbbf24':'var(--text-dim)')+';text-transform:uppercase;letter-spacing:0.3px">'+b.metric+'</span><div style="font-size:10px;color:var(--text-dim);font-family:var(--sans)">'+b.note+'</div></div>'+
+      '<div style="text-align:right;flex:0 0 auto"><span style="font-size:17px;font-weight:700;color:'+(isApple?'#fbbf24':(isRef?'var(--accent)':'#e5e5e5'))+'">'+eq+'</span><span style="font-size:10px;color:var(--text-dim)"> ms</span><div style="font-size:9px;color:var(--text-dim)">'+rangeTxt+'</div></div>'+
+    '</div>';
+  }).join('');
+  contentEl.innerHTML='<p style="margin-bottom:4px;font-size:12px">Partiendo de tu <strong style="color:var(--accent)">HRV real de Garmin: '+rmssd+' ms</strong>, la misma noche en otras marcas rondaría:</p>'+
+    rows+
+    '<p style="margin-top:10px;font-size:10.5px;color:var(--text-dim);line-height:1.5;font-family:var(--sans)">Todas usan la misma fórmula (RMSSD), pero <strong>miden tramos distintos de la noche</strong> y filtran el ruido a su manera. Garmin promedia <strong>toda la noche</strong> con filtrado conservador, así que lee bajo; Fitbit y Whoop se centran en el <strong>sueño más profundo/estable</strong>, lo que sube el número. <strong style="color:#fbbf24">Apple usa SDNN</strong> con muestreos puntuales, otra métrica no comparable. Regla de oro: los valores absolutos <strong>no son comparables entre marcas</strong> — lo fiable es tu <strong>propia tendencia</strong> con un mismo dispositivo. Estimaciones amplias, no conversiones exactas.</p>';
+  openModal('term');
+}
 function showHrvInfo(){
   var titleEl=document.getElementById('termTitle');
   var contentEl=document.getElementById('termContent');
@@ -2201,29 +2260,52 @@ function makeChart(canvasId,labels,data,label,color,dates){
   color=color||'#a7f3d0';
   if(charts[canvasId]){try{charts[canvasId].destroy();}catch(e){}}
   const ctx=document.getElementById(canvasId);if(!ctx)return;
+  // Helper: hex -> rgba con alpha
+  function rgba(hex,a){var h=hex.replace('#','');if(h.length===3){h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];}var r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+  // Degradado vertical para el relleno (más profesional que un color plano).
+  var g2d=ctx.getContext&&ctx.getContext('2d');
+  var fill=rgba(color,0.14);
+  try{if(g2d){var h=ctx.height||160;var grad=g2d.createLinearGradient(0,0,0,h);grad.addColorStop(0,rgba(color,0.28));grad.addColorStop(1,rgba(color,0.01));fill=grad;}}catch(e){}
+  // Estadísticas para líneas de referencia y puntos destacados.
+  var nums=data.filter(function(v){return typeof v==='number'&&!isNaN(v);});
+  var mean=nums.length?nums.reduce(function(a,b){return a+b;},0)/nums.length:0;
+  var maxV=nums.length?Math.max.apply(null,nums):0;
+  var minV=nums.length?Math.min.apply(null,nums):0;
+  // Resalta el punto máximo, mínimo y el último con radios/colores distintos.
+  function ptRadius(v,i,isLast){if(v===maxV||v===minV)return 5;if(isLast)return 5;return 3;}
+  function ptColor(v,i,isLast){if(v===maxV)return '#fbbf24';if(v===minV)return rgba(color,0.5);if(isLast)return '#fff';return color;}
   // If real dates are provided, plot on a proportional (linear by-day) x-axis so gaps in
   // time are represented to scale. Otherwise fall back to evenly-spaced category labels.
   let useTime=Array.isArray(dates)&&dates.length===data.length&&dates.length>0;
   let dataset,xScale;
+  var lastIdx=data.length-1;
+  var prColors=data.map(function(v,i){return ptColor(v,i,i===lastIdx);});
+  var prRadii=data.map(function(v,i){return ptRadius(v,i,i===lastIdx);});
   if(useTime){
     const dayMs=86400000;
     const ts=dates.map(function(d){return new Date(d+'T12:00:00').getTime();});
     const minT=Math.min.apply(null,ts);
     const pts=data.map(function(v,i){return {x:(ts[i]-minT)/dayMs,y:v,_label:labels[i]};});
-    dataset={label:label,data:pts,borderColor:color,backgroundColor:color+'1a',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:7,pointHitRadius:18,borderWidth:1.8,pointBackgroundColor:color,pointBorderColor:'#000',pointBorderWidth:1};
+    dataset={label:label,data:pts,borderColor:color,backgroundColor:fill,tension:0.35,fill:true,pointRadius:prRadii,pointHoverRadius:8,pointHitRadius:18,borderWidth:2.2,pointBackgroundColor:prColors,pointBorderColor:'#0a0a0a',pointBorderWidth:1.5,clip:8};
     const span=Math.max(1,(Math.max.apply(null,ts)-minT)/dayMs);
-    xScale={type:'linear',min:0,max:span,ticks:{color:'#444',font:{size:9},maxTicksLimit:7,callback:function(val){
+    xScale={type:'linear',min:0,max:span,ticks:{color:'#8a8a8a',font:{size:9.5},maxTicksLimit:7,maxRotation:0,autoSkip:true,callback:function(val){
       // show the label of the nearest data point to this x (in days)
       let best=null,bestD=1e9;
       for(let i=0;i<pts.length;i++){const dd=Math.abs(pts[i].x-val);if(dd<bestD){bestD=dd;best=pts[i];}}
       return best&&bestD<0.5?best._label:'';
-    }},grid:{color:'rgba(255,255,255,0.03)'}};
+    }},grid:{color:'rgba(255,255,255,0.04)',drawTicks:false},border:{display:false}};
   }else{
-    dataset={label:label,data:data,borderColor:color,backgroundColor:color+'1a',tension:0.3,fill:true,pointRadius:4,pointHoverRadius:7,pointHitRadius:18,borderWidth:1.8,pointBackgroundColor:color,pointBorderColor:'#000',pointBorderWidth:1};
-    xScale={ticks:{color:'#444',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.03)'}};
+    dataset={label:label,data:data,borderColor:color,backgroundColor:fill,tension:0.35,fill:true,pointRadius:prRadii,pointHoverRadius:8,pointHitRadius:18,borderWidth:2.2,pointBackgroundColor:prColors,pointBorderColor:'#0a0a0a',pointBorderWidth:1.5,clip:8};
+    xScale={ticks:{color:'#8a8a8a',font:{size:9.5},maxTicksLimit:8,maxRotation:0,autoSkip:true},grid:{color:'rgba(255,255,255,0.04)',drawTicks:false},border:{display:false}};
   }
+  // Línea de media (referencia) como dataset punteado detrás de la serie.
+  var meanData=useTime?dataset.data.map(function(p){return {x:p.x,y:parseFloat(mean.toFixed(2))};}):data.map(function(){return parseFloat(mean.toFixed(2));});
+  var meanSet={label:'media',data:meanData,borderColor:rgba(color,0.4),borderWidth:1,borderDash:[5,5],pointRadius:0,pointHitRadius:0,fill:false,tension:0,order:1};
+  dataset.order=0;
+  // Padding vertical para que los puntos no se corten arriba/abajo.
+  var pad=(maxV-minV)*0.12||1;
   try{
-    charts[canvasId]=new Chart(ctx,{type:'line',data:{labels:useTime?undefined:labels,datasets:[dataset]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false,axis:'xy'},plugins:{legend:{display:false},tooltip:{backgroundColor:'#000',borderColor:color,borderWidth:1,padding:9,displayColors:false,callbacks:{title:function(items){if(!items.length)return '';const it=items[0];if(useTime&&it.raw&&it.raw._label)return it.raw._label;return it.label||'';},label:function(it){const v=useTime?it.raw.y:it.parsed.y;return label+': '+v;}}}},scales:{x:xScale,y:{ticks:{color:'#444',font:{size:9}},grid:{color:'rgba(255,255,255,0.03)'}}}}});
+    charts[canvasId]=new Chart(ctx,{type:'line',data:{labels:useTime?undefined:labels,datasets:[dataset,meanSet]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:6,right:6,bottom:2,left:2}},interaction:{mode:'nearest',intersect:false,axis:'xy'},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(0,0,0,0.92)',borderColor:color,borderWidth:1,padding:10,cornerRadius:8,titleColor:'#fff',bodyColor:'#e5e5e5',displayColors:false,filter:function(it){return it.datasetIndex===0;},callbacks:{title:function(items){if(!items.length)return '';const it=items[0];if(useTime&&it.raw&&it.raw._label)return it.raw._label;return it.label||'';},label:function(it){const v=useTime?it.raw.y:it.parsed.y;var extra='';if(v===maxV)extra='  ▲ máx';else if(v===minV)extra=' ▼ mín';return label+': '+v+extra;},afterLabel:function(it){const v=useTime?it.raw.y:it.parsed.y;var diff=v-mean;var sign=diff>=0?'+':'';return 'media: '+mean.toFixed(1)+'  ('+sign+diff.toFixed(1)+')';}}}},scales:{x:xScale,y:{suggestedMin:minV-pad,suggestedMax:maxV+pad,ticks:{color:'#8a8a8a',font:{size:9.5},maxTicksLimit:6,padding:4},grid:{color:'rgba(255,255,255,0.04)',drawTicks:false},border:{display:false}}}}});
   }catch(e){}
 }
 
@@ -2256,7 +2338,7 @@ const EDIT_FIELDS={
   weight:[{k:'date',l:'Fecha',t:'date'},{k:'value',l:'Peso (kg)',t:'number'}],
   measurements:[{k:'date',l:'Fecha',t:'date'},{k:'waist',l:'Cintura',t:'number'},{k:'chest',l:'Pecho',t:'number'},{k:'thigh',l:'Muslo',t:'number'},{k:'bicep',l:'Bícep',t:'number'},{k:'hip',l:'Cadera',t:'number'},{k:'neck',l:'Cuello',t:'number'}],
   fasting:[{k:'date',l:'Fecha',t:'date'},{k:'start',l:'Última comida',t:'time'},{k:'end',l:'Fin ayuno',t:'time'}],
-  sleep:[{k:'date',l:'Fecha',t:'date'},{k:'hrv',l:'HRV',t:'number'},{k:'hours',l:'Sueño',t:'hm'},{k:'score',l:'Puntuación',t:'number'},{k:'hr',l:'HR nocturno',t:'number'}],
+  sleep:[{k:'date',l:'Fecha',t:'date'},{k:'hrv',l:'HRV',t:'number'},{k:'hours',l:'Sueño',t:'hm'},{k:'score',l:'Puntuación',t:'number'},{k:'hr',l:'HR reposo',t:'number'}],
   allergy:[{k:'date',l:'Fecha',t:'date'},{k:'level',l:'Intensidad',t:'number'},{k:'notes',l:'Notas',t:'text'}],
   vo2history:[{k:'date',l:'Fecha',t:'date'},{k:'value',l:'VO2 Max',t:'number'}],
   activity:[{k:'date',l:'Fecha',t:'date'},{k:'subtype',l:'Tipo',t:'text'},{k:'duration',l:'Duración (min)',t:'number'},{k:'result',l:'Resultado',t:'text'},{k:'distance',l:'Distancia',t:'text'},{k:'hrAvg',l:'FC media',t:'number'}],
@@ -2535,13 +2617,29 @@ function vitDPerMinute(uvb){
 
 // --- Reusable serum 25(OH)D estimation (shared by Sol section and Panel widget) ---
 // Average daily IU produced from sun over the last 30 days.
-// --- Serum 25(OH)D kinetics: exponential decay model (half-life ~15 days) ---
-// Each IU produced by sun adds to serum and decays exponentially. The serum level is the
-// sum of every past session's contribution, each decayed by e^(-k·daysAgo), plus the
-// analytic baseline. Calibrated so 100 IU/day sustained ≈ +1 ng/ml at equilibrium.
-var VITD_HALFLIFE=15; // days
-var VITD_K=Math.log(2)/VITD_HALFLIFE; // decay constant per day
-var VITD_C=(1-Math.exp(-VITD_K))/100; // ng/ml added per IU (single dose), calibrated
+// --- Serum 25(OH)D kinetics: two-compartment model (blood + body/fat reserve) ---
+// Physiology: vitamin D from sun does not just sit in the blood and vanish. Part of it is
+// stored in body tissue (mainly fat) and released slowly back into circulation over weeks
+// to months. We model this with TWO exponential decays:
+//   • a FAST compartment  (blood/circulating 25(OH)D, half-life ~18 days) — the bulk of the
+//     short-term signal; explains the measurable drop over the first weeks after a peak.
+//   • a SLOW compartment  (body/fat reserve, half-life ~75 days) — a long tail that keeps
+//     feeding the blood, so in a UVB-free winter the level declines believably over MONTHS
+//     instead of collapsing to the floor in a few weeks.
+// Each IU produced by the sun is split between the two pools; the serum contribution of a
+// past session is the sum of both pools decayed by their own constant. Calibrated so that a
+// sustained 100 IU/day ≈ +1 ng/ml at equilibrium (same calibration target as before, so
+// summer/steady-state numbers stay familiar; only the winter/decline shape changes).
+var VITD_HALFLIFE=18;        // days — fast (blood) compartment
+var VITD_K=Math.log(2)/VITD_HALFLIFE;
+var VITD_RESERVE_HALFLIFE=75; // days — slow (body/fat reserve) compartment
+var VITD_RK=Math.log(2)/VITD_RESERVE_HALFLIFE;
+var VITD_RESERVE_FRACTION=0.35; // fraction of each dose routed to the slow reserve pool
+// Per-IU ng/ml contribution split across the two pools, calibrated so 100 IU/day sustained
+// tends to +1 ng/ml at equilibrium (blended across both pools).
+var _vitdFastEq=(1-VITD_RESERVE_FRACTION)/(1-Math.exp(-VITD_K));
+var _vitdSlowEq=VITD_RESERVE_FRACTION/(1-Math.exp(-VITD_RK));
+var VITD_C=1/(100*(_vitdFastEq+_vitdSlowEq)); // ng/ml per IU, blended calibration
 // Dietary/reserve floor: serum never falls below this (body stores + diet). Configurable.
 var VITD_FLOOR=12; // ng/ml minimum
 // The analytic baseline "ages": an old blood test no longer reflects today's status, so its
@@ -2561,7 +2659,10 @@ function vitDSunBoostAt(refDate){
     const daysAgo=(ref-d)/(1000*60*60*24);
     if(daysAgo<0)return; // session is in the future relative to ref
     const iu=parseFloat(s.vitd)||0;
-    boost+=iu*VITD_C*Math.exp(-VITD_K*daysAgo);
+    // Two pools: fast (blood) and slow (fat reserve), each decaying with its own half-life.
+    const fast=(1-VITD_RESERVE_FRACTION)*Math.exp(-VITD_K*daysAgo);
+    const slow=VITD_RESERVE_FRACTION*Math.exp(-VITD_RK*daysAgo);
+    boost+=iu*VITD_C*(fast+slow);
   });
   return boost;
 }
@@ -2748,7 +2849,7 @@ const WIDGET_DEFS={
   sleep_hrv_avg:{name:'HRV media mes',icon:'💗',section:'estado',get:function(){const v=avg(filterByRange(store.sleep,'1m'),'hrv');return v>0?{val:v,unit:'ms',sub:'30 días'}:null;}},
   sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate,date:s.date};}},
   sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating,date:s.date};}},
-  sleep_hr:{name:'HR nocturno',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
+  sleep_hr:{name:'HR reposo',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
   fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date),date:f.date}:null;}},
   fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
@@ -3443,6 +3544,49 @@ function moveWidget(idx,dir){
 
 function togglePanelSection(name){store.panelCollapsed[name]=!store.panelCollapsed[name];saveCollapsed();render();}
 
+// Mapa de widgets con serie histórica: qué array, qué campo y si "más alto es mejor".
+// higher=true -> el 10% superior son los valores MÁS ALTOS; higher=false -> los MÁS BAJOS.
+const WIDGET_STATS={
+  weight:{arr:'weight',field:'value',higher:false},
+  sleep_hrv:{arr:'sleep',field:'hrv',higher:true},
+  sleep_hours:{arr:'sleep',field:'hours',higher:true},
+  sleep_score:{arr:'sleep',field:'score',higher:true},
+  sleep_hr:{arr:'sleep',field:'hr',higher:false},
+  fasting_last:{arr:'fasting',field:'duration',higher:true},
+  steps:{arr:'steps',field:'value',higher:true},
+  vo2max:{arr:null},
+  meditation_last:{arr:'meditation',field:'minutes',higher:true}
+};
+// ¿El dato mostrado por el widget está en el 10% mejor de su histórico?
+// Requiere al menos 8 registros para ser estadísticamente razonable.
+function widgetInTopDecile(id,data){
+  const cfg=WIDGET_STATS[id];
+  if(!cfg||!cfg.arr||!data)return false;
+  const arr=store[cfg.arr];
+  if(!Array.isArray(arr)||arr.length<8)return false;
+  const vals=arr.map(function(x){return parseFloat(x[cfg.field]);}).filter(function(v){return !isNaN(v);});
+  if(vals.length<8)return false;
+  const cur=parseFloat(String(data.val).replace(',','.'));
+  // Para duraciones formateadas (HH:MM) usamos el campo crudo del último registro.
+  let curVal=cur;
+  if(isNaN(curVal)){
+    const last=arr[arr.length-1];
+    curVal=last?parseFloat(last[cfg.field]):NaN;
+  }
+  if(isNaN(curVal))return false;
+  const sorted=vals.slice().sort(function(a,b){return a-b;});
+  if(cfg.higher){
+    // umbral del percentil 90
+    const idx=Math.floor(sorted.length*0.9);
+    const threshold=sorted[Math.min(idx,sorted.length-1)];
+    return curVal>=threshold;
+  }else{
+    // mejor = más bajo: percentil 10
+    const idx=Math.ceil(sorted.length*0.1)-1;
+    const threshold=sorted[Math.max(0,idx)];
+    return curVal<=threshold;
+  }
+}
 function renderWidget(id){
   const def=WIDGET_DEFS[id];if(!def)return '';
   const data=def.get();
@@ -3454,7 +3598,11 @@ function renderWidget(id){
   const isToday=data.date&&String(data.date).substring(0,10)===today();
   const todayCls=isToday?' panel-card-today':'';
   const todayBadge=isToday?'<span class="panel-card-today-badge">HOY</span>':'';
-  return '<div class="panel-card'+todayCls+'" onclick="showTab(\''+def.section+'\')">'+todayBadge+'<div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
+  // Resaltado dorado si el valor está en el 10% mejor del histórico.
+  const topDecile=widgetInTopDecile(id,data);
+  const topCls=topDecile?' panel-card-top':'';
+  const topBadge=topDecile?'<span class="panel-card-top-badge" title="Entre el 10% mejor de tu histórico">★ TOP</span>':'';
+  return '<div class="panel-card'+todayCls+topCls+'" onclick="showTab(\''+def.section+'\')">'+topBadge+todayBadge+'<div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
 }
 
 function renderWidgetsModal(){
@@ -3611,7 +3759,10 @@ function computeVitDSerumSeries(filt,range,allRecords){
       const d=new Date(x.date+'T12:00:00');
       const daysAgo=(cur-d)/dayMs;
       if(daysAgo<0)return;
-      boost+=(parseFloat(x.vitd)||0)*VITD_C*Math.exp(-VITD_K*daysAgo);
+      // Two-compartment contribution (fast blood pool + slow reserve pool).
+      const fast=(1-VITD_RESERVE_FRACTION)*Math.exp(-VITD_K*daysAgo);
+      const slow=VITD_RESERVE_FRACTION*Math.exp(-VITD_RK*daysAgo);
+      boost+=(parseFloat(x.vitd)||0)*VITD_C*(fast+slow);
     });
     const ngml=Math.min(150,Math.max(VITD_FLOOR,effBase+Math.min(60,boost)));
     labels.push(cur.toLocaleDateString('es-ES',{day:'2-digit',month:'short'}));
@@ -4038,12 +4189,10 @@ function renderBodyBlock(){
   let h='<div class="card" id="s-body">'+
     blockHeader('body','📐','PESO Y MEDIDAS','Medidas')+
     '<div class="collapsible'+(collapsed?' collapsed':'')+'">'+
-      // First row: FECHA + PESO (kg wheel + decimal wheel) + peso resultante + + button
+      // First row: FECHA + PESO unificado (kg.decimal en un cuadro) + + button
       '<div class="weight-input-row">'+
         '<div class="input-group date-compact"><label>FECHA</label><input type="date" id="bodyDate" value="'+today()+'"></div>'+
-        '<div class="input-group weight-kg-group"><label>KG</label>'+kgWheelHTML('bodyWeightKg',60,120,parseInt(localStorage.getItem('h_lastWeightKg'))||84)+'</div>'+
-        '<div class="input-group weight-dec-group"><label>DEC.</label>'+decWheelHTML('bodyWeightDec',(localStorage.getItem('h_lastWeightDec')!=null?parseInt(localStorage.getItem('h_lastWeightDec')):5))+'</div>'+
-        '<div class="input-group weight-result-group"><label>PESO</label><div class="weight-result-text" id="bodyWeightDisplay">'+(parseInt(localStorage.getItem('h_lastWeightKg'))||84)+'.'+(localStorage.getItem('h_lastWeightDec')!=null?parseInt(localStorage.getItem('h_lastWeightDec')):5)+'</div></div>'+
+        '<div class="input-group weight-unified-group"><label>PESO</label>'+weightWheelHTML(40,200,parseInt(localStorage.getItem('h_lastWeightKg'))||84,(localStorage.getItem('h_lastWeightDec')!=null?parseInt(localStorage.getItem('h_lastWeightDec')):5))+'</div>'+
         '<button class="add-btn" onclick="addBody()" title="Registrar">+</button>'+
       '</div>'+
       // Fila de acciones: toggle de medidas + botón de foto
@@ -4151,10 +4300,15 @@ function renderSleepBlock(){
         '<div class="input-group"><label>PUNTUACIÓN</label>'+numWheelHTML('sleepScore',50,100,85)+'</div>'+
         '<div class="input-group"><label>SUEÑO (H:M)</label><input type="time" id="sleepHoursTime" value="07:30"></div>'+
       '</div>'+
-      // Row 2: HR nocturno + HRV + (+)
+      // Row 2: HR reposo + HRV + (+)
       '<div class="sleep-row2">'+
-        '<div class="input-group"><label>HR NOCT.</label>'+numWheelHTML('sleepHR',30,60,42)+'</div>'+
-        '<div class="input-group"><label>HRV <button class="help-icon" onclick="event.stopPropagation();showHrvInfo()">?</button></label>'+numWheelHTML('sleepHRV',40,140,70)+'</div>'+
+        '<div class="input-group"><label>HR REPOSO</label>'+numWheelHTML('sleepHR',30,60,42)+'</div>'+
+        '<div class="input-group"><label>HRV <button class="help-icon" onclick="event.stopPropagation();showHrvInfo()">?</button>'+(function(){
+          // Botón de equivalencia entre marcas: solo si hay registro de sueño con HRV para HOY.
+          var todayRec=(store.sleep||[]).find(function(s){return s.date&&String(s.date).substring(0,10)===today()&&s.hrv;});
+          if(!todayRec)return '';
+          return ' <button class="hrv-equiv-btn" onclick="event.stopPropagation();showHrvEquivalence('+parseFloat(todayRec.hrv)+')" title="Equivalencia entre marcas">⇄</button>';
+        })()+'</label>'+numWheelHTML('sleepHRV',40,140,70)+'</div>'+
         '<button class="add-btn" onclick="addSleep()" title="Registrar sueño">+</button>'+
       '</div>';
   if(store.sleep.length){
@@ -4163,7 +4317,7 @@ function renderSleepBlock(){
       return '<div style="font-size:11.5px;color:#bbb">HRV '+s.hrv+' · '+fmtDuration(s.hours)+' · Score '+s.score+' · HR '+s.hr+'bpm</div>'+
         '<div style="display:inline-flex;align-items:center;gap:5px;margin-top:3px;cursor:pointer" onclick="event.stopPropagation();showSleepEvalById('+s.id+')"><span style="font-size:11px;font-weight:700;color:'+ev.color+'">'+ev.emoji+' '+ev.composite+'</span><span style="font-size:9px;color:'+ev.color+';text-transform:uppercase;letter-spacing:0.5px">'+ev.rating+'</span></div>';
     },{chartLabel:'HRV',chartKey:'hrv',chartColor:'#a7f3d0',
-       searchFields:[{key:'hrv',label:'HRV',aliases:['hrv','vfc']},{key:'hr',label:'HR noct.',aliases:['hr','pulso','fc']},{key:'score',label:'Puntuación',aliases:['score','puntuacion','puntos']},{key:'hours',label:'Duración',aliases:['horas','duracion','sueño','sueno']},{key:'_global',label:'Global',aliases:['global','valoracion'],get:function(it){var e=evalSleep(it);return e?e.composite:null;}},{key:'date',label:'Fecha',aliases:['fecha','día']}],
+       searchFields:[{key:'hrv',label:'HRV',aliases:['hrv','vfc']},{key:'hr',label:'HR reposo',aliases:['hr','pulso','fc','reposo']},{key:'score',label:'Puntuación',aliases:['score','puntuacion','puntos']},{key:'hours',label:'Duración',aliases:['horas','duracion','sueño','sueno']},{key:'_global',label:'Global',aliases:['global','valoracion'],get:function(it){var e=evalSleep(it);return e?e.composite:null;}},{key:'date',label:'Fecha',aliases:['fecha','día']}],
        chartMetrics:[
          {key:'hrv',label:'HRV',color:'#a7f3d0'},
          {key:'score',label:'Puntuación',color:'#60a5fa'},
@@ -4619,25 +4773,53 @@ function evalSleep(s){
   else if(hours>=5&&hours<6)durScore=50+(hours-5)*25;
   else if(hours>10)durScore=75;
   else durScore=Math.max(10,hours*10);
-  // HRV: higher is better (relative). 20=poor,40=fair,60=good,80+=excellent
+  // HRV: higher is better. Curva MÁS EXIGENTE (referencia Garmin RMSSD nocturno): un HRV
+  // mediocre ya no saca 80; hay que estar claramente alto para puntuar bien.
   let hrvScore;
-  if(hrv>=70)hrvScore=100;else if(hrv>=50)hrvScore=80+(hrv-50)*1;else if(hrv>=35)hrvScore=60+(hrv-35)*1.33;else if(hrv>=20)hrvScore=35+(hrv-20)*1.67;else hrvScore=Math.max(10,hrv*1.75);
-  // Resting HR at night: lower is better. <50 excellent, 50-60 good, 60-70 fair, >70 poor
+  if(hrv>=75)hrvScore=100;
+  else if(hrv>=60)hrvScore=85+(hrv-60)*1;      // 60→85, 75→100
+  else if(hrv>=45)hrvScore=65+(hrv-45)*1.33;   // 45→65, 60→85
+  else if(hrv>=30)hrvScore=40+(hrv-30)*1.67;   // 30→40, 45→65
+  else if(hrv>=20)hrvScore=20+(hrv-20)*2;      // 20→20, 30→40
+  else hrvScore=Math.max(5,hrv);
+  // Resting HR at night: lower is better. Curva más exigente.
   let hrScore;
-  if(hr<=0)hrScore=null;else if(hr<48)hrScore=100;else if(hr<=55)hrScore=85;else if(hr<=62)hrScore=70;else if(hr<=70)hrScore=50;else hrScore=Math.max(15,100-(hr-50)*2);
-  // Garmin device score if provided is trustworthy; blend it in heavily
+  if(hr<=0)hrScore=null;
+  else if(hr<45)hrScore=100;
+  else if(hr<=50)hrScore=88;
+  else if(hr<=56)hrScore=72;
+  else if(hr<=62)hrScore=55;
+  else if(hr<=70)hrScore=38;
+  else hrScore=Math.max(10,100-(hr-48)*2.2);
+  // --- Ponderación: las métricas OBJETIVAS (HRV, HR) mandan; el score del dispositivo
+  // (Garmin) se reduce a un apoyo, porque tiende a salir alto aun con recuperación pobre. ---
   const parts=[];
-  parts.push({w:0.3,v:durScore});
-  parts.push({w:0.3,v:hrvScore});
-  if(hrScore!=null)parts.push({w:0.15,v:hrScore});
-  if(score>0)parts.push({w:0.5,v:score}); // device score dominates if present
+  parts.push({w:0.28,v:durScore});
+  parts.push({w:0.40,v:hrvScore});               // HRV es el mayor peso individual
+  if(hrScore!=null)parts.push({w:0.25,v:hrScore});
+  if(score>0)parts.push({w:0.20,v:score});       // el score del dispositivo ya no domina
   let tw=0,acc=0;parts.forEach(function(p){tw+=p.w;acc+=p.w*p.v;});
-  const composite=Math.round(acc/tw);
+  let composite=acc/tw;
+  // --- Penalización no lineal ("contundente"): si las métricas fisiológicas son malas,
+  // el resultado global baja con fuerza aunque el resto compense. Un mal HRV o un HR alto
+  // no deben quedar enmascarados por un buen score de dispositivo. ---
+  var penalty=0;
+  if(hrv>0&&hrvScore<45)penalty+=(45-hrvScore)*0.45;     // HRV pobre pesa mucho
+  else if(hrv>0&&hrvScore<60)penalty+=(60-hrvScore)*0.20;
+  if(hrScore!=null&&hrScore<45)penalty+=(45-hrScore)*0.35; // HR de reposo alto penaliza
+  if(durScore<50)penalty+=(50-durScore)*0.20;             // dormir muy poco penaliza
+  // Si DOS o más señales objetivas son malas a la vez, penalización extra (efecto combinado).
+  var badCount=0;
+  if(hrv>0&&hrvScore<50)badCount++;
+  if(hrScore!=null&&hrScore<50)badCount++;
+  if(durScore<55)badCount++;
+  if(badCount>=2)penalty+=8*(badCount-1);
+  composite=Math.round(Math.max(5,composite-penalty));
   let rating,color,emoji;
   if(composite>=90){rating='Excelente';color='#34d399';emoji='🌟';}
   else if(composite>=80){rating='Muy bueno';color='#a7f3d0';emoji='😴';}
-  else if(composite>=70){rating='Bueno';color='#fbbf24';emoji='🙂';}
-  else if(composite>=55){rating='Regular';color='#fb923c';emoji='😐';}
+  else if(composite>=68){rating='Bueno';color='#fbbf24';emoji='🙂';}
+  else if(composite>=52){rating='Regular';color='#fb923c';emoji='😐';}
   else{rating='Deficiente';color='#f87171';emoji='😴';}
   return {composite:composite,rating:rating,color:color,emoji:emoji,durScore:Math.round(durScore),hrvScore:Math.round(hrvScore),hrScore:hrScore!=null?Math.round(hrScore):null};
 }
@@ -4850,8 +5032,8 @@ function renderActividad(c){
     h+='<div class="sport-form-grid sport-form-grid-4">'+
       '<div class="input-group"><label>TIEMPO</label>'+timeWheelHTML('actDur')+'</div>'+
       '<div class="input-group"><label>REPETICIONES</label><input type="text" id="actResult" placeholder="100 reps"></div>'+
-      '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="155"></div>'+
-      '<div class="input-group"><label>FC MÁX</label><input type="number" id="actHRmax" placeholder="185"></div>'+
+      '<div class="input-group"><label>FC MEDIA</label>'+hrWheelHTML('actHRavg','h_lastFCavg',145)+'</div>'+
+      '<div class="input-group"><label>FC MÁX</label>'+hrWheelHTML('actHRmax','h_lastFCmax',175)+'</div>'+
     '</div>';
   }else if(actType==='carrera'){
     h+='<div class="input-group"><label>TIPO DE CARRERA</label><select id="actSubtype" onchange="setRunType(this.value)"><option value="continua"'+(runType==='continua'?' selected':'')+'>Continua</option><option value="series"'+(runType==='series'?' selected':'')+'>Series</option></select></div>';
@@ -4860,8 +5042,8 @@ function renderActividad(c){
         '<div class="input-group"><label>DISTANCIA (KM)</label><input type="number" step="0.01" id="actDistance" placeholder="10"></div>'+
         '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="50"></div>'+
         '<div class="input-group"><label>RITMO MEDIO (min/km)</label><input type="text" id="actResult" placeholder="5:00"></div>'+
-        '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="145"></div>'+
-        '<div class="input-group"><label>FC MÁXIMA</label><input type="number" id="actHRmax" placeholder="175"></div>'+
+        '<div class="input-group"><label>FC MEDIA</label>'+hrWheelHTML('actHRavg','h_lastFCavg',145)+'</div>'+
+        '<div class="input-group"><label>FC MÁXIMA</label>'+hrWheelHTML('actHRmax','h_lastFCmax',175)+'</div>'+
         '<div class="input-group"><label>DESNIVEL (m)</label><input type="number" id="actHRmax2" placeholder="opcional"></div>'+
       '</div>';
     }else{
@@ -4870,8 +5052,8 @@ function renderActividad(c){
         '<div class="input-group"><label>DURACIÓN TOTAL (min)</label><input type="number" id="actDuration" placeholder="45"></div>'+
         '<div class="input-group"><label>RITMO POR SERIE (min/km)</label><input type="text" id="actResult" placeholder="3:45"></div>'+
         '<div class="input-group"><label>RECUPERACIÓN (s)</label><input type="number" id="actHRavg" placeholder="60"></div>'+
-        '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRmax" placeholder="165"></div>'+
-        '<div class="input-group"><label>FC MÁXIMA</label><input type="number" id="actHRmax2" placeholder="185"></div>'+
+        '<div class="input-group"><label>FC MEDIA</label>'+hrWheelHTML('actHRmax','h_lastFCavg',145)+'</div>'+
+        '<div class="input-group"><label>FC MÁXIMA</label>'+hrWheelHTML('actHRmax2','h_lastFCmax',175)+'</div>'+
       '</div>';
     }
   }else if(actType==='piscina'){
@@ -4896,7 +5078,7 @@ function renderActividad(c){
         '<div class="input-group"><label>DISTANCIA</label><input type="text" id="actDistance" placeholder="opcional"></div>'+
         '<div class="input-group"><label>DURACIÓN (MIN)</label><input type="number" id="actDuration" placeholder="60"></div>'+
         '<div class="input-group"><label>RESULTADO</label><input type="text" id="actResult" placeholder="opcional"></div>'+
-        '<div class="input-group"><label>FC MEDIA</label><input type="number" id="actHRavg" placeholder="bpm"></div>'+
+        '<div class="input-group"><label>FC MEDIA</label>'+hrWheelHTML('actHRavg','h_lastFCavg',145)+'</div>'+
       '</div>';
     }
   }
@@ -5913,7 +6095,18 @@ function fmtActivityDuration(d){
 
 // Genera una ruleta de tiempo MM:SS (mismo estilo que las ruletas de la app).
 // idBase -> crea idBase+'Min' y idBase+'Sec'. selMin/selSec opcionales (números).
-// Ruleta de un solo número (min..max) con valor por defecto. Para HR nocturno, HRV, etc.
+// Ruleta de frecuencia cardíaca (120-220) que recuerda el último valor por id.
+// storeKey = clave localStorage; def = valor por defecto si no hay memoria.
+function hrWheelHTML(id,storeKey,def){
+  var saved=parseInt(localStorage.getItem(storeKey));
+  var sel=(!isNaN(saved)&&saved>=120&&saved<=220)?saved:def;
+  var opts='';for(var v=120;v<=220;v++){opts+='<option value="'+v+'"'+(v===sel?' selected':'')+'>'+v+'</option>';}
+  return '<div class="sport-time-wheel num-wheel hr-wheel"><select id="'+id+'" data-hrkey="'+storeKey+'" onchange="onHrWheelChange(this)">'+opts+'</select></div>';
+}
+function onHrWheelChange(el){
+  if(el&&el.dataset&&el.dataset.hrkey){localStorage.setItem(el.dataset.hrkey,el.value);}
+}
+// Ruleta de un solo número (min..max) con valor por defecto. Para HR reposo, HRV, etc.
 function numWheelHTML(id,min,max,def){
   var opts='';for(var v=min;v<=max;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>'+v+'</option>';}
   return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="valor">'+opts+'</select></div>';
@@ -5922,6 +6115,18 @@ function numWheelHTML(id,min,max,def){
 function kgWheelHTML(id,min,max,def){
   var opts='';for(var v=min;v<=max;v++){opts+='<option value="'+v+'"'+(v===def?' selected':'')+'>'+v+'</option>';}
   return '<div class="sport-time-wheel num-wheel"><select id="'+id+'" aria-label="kilos" onchange="onWeightWheelChange()">'+opts+'</select></div>';
+}
+// Ruleta de peso unificada (opción 2): kg y decimal en un solo cuadro con "." en medio,
+// igual que el cuadro de tiempo mm:ss. Dos ruedas cortas dentro de una única caja.
+function weightWheelHTML(kgMin,kgMax,kgDef,decDef){
+  var kgOpts='';for(var k=kgMin;k<=kgMax;k++){kgOpts+='<option value="'+k+'"'+(k===kgDef?' selected':'')+'>'+k+'</option>';}
+  var decOpts='';for(var d=0;d<=9;d++){decOpts+='<option value="'+d+'"'+(d===decDef?' selected':'')+'>'+d+'</option>';}
+  return '<div class="sport-time-wheel weight-wheel">'+
+    '<select id="bodyWeightKg" aria-label="kilos" onchange="onWeightWheelChange()">'+kgOpts+'</select>'+
+    '<span class="stw-colon">.</span>'+
+    '<select id="bodyWeightDec" aria-label="decimal" onchange="onWeightWheelChange()">'+decOpts+'</select>'+
+    '<span class="weight-wheel-unit">kg</span>'+
+  '</div>';
 }
 // Ruleta de decimales (.0 a .9) para el peso. def = dígito por defecto (0-9).
 function decWheelHTML(id,def){
@@ -7763,7 +7968,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 29.16</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.3</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
