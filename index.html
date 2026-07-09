@@ -2635,11 +2635,11 @@ var VITD_K=Math.log(2)/VITD_HALFLIFE;
 var VITD_RESERVE_HALFLIFE=75; // days — slow (body/fat reserve) compartment
 var VITD_RK=Math.log(2)/VITD_RESERVE_HALFLIFE;
 var VITD_RESERVE_FRACTION=0.35; // fraction of each dose routed to the slow reserve pool
-// Per-IU ng/ml contribution split across the two pools, calibrated so 100 IU/day sustained
-// tends to +1 ng/ml at equilibrium (blended across both pools).
-var _vitdFastEq=(1-VITD_RESERVE_FRACTION)/(1-Math.exp(-VITD_K));
-var _vitdSlowEq=VITD_RESERVE_FRACTION/(1-Math.exp(-VITD_RK));
-var VITD_C=1/(100*(_vitdFastEq+_vitdSlowEq)); // ng/ml per IU, blended calibration
+// Calibration: the contribution of a single dose ON THE DAY IT IS TAKEN must equal the old
+// single-compartment model, so switching models does NOT change your current estimated level
+// — it only changes how slowly past doses decay afterwards (the fat-reserve long tail).
+// On day 0 the two pools sum to (1-frac)+frac = 1, so VITD_C = old per-IU constant.
+var VITD_C=(1-Math.exp(-Math.log(2)/15))/100; // ng/ml per IU, matches prior calibration
 // Dietary/reserve floor: serum never falls below this (body stores + diet). Configurable.
 var VITD_FLOOR=12; // ng/ml minimum
 // The analytic baseline "ages": an old blood test no longer reflects today's status, so its
@@ -7968,7 +7968,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.3</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.4</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
