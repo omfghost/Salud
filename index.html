@@ -368,7 +368,7 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .panel-card-top .panel-card-value{color:#fbbf24}
 .panel-card-top-badge{position:absolute;bottom:7px;right:7px;background:#fbbf24;color:#3a2c05;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(251,191,36,0.55);z-index:3}
 /* Mini-indicador "HOY" cuando coincide con el chip TOP: va arriba a la derecha, pequeño */
-.panel-card-today-mini{position:absolute;top:6px;right:6px;background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.45);font-family:var(--sans);font-size:7px;font-weight:800;letter-spacing:0.5px;padding:1px 4px;border-radius:5px;line-height:1.15;z-index:4}
+.panel-card-today-mini{position:absolute;bottom:25px;right:7px;background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.45);font-family:var(--sans);font-size:6px;font-weight:800;letter-spacing:0.4px;padding:1px 3px;border-radius:4px;line-height:1.1;z-index:4}
 .panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
 .panel-card-today-badge{position:absolute;bottom:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
@@ -7977,7 +7977,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.5</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.6</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
