@@ -367,7 +367,8 @@ input[type="date"],input[type="time"]{font-family:var(--sans);color-scheme:dark;
 .panel-card-top{border-color:rgba(251,191,36,0.55)!important;box-shadow:0 0 0 1px rgba(251,191,36,0.3),0 0 16px rgba(251,191,36,0.18)!important;background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(251,146,60,0.03))}
 .panel-card-top .panel-card-value{color:#fbbf24}
 .panel-card-top-badge{position:absolute;bottom:7px;right:7px;background:#fbbf24;color:#3a2c05;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(251,191,36,0.55);z-index:3}
-.panel-card-top.panel-card-today .panel-card-today-badge{display:none}
+/* Mini-indicador "HOY" cuando coincide con el chip TOP: va arriba a la derecha, pequeño */
+.panel-card-today-mini{position:absolute;top:6px;right:6px;background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.45);font-family:var(--sans);font-size:7px;font-weight:800;letter-spacing:0.5px;padding:1px 4px;border-radius:5px;line-height:1.15;z-index:4}
 .panel-card-today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#34d399}
 .panel-card-today-badge{position:absolute;bottom:7px;right:7px;background:#34d399;color:#04110b;font-family:var(--sans);font-size:8px;font-weight:800;letter-spacing:0.6px;padding:2px 6px;border-radius:7px;line-height:1;box-shadow:0 0 8px rgba(52,211,153,0.5);z-index:2}
 .panel-card:active{transform:scale(0.97);border-color:rgba(167,243,208,0.2)}
@@ -3597,11 +3598,19 @@ function renderWidget(id){
   // Highlight when the shown datum was recorded today
   const isToday=data.date&&String(data.date).substring(0,10)===today();
   const todayCls=isToday?' panel-card-today':'';
-  const todayBadge=isToday?'<span class="panel-card-today-badge">HOY</span>':'';
   // Resaltado dorado si el valor está en el 10% mejor del histórico.
   const topDecile=widgetInTopDecile(id,data);
   const topCls=topDecile?' panel-card-top':'';
   const topBadge=topDecile?'<span class="panel-card-top-badge" title="Entre el 10% mejor de tu histórico">★ TOP</span>':'';
+  // Indicador de "hoy": si NO hay chip TOP, va el chip normal "HOY" abajo a la derecha.
+  // Si SÍ hay TOP (que ocupa esa esquina), mostramos un punto pequeño "HOY" arriba a la
+  // derecha para que ambos se vean sin solaparse.
+  let todayBadge='';
+  if(isToday){
+    todayBadge=topDecile
+      ?'<span class="panel-card-today-mini" title="Registrado hoy">HOY</span>'
+      :'<span class="panel-card-today-badge">HOY</span>';
+  }
   return '<div class="panel-card'+todayCls+topCls+'" onclick="showTab(\''+def.section+'\')">'+topBadge+todayBadge+'<div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value">'+data.val+'<span class="panel-card-unit">'+(data.unit||'')+'</span></div><div class="panel-card-sub">'+(data.sub||'')+'</div></div>';
 }
 
@@ -7968,7 +7977,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.4</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.5</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
