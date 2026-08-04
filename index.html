@@ -1659,6 +1659,18 @@ function deletePhotoData(ref){
 var _photoCache={};
 var _photoMissing={};   // refs que existen en datos pero cuyos bytes no están en IndexedDB
 var _pendingPhotoChecks=[];   // verificaciones de fotos diferidas tras sincronización remota
+// Al terminar de leer una foto de IndexedDB hay que repintar TAMBIÉN los modales
+// abiertos: render() solo redibuja la pestaña, así que el editor de día se quedaba
+// eternamente en «Cargando foto…» (la foto estaba bien, solo no se refrescaba).
+function refreshPhotoDependentUI(){
+  if(typeof render==='function')render();
+  try{
+    var de=document.getElementById('modal-dayEditor');
+    if(de&&de.classList.contains('active')&&typeof refreshDayImagePreview==='function')refreshDayImagePreview();
+    var qf=document.getElementById('modal-quickFill');
+    if(qf&&qf.classList.contains('active')&&typeof renderQuickFill==='function')renderQuickFill();
+  }catch(e){}
+}
 function ensurePhotoCached(ref){
   if(!ref||ref.indexOf('img:')!==0)return;          // nothing to resolve
   if(_photoCache[ref]!==undefined)return;            // already cached (or pending)
@@ -1673,10 +1685,10 @@ function ensurePhotoCached(ref){
       _photoMissing[ref]=true;
     }
     // Re-render so the freshly-loaded image (or missing state) appears.
-    if(typeof render==='function')render();
+    refreshPhotoDependentUI();
   }).catch(function(){
     _photoCache[ref]=null;_photoMissing[ref]=true;
-    if(typeof render==='function')render();
+    refreshPhotoDependentUI();
   });
 }
 // ¿Sabemos que esta foto falta (bytes no disponibles en este dispositivo)?
@@ -2246,14 +2258,19 @@ function purgeOldWeeks(){
   Object.keys(store.weekArchive).forEach(function(key){
     // Conservamos de -4 hasta +1; lo que esté por debajo de -4 se elimina.
     if(key<minKey){
-      var wk=store.weekArchive[key];
+      var wk=store.weekArchive[key]||{};
+      var imgs=[];
       WEEKDAY_IDS.concat(['extra']).forEach(function(did){
         var img=wk[did]&&wk[did].image;
-        if(img&&typeof img==='string'&&img.indexOf('img:')===0){
-          if(!photoRefInUse(img,null,null)){try{deletePhotoData(img);}catch(e){}}
-        }
+        if(img&&typeof img==='string'&&img.indexOf('img:')===0)imgs.push(img);
       });
+      // Quitamos la semana del archivo ANTES de comprobar las fotos: ahora photoRefInUse
+      // recorre todo el archivo y, si no, la propia semana que estamos purgando aparecería
+      // como usuaria de sus fotos y nunca se liberaría el espacio.
       delete store.weekArchive[key];changed=true;
+      imgs.forEach(function(img){
+        if(!photoRefInUse(img,null,null)){try{deletePhotoData(img);}catch(e){}}
+      });
     }
   });
   if(changed)save('weekArchive',store.weekArchive);
@@ -2383,8 +2400,9 @@ function delItem(type,id){
   // Free any attached photo/video from IndexedDB so it doesn't linger on the device.
   const rec=(store[type]||[]).find(function(x){return x.id===id;});
   if(rec){
-    if(rec.photo)deletePhotoData(rec.photo);
-    if(rec.image)deletePhotoData(rec.image);
+    // Solo liberamos los bytes si ninguna semana ni otro registro usa esa misma foto.
+    if(rec.photo&&!photoRefInUse(rec.photo,null,null))deletePhotoData(rec.photo);
+    if(rec.image&&!photoRefInUse(rec.image,null,null))deletePhotoData(rec.image);
     if(rec.video)deleteVideoBlob(rec.video);
   }
   store[type]=store[type].filter(function(x){return x.id!==id;});
@@ -2972,11 +2990,24 @@ function checkWeeklyReset(){
       if(src.actId)snapshot[did].actId=src.actId; // vínculo al registro, si existe
     });
     store.weekArchive[last]=snapshot;
-    // La semana en curso se reinicia: si el plan se repite cada semana, conservamos los
-    // textos/fotos base pero quitamos las marcas; los vínculos a registros se limpian.
+    // ¿Habías planificado esta semana por adelantado (vista "semana siguiente")? Ese
+    // contenido vivía en weekArchive[current]; ahora que la semana ha llegado, pasa a ser
+    // la semana en curso. Antes se quedaba huérfano ahí y acababa purgado con sus fotos.
+    var planned=store.weekArchive[current];
     WEEKDAY_IDS.concat(['extra']).forEach(function(did){
-      if(store.weeklyPlan[did]){store.weeklyPlan[did].done=false;delete store.weeklyPlan[did].actId;}
+      var pl=planned&&planned[did];
+      if(pl&&(pl.text||pl.image)){
+        store.weeklyPlan[did]={text:pl.text||'',image:pl.image||null,done:false};
+      }else{
+        // Sin plan previo: conservamos el texto base (el plan puede repetirse) pero la FOTO
+        // se queda solo en la semana archivada. Antes la referencia quedaba duplicada en
+        // ambas semanas: la foto de la semana pasada reaparecía en la nueva y, al
+        // sustituirla, se borraban los bytes que el archivo seguía necesitando.
+        var cur=store.weeklyPlan[did]||{text:'',image:null};
+        store.weeklyPlan[did]={text:cur.text||'',image:null,done:false};
+      }
     });
+    if(planned)delete store.weekArchive[current];
     saveWeekly();
     save('weekArchive',store.weekArchive);
     purgeOldWeeks();
@@ -3605,7 +3636,7 @@ function renderPanel(c){
           const completed=data.done===true;
           const highlighted=hasContent&&!completed;
           const isToday=d.id===todayId;
-          const onClickHandler=data.image?'openImageViewer(\''+d.id+'\',\'panel\')':'openDayEditor(\''+d.id+'\')';
+          const onClickHandler=data.image?'openImageViewer(\''+d.id+'\',\'panel\',0)':'openDayEditor(\''+d.id+'\',0)';
           const dnum=dayOfMonthFor(d.id,0);
           return '<div class="day-chip '+(highlighted?'has-content':'')+' '+(isToday?'today-chip':'')+' '+(completed?'day-completed-chip':'')+'" onclick="'+onClickHandler+'" title="'+d.name+(completed?' (completado)':'')+'"><span class="day-chip-short">'+d.short+(completed?' ✓':'')+'</span><span class="day-chip-num">'+dnum+'</span></div>';
         }).join('')+
@@ -3615,7 +3646,7 @@ function renderPanel(c){
           const exHasContent=!!(ex.text||ex.image);
           const exCompleted=ex.done===true;
           const exHighlighted=exHasContent&&!exCompleted;
-          const exHandler=ex.image?'openImageViewer(\'extra\',\'panel\')':'openDayEditor(\'extra\')';
+          const exHandler=ex.image?'openImageViewer(\'extra\',\'panel\',0)':'openDayEditor(\'extra\',0)';
           return '<div class="day-chip day-chip-extra '+(exHighlighted?'has-content':'')+' '+(exCompleted?'day-completed-chip':'')+'" onclick="'+exHandler+'" title="T. Extra'+(exCompleted?' (completado)':'')+'">T+'+(exCompleted?' ✓':'')+'</div>';
         })()+
       '</div>'+
@@ -6488,7 +6519,7 @@ function clearAllWeeklyDays(){
   // Remove every attached photo from IndexedDB too (si no la usa otra semana/registro).
   DAY_NAMES.concat([{id:'extra'}]).forEach(function(d){
     var rec=wk[d.id];
-    if(rec&&rec.image&&!photoRefInUse(rec.image,d.id,null))deletePhotoData(rec.image);
+    if(rec&&rec.image&&!photoRefInUse(rec.image,d.id,null,weekViewOffset))deletePhotoData(rec.image);
   });
   DAY_NAMES.forEach(function(d){wk[d.id]={text:'',image:null,done:false};});
   wk.extra={text:'',image:null,done:false};
@@ -6518,9 +6549,12 @@ function renderManageDays(){
 let editingDayId=null;
 let editingImageData=null;
 let editingWeekOffset=0;
-function openDayEditor(dayId){
+function openDayEditor(dayId,weekOffset){
   editingDayId=dayId;
-  editingWeekOffset=weekViewOffset; // recordamos la semana que se está editando
+  // La semana sobre la que se edita debe venir de quien abre el editor. El Panel muestra
+  // SIEMPRE la semana en curso, así que pasa 0; si no, heredaba weekViewOffset (la semana
+  // que quedara abierta en Actividad) y la foto acababa en otra semana distinta.
+  editingWeekOffset=(weekOffset==null)?weekViewOffset:weekOffset;
   let dayName;
   if(dayId==='extra'){
     dayName='T. EXTRA';
@@ -6528,9 +6562,17 @@ function openDayEditor(dayId){
     const day=DAY_NAMES.find(function(d){return d.id===dayId;});
     dayName=day?day.name.toUpperCase():dayId.toUpperCase();
   }
-  const data=currentWeekData()[dayId]||{text:'',image:null};
+  const data=weekDataForOffset(editingWeekOffset)[dayId]||{text:'',image:null};
   editingImageData=data.image;
   if(editingImageData)ensurePhotoCached(editingImageData);
+  // Añadimos la fecha concreta al título: así se ve de un vistazo a qué semana va la foto.
+  if(dayId!=='extra'){
+    var _dt=dateForWeekdayOffset(dayId,editingWeekOffset);
+    if(_dt)dayName+=' '+_dt.getDate()+' '+['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][_dt.getMonth()];
+  }else if(editingWeekOffset!==0){
+    var _mon=mondayForOffset(editingWeekOffset);
+    dayName+=' · SEM '+_mon.getDate()+'/'+(_mon.getMonth()+1);
+  }
   document.getElementById('dayEditorTitle').textContent=dayName;
   document.getElementById('dayEditorText').value=data.text||'';
   refreshDayImagePreview();
@@ -6575,7 +6617,10 @@ function handleDayImage(e){
   reader.readAsDataURL(file);
 }
 function clearDayImage(){
-  if(editingImageData)deletePhotoData(editingImageData);
+  // Solo desvinculamos. El borrado real de los bytes lo decide saveDayPlan(), que
+  // comprueba antes que la foto no la esté usando otra semana o un registro. Antes se
+  // borraba aquí mismo, así que se destruían fotos de otras semanas (y también si
+  // después cerrabas el editor sin guardar).
   editingImageData=null;
   refreshDayImagePreview();
   document.getElementById('dayImageInput').value='';
@@ -6584,7 +6629,7 @@ function saveDayPlan(){if(!editingDayId)return;const text=document.getElementByI
   // If the photo was replaced with a different one, delete the previous from IndexedDB,
   // but only if it isn't still referenced by another day or an activity record.
   if(prev.image&&prev.image!==editingImageData&&prev.image.indexOf&&prev.image.indexOf('img:')===0){
-    if(!photoRefInUse(prev.image,editingDayId,editingImageData))deletePhotoData(prev.image);
+    if(!photoRefInUse(prev.image,editingDayId,editingImageData,editingWeekOffset))deletePhotoData(prev.image);
   }
   wk[editingDayId]={text:text,image:editingImageData,done:prev.done===true};
   if(prev.actId)wk[editingDayId].actId=prev.actId; // conservamos el vínculo al registro
@@ -6618,7 +6663,7 @@ function renderQuickFill(){
   if(!box)return;
   box.innerHTML=quickFillDays().map(function(d){
     var buf=quickFillBuf[d.id]||{text:'',image:null};
-    var dt=(d.id==='extra')?null:dateForWeekday(d.id);
+    var dt=(d.id==='extra')?null:dateForWeekdayOffset(d.id,quickFillWeekOffset||0);
     var label=(d.id==='extra')?'T. Extra':(d.name+(dt?' '+dt.getDate():''));
     var imgSrc=buf.image?photoSrc(buf.image):'';
     var thumb=buf.image
@@ -6683,7 +6728,7 @@ function saveQuickFill(){
     var original=(buf.originalImage!==undefined)?buf.originalImage:prev.image;
     if(original&&original!==buf.image&&original.indexOf&&original.indexOf('img:')===0){
       // Además, solo borramos si esa referencia ya no está en uso por ningún día.
-      if(!photoRefInUse(original,id,buf.image))deletePhotoData(original);
+      if(!photoRefInUse(original,id,buf.image,quickFillWeekOffset||0))deletePhotoData(original);
     }
     wk[id]={text:buf.text||'',image:buf.image||null,done:prev.done===true};
     if(prev.actId)wk[id].actId=prev.actId;
@@ -6694,28 +6739,46 @@ function saveQuickFill(){
 }
 // ¿La referencia de foto sigue usándose por algún día (distinto de excludeDay) o por la
 // nueva imagen que vamos a guardar? Evita borrar bytes que aún están en uso.
-function photoRefInUse(ref,excludeDay,newImg){
+function photoRefInUse(ref,excludeDay,newImg,excludeWeekOffset){
   if(!ref)return false;
   if(newImg===ref)return true;
-  var wp=store.weeklyPlan||{};
   var inUse=false;
-  Object.keys(wp).forEach(function(k){
-    if(k===excludeDay)return;
-    if(wp[k]&&wp[k].image===ref)inUse=true;
-  });
-  // También comprobamos los registros de actividad (la foto se copia al registrar).
+  // Clave de la semana que se está editando: solo en ESA semana se excluye el día en curso.
+  var exKey=null;
+  if(excludeWeekOffset!=null){
+    try{exKey=(excludeWeekOffset===0)?'__current__':weekKeyForOffset(excludeWeekOffset);}catch(e){exKey=null;}
+  }
+  function scanWeek(key,wk){
+    if(!wk||typeof wk!=='object')return;
+    Object.keys(wk).forEach(function(k){
+      if(k===excludeDay&&(exKey===null?key==='__current__':key===exKey))return;
+      var v=wk[k];
+      if(v&&typeof v==='object'&&v.image===ref)inUse=true;
+    });
+  }
+  scanWeek('__current__',store.weeklyPlan);
+  // ANTES solo se miraba la semana en curso: por eso, al cambiar o borrar una foto, se
+  // destruían los bytes de fotos que seguían usándose en semanas archivadas.
+  var arch=store.weekArchive||{};
+  Object.keys(arch).forEach(function(key){scanWeek(key,arch[key]);});
+  // Registros de actividad y de medidas (la foto se copia al registrar).
   if(!inUse&&Array.isArray(store.activity)){
     store.activity.forEach(function(a){if(a&&a.photo===ref)inUse=true;});
+  }
+  if(!inUse&&Array.isArray(store.measurements)){
+    store.measurements.forEach(function(m){if(m&&m.photo===ref)inUse=true;});
   }
   return inUse;
 }
 var imageViewerOrigin=null;
 var _imgZoom={scale:1,x:0,y:0,startDist:0,startScale:1,lastX:0,lastY:0,dragging:false,pinching:false};
-function openImageViewer(srcOrDayId,origin){
+function openImageViewer(srcOrDayId,origin,weekOffset){
   let ref=srcOrDayId;
   // If a weekday/extra id was passed, pull its stored image reference.
-  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&srcOrDayId.indexOf('img:')!==0&&currentWeekData()[srcOrDayId]){
-    ref=currentWeekData()[srcOrDayId].image||'';
+  // weekOffset explícito (el Panel pasa 0) para no leer la semana equivocada.
+  const _wk=weekDataForOffset((weekOffset==null)?weekViewOffset:weekOffset);
+  if(srcOrDayId&&!srcOrDayId.startsWith('data:')&&!srcOrDayId.startsWith('http')&&!srcOrDayId.startsWith('blob:')&&srcOrDayId.indexOf('img:')!==0&&_wk[srcOrDayId]){
+    ref=_wk[srcOrDayId].image||'';
   }
   if(!ref){alert('Sin imagen para mostrar');return;}
   imageViewerOrigin=origin||null;
@@ -8139,7 +8202,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.7</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.8</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
