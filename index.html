@@ -1447,6 +1447,74 @@ const store={
     sunday:{text:'',image:null},extra:{text:'',image:null,done:false},calendarSync:false
   }
 };
+
+// ============= SANEADO DEL STORE =============
+// Un solo campo corrupto (null, tipo equivocado, o un registro null dentro de un array)
+// bastaba para que el render de una pestaña lanzara una excepción y la pantalla quedara
+// completamente en negro (render() capturaba el error en silencio). sanitizeStore()
+// repara la estructura al arrancar y tras cada sincronización con la nube.
+const STORE_RECORD_ARRAYS=['weight','sleep','fasting','meditation','activity','measurements','sun','records','maestroSaved'];
+const STORE_LIST_DEFAULTS={
+  sports:function(){return DEFAULT_SPORTS.slice();},
+  estadoOrder:function(){return DEFAULT_ESTADO_ORDER.slice();},
+  activityOrder:function(){return ['weekly','sport','acthistory','records','wods'];},
+  panelOrder:function(){return ['sun','weekly','bodyState','widgets'];},
+  solOrder:function(){return ['environment','hormones','suntimer','lightfreq'];}
+};
+const STORE_OBJ_DEFAULTS={
+  settings:function(){return {music:true,transitionSound:true,autoLocation:true,lat:40.4168,lng:-3.7038,sunEffects:true,countdown:3,weather:'soleado',autoWeather:true,skinType:'III',clothing:'shorts'};},
+  sportParams:function(){return {};},
+  panelCollapsed:function(){return {};},
+  collapsed:function(){return {};},
+  weekArchive:function(){return {};},
+  lightLog:function(){return {amanecer:{},ocaso:{},higiene:{}};},
+  activeDays:function(){return {monday:true,tuesday:true,wednesday:true,thursday:true,friday:true,saturday:true,sunday:true};},
+  weeklyPlan:function(){return {monday:{text:'',image:null},tuesday:{text:'',image:null},wednesday:{text:'',image:null},thursday:{text:'',image:null},friday:{text:'',image:null},saturday:{text:'',image:null},sunday:{text:'',image:null},extra:{text:'',image:null,done:false},calendarSync:false};}
+};
+function sanitizeStore(){
+  const fixed=[];
+  function mark(k){if(fixed.indexOf(k)<0)fixed.push(k);}
+  // 1) Arrays de registros: deben ser arrays sin elementos nulos ni basura.
+  STORE_RECORD_ARRAYS.forEach(function(k){
+    if(!Array.isArray(store[k])){store[k]=[];mark(k);return;}
+    const clean=store[k].filter(function(x){return x&&typeof x==='object';});
+    if(clean.length!==store[k].length){store[k]=clean;mark(k);}
+  });
+  // 2) Listas de orden / deportes: array de strings, nunca vacío.
+  Object.keys(STORE_LIST_DEFAULTS).forEach(function(k){
+    if(!Array.isArray(store[k])){store[k]=STORE_LIST_DEFAULTS[k]();mark(k);return;}
+    const clean=store[k].filter(function(x){return x!=null&&(typeof x==='string'||typeof x==='object');});
+    if(!clean.length){store[k]=STORE_LIST_DEFAULTS[k]();mark(k);}
+    else if(clean.length!==store[k].length){store[k]=clean;mark(k);}
+  });
+  // 3) Widgets: array (puede estar vacío si el usuario los quitó todos) sin entradas nulas.
+  if(!Array.isArray(store.widgets)){store.widgets=DEFAULT_WIDGETS.slice();mark('widgets');}
+  else{
+    const cw=store.widgets.filter(function(x){return typeof x==='string'&&x;});
+    if(cw.length!==store.widgets.length){store.widgets=cw;mark('widgets');}
+  }
+  // 4) Objetos de configuración: deben ser objetos planos.
+  Object.keys(STORE_OBJ_DEFAULTS).forEach(function(k){
+    // weekArchive se carga más abajo: si aún no existe no lo tocamos para no pisarlo.
+    if(k==='weekArchive'&&store[k]===undefined)return;
+    if(!store[k]||typeof store[k]!=='object'||Array.isArray(store[k])){store[k]=STORE_OBJ_DEFAULTS[k]();mark(k);}
+  });
+  // 5) weeklyPlan: cada día debe ser un objeto (un día null rompía la vista semanal).
+  ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','extra'].forEach(function(d){
+    if(!store.weeklyPlan[d]||typeof store.weeklyPlan[d]!=='object'){
+      store.weeklyPlan[d]=(d==='extra')?{text:'',image:null,done:false}:{text:'',image:null};
+      mark('weeklyPlan');
+    }
+  });
+  // 6) Persistimos solo lo que se haya reparado.
+  fixed.forEach(function(k){
+    try{localStorage.setItem('h_'+k,JSON.stringify(store[k]));}catch(e){}
+  });
+  if(fixed.length)console.warn('sanitizeStore reparó:',fixed.join(', '));
+  return fixed;
+}
+sanitizeStore();
+
 // Ensure extra slot exists in older saved data
 if(!store.weeklyPlan.extra)store.weeklyPlan.extra={text:'',image:null,done:false};
 // Archivo de semanas anteriores/próxima (indexado por lunes YYYY-MM-DD).
@@ -2547,12 +2615,89 @@ function showTab(tab,btn,dir){
 }
 
 function render(){
+  const c=document.getElementById('content');
+  if(!c)return;
+  const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,maestro:renderMaestro,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
+  const fn=renderers[currentTab]||renderPanel;
   try{
-    const c=document.getElementById('content');
-    const renderers={panel:renderPanel,estado:renderEstado,sueno:renderSueno,actividad:renderActividad,maestro:renderMaestro,meditacion:renderMeditacion,sol:renderSol,ajustes:renderAjustes};
     c.innerHTML='';
-    (renderers[currentTab]||renderPanel)(c);
-  }catch(e){console.warn('render',e);}
+    fn(c);
+    return;
+  }catch(e){
+    console.warn('render',e);
+    // Segundo intento: reparamos la estructura de datos y volvemos a montar la vista.
+    try{
+      sanitizeStore();
+      c.innerHTML='';
+      fn(c);
+      return;
+    }catch(e2){
+      console.warn('render (2º intento)',e2);
+      c.innerHTML=renderErrorCard(e2);
+    }
+  }
+}
+// Tarjeta de error visible: antes, si un render fallaba, el catch se lo tragaba y la
+// pestaña quedaba con el fondo en negro sin ninguna pista de qué había pasado.
+function renderErrorCard(e){
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(ch){return ch==='&'?'&amp;':(ch==='<'?'&lt;':'&gt;');});}
+  const msg=esc(e&&e.message?e.message:e);
+  const where=esc(((e&&e.stack||'').split('\n')[1]||'').trim());
+  return '<div class="section-title-inline" style="margin-bottom:10px">ERROR AL MOSTRAR ESTA SECCIÓN</div>'+
+    '<div class="card" style="padding:14px;line-height:1.5">'+
+      '<div style="font-size:13px;color:var(--text)">No se ha podido dibujar esta pantalla, pero <b>tus datos siguen guardados</b>.</div>'+
+      '<div style="margin-top:10px;font-size:11.5px;color:var(--text-dim);word-break:break-word">'+
+        '<div><b>Fallo:</b> '+msg+'</div>'+(where?'<div style="margin-top:3px"><b>Dónde:</b> '+where+'</div>':'')+
+      '</div>'+
+      '<div class="btn-row" style="margin-top:14px;flex-wrap:wrap;gap:8px">'+
+        '<button class="btn btn-primary btn-sm" style="flex:1;min-width:96px" onclick="render()">Reintentar</button>'+
+        '<button class="btn btn-secondary btn-sm" style="flex:1;min-width:120px" onclick="repairCurrentView()">Reparar sección</button>'+
+        '<button class="btn btn-tertiary btn-sm" style="flex:1;min-width:110px" onclick="copyErrorInfo(this)">Copiar detalle</button>'+
+      '</div>'+
+      '<div style="margin-top:10px;font-size:10.5px;color:var(--text-dim)">«Reparar sección» restaura el orden de bloques y los widgets a los valores por defecto. No borra ningún registro.</div>'+
+    '</div>';
+}
+// Aísla cada bloque del panel: si uno falla, se degrada a un aviso pequeño en lugar de
+// tumbar toda la pantalla.
+function safePanelBlock(label,build){
+  try{return build();}
+  catch(err){
+    // Primer fallo: reparamos la estructura del store y reintentamos una vez.
+    try{sanitizeStore();return build();}catch(e2){}
+    const e=err;
+    console.warn('bloque de panel «'+label+'»',e);
+    const msg=String(e&&e.message?e.message:e).replace(/[&<>]/g,'');
+    return '<div class="panel-section-title"><span>'+label+'</span></div>'+
+      '<div class="card" style="padding:12px">'+
+        '<div style="font-size:12px;color:var(--text-dim);line-height:1.45">No se pudo cargar este bloque.<br><span style="font-size:11px">'+msg+'</span></div>'+
+        '<button class="btn btn-tertiary btn-sm" style="margin-top:9px" onclick="repairCurrentView()">Reparar</button>'+
+      '</div>';
+  }
+}
+function copyErrorInfo(btn){
+  const box=btn.closest('.card');
+  const txt=box?box.innerText:'';
+  try{navigator.clipboard.writeText(txt);btn.textContent='Copiado ✓';setTimeout(function(){btn.textContent='Copiar detalle';},1800);}catch(e){}
+}
+// Restaura preferencias de disposición (no toca registros) y vuelve a renderizar.
+function repairCurrentView(){
+  sanitizeStore();
+  store.panelOrder=['sun','weekly','bodyState','widgets'];
+  store.panelCollapsed={};
+  store.widgets=DEFAULT_WIDGETS.slice();
+  store.estadoOrder=DEFAULT_ESTADO_ORDER.slice();
+  store.solOrder=['environment','hormones','suntimer','lightfreq'];
+  store.activityOrder=['weekly','sport','acthistory','records','wods'];
+  try{
+    localStorage.setItem('h_panelOrder',JSON.stringify(store.panelOrder));
+    localStorage.setItem('h_panelCollapsed',JSON.stringify(store.panelCollapsed));
+    localStorage.setItem('h_widgets',JSON.stringify(store.widgets));
+    localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));
+    localStorage.setItem('h_solOrder',JSON.stringify(store.solOrder));
+    localStorage.setItem('h_activityOrder',JSON.stringify(store.activityOrder));
+  }catch(e){}
+  panelReorderMode=false;widgetReorderMode=false;
+  render();
 }
 
 function calcSunTimes(lat,lng,date){
@@ -2843,22 +2988,26 @@ function checkWeeklyReset(){
 // Run reset check on load
 checkWeeklyReset();
 
+// Acceso seguro a los arrays de registros: devuelven siempre un array limpio y el
+// ultimo registro valido, aunque el store traiga huecos o entradas nulas.
+function recArr(k){const a=store[k];return Array.isArray(a)?a.filter(function(x){return x&&typeof x==='object';}):[];}
+function lastRec(k){const a=recArr(k);return a.length?a[a.length-1]:null;}
 const WIDGET_DEFS={
-  weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=store.weight[store.weight.length-1];return w?{val:w.value,unit:'kg',sub:fmtDate(w.date),date:w.date}:null;}},
+  weight:{name:'Peso actual',icon:'⚖️',section:'estado',get:function(){const w=lastRec('weight');return (w&&w.value!=null&&w.value!=='')?{val:w.value,unit:'kg',sub:fmtDate(w.date),date:w.date}:null;}},
   weight_avg:{name:'Peso media mes',icon:'📊',section:'estado',get:function(){const v=avg(filterByRange(store.weight,'1m'),'value');return v>0?{val:v,unit:'kg',sub:'30d'}:null;}},
-  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hrv,unit:'ms',sub:fmtDate(s.date),date:s.date}:null;}},
+  sleep_hrv:{name:'HRV última noche',icon:'💓',section:'estado',get:function(){const s=lastRec('sleep');return (s&&s.hrv!=null&&s.hrv!=='')?{val:s.hrv,unit:'ms',sub:fmtDate(s.date),date:s.date}:null;}},
   sleep_hrv_avg:{name:'HRV media mes',icon:'💗',section:'estado',get:function(){const v=avg(filterByRange(store.sleep,'1m'),'hrv');return v>0?{val:v,unit:'ms',sub:'30 días'}:null;}},
-  sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate,date:s.date};}},
-  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating,date:s.date};}},
-  sleep_hr:{name:'HR reposo',icon:'❤️',section:'estado',get:function(){const s=store.sleep[store.sleep.length-1];return s?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
-  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=store.fasting[store.fasting.length-1];return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date),date:f.date}:null;}},
+  sleep_hours:{name:'Horas sueño',icon:'😴',section:'estado',get:function(){const s=lastRec('sleep');if(!s||s.hours==null||s.hours==='')return null;const hrs=parseFloat(s.hours)||0;let rate=hrs>=7&&hrs<=9?'Óptimo':hrs>=6?'Aceptable':'Bajo';return {val:fmtDuration(s.hours),unit:'',sub:rate,date:s.date};}},
+  sleep_score:{name:'Puntuación sueño',icon:'⭐',section:'estado',get:function(){const s=lastRec('sleep');if(!s)return null;const ev=evalSleep(s);return {val:s.score||ev.composite,unit:'/100',sub:ev.rating,date:s.date};}},
+  sleep_hr:{name:'HR reposo',icon:'❤️',section:'estado',get:function(){const s=lastRec('sleep');return (s&&s.hr!=null&&s.hr!=='')?{val:s.hr,unit:'bpm',sub:fmtDate(s.date),date:s.date}:null;}},
+  fasting_last:{name:'Último ayuno',icon:'🕐',section:'estado',get:function(){const f=lastRec('fasting');return f?{val:fmtDuration(f.duration),unit:'',sub:fmtDate(f.date),date:f.date}:null;}},
   fasting_avg:{name:'Ayuno medio mes',icon:'📉',section:'estado',get:function(){const v=avg(filterByRange(store.fasting,'1m'),'duration');return v>0?{val:fmtDuration(v),unit:'',sub:'30d'}:null;}},
   vo2max:{name:'VO2 Max',icon:'🫁',section:'estado',get:function(){return store.vo2max?{val:store.vo2max,unit:'',sub:'ml/kg/min'}:null;}},
-  meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=store.meditation[store.meditation.length-1];if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s',date:m.date};}},
-  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=store.activity[store.activity.length-1];if(!a)return null;const sp=store.sports.find(function(s){return s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(fmtActivityDuration(a.duration));if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
+  meditation_last:{name:'Última meditación',icon:'🧘',section:'meditacion',get:function(){const m=lastRec('meditation');if(!m)return null;return{val:fmtTime(m.duration),unit:'',sub:fmtDate(m.date)+' · '+m.inhale+'/'+m.exhale+'s',date:m.date};}},
+  activity_last:{name:'Último entreno',icon:'🏋️',section:'actividad',get:function(){const a=lastRec('activity');if(!a)return null;const sps=Array.isArray(store.sports)?store.sports:[];const sp=sps.find(function(s){return s&&s.id===a.type;});const name=sp?sp.name:a.type;const detail=[];if(a.subtype)detail.push(a.subtype);if(a.result)detail.push(a.result);else if(a.duration)detail.push(fmtActivityDuration(a.duration));if(a.distance)detail.push(a.distance);return{val:name,unit:'',sub:(detail.join(' · ')||fmtDate(a.date)),date:a.date};}},
   activity_count:{name:'Entrenos mes',icon:'💪',section:'actividad',get:function(){const c=filterByRange(store.activity,'1m').length;return{val:c,unit:'',sub:'30 días'};}},
-  waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
-  chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=[].concat(store.measurements).reverse().find(function(x){return x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
+  waist:{name:'Cintura',icon:'📏',section:'estado',get:function(){const m=recArr('measurements').slice().reverse().find(function(x){return x&&x.waist;});return m?{val:m.waist,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
+  chest:{name:'Pecho',icon:'📐',section:'estado',get:function(){const m=recArr('measurements').slice().reverse().find(function(x){return x&&x.chest;});return m?{val:m.chest,unit:'cm',sub:fmtDate(m.date),date:m.date}:null;}},
   vitd_total:{name:'Vit D sol',icon:'☀️',section:'sol',get:function(){if(!Array.isArray(store.sun)||!store.sun.length)return null;const boost=(typeof vitDSunBoostAt==='function')?Math.min(60,vitDSunBoostAt(new Date())):0;return{val:'+'+boost.toFixed(1),unit:'ng/ml',sub:'aporte actual'};}},
   vitd_level:{name:'Nivel VitD actual',icon:'🧬',section:'sol',get:function(){if(typeof estimatedVitDNgml!=='function')return null;const ngml=estimatedVitDNgml();const st=vitDStatus(ngml);return{val:ngml.toFixed(1),unit:'ng/ml',sub:st.label};}},
   health_status:{name:'Estado de salud',icon:'🩺',section:'estado',get:function(){if(typeof computeHealth!=='function')return null;const r=computeHealth(28);if(!r.hasData)return null;const rt=healthRating(r.composite);return{val:r.composite,unit:'/100',sub:rt.emoji+' '+rt.label};}}
@@ -3382,7 +3531,11 @@ function renderBodyStateCard(hour,times){
 
 function renderPanel(c){
   const now=new Date();
-  const times=calcSunTimes(store.settings.lat,store.settings.lng);
+  // Guardas locales: aunque sanitizeStore() ya repara el store al arrancar y tras cada
+  // sincronizacion, aqui evitamos que un campo nulo puntual tumbe todo el panel.
+  const pSet=(store.settings&&typeof store.settings==='object')?store.settings:{lat:40.4168,lng:-3.7038};
+  const pCol=(store.panelCollapsed&&typeof store.panelCollapsed==='object')?store.panelCollapsed:{};
+  const times=calcSunTimes(pSet.lat,pSet.lng);
   const hour=sunLive?(now.getHours()+now.getMinutes()/60):sunSliderHour;
   const uv=uvIndex(hour,times,true);
   const isDay=hour>=times.sunrise&&hour<=times.sunset;
@@ -3390,8 +3543,8 @@ function renderPanel(c){
   let greeting='BUENAS NOCHES';
   if(realHour>=6&&realHour<12)greeting='BUENOS DÍAS';
   else if(realHour>=12&&realHour<20)greeting='BUENAS TARDES';
-  const sunCollapsed=store.panelCollapsed.sun===true;
-  const weeklyCollapsed=store.panelCollapsed.weeklyPanel===true;
+  const sunCollapsed=pCol.sun===true;
+  const weeklyCollapsed=pCol.weeklyPanel===true;
   const todayId=getTodayDayId();
 
   // Title row: PANEL + welcome on the right, plus section-reorder toggle
@@ -3403,6 +3556,7 @@ function renderPanel(c){
   // Reorder mode for panel sections
   if(panelReorderMode){
     const names={sun:'☀️ Solar',weekly:'📅 Programación semanal',bodyState:'🌅 Estado corporal',widgets:'📊 Tus datos'};
+    if(!Array.isArray(store.panelOrder)||!store.panelOrder.length)store.panelOrder=['sun','weekly','bodyState','widgets'];
     html+='<div class="widget-reorder-list">'+
       store.panelOrder.map(function(id,idx){
         return '<div class="widget-reorder-item">'+
@@ -3422,7 +3576,7 @@ function renderPanel(c){
   const pBlocks={};
 
   // SOLAR
-  pBlocks.sun='<div class="panel-section-title">'+
+  pBlocks.sun=safePanelBlock('SOLAR — EN VIVO',function(){return '<div class="panel-section-title">'+
     '<span>SOLAR — EN VIVO</span>'+
     '<div style="display:flex;align-items:center;gap:4px">'+
       '<button class="panel-go-arrow" onclick="showTab(\'sol\')" title="Ir a Sol">→</button>'+
@@ -3431,10 +3585,10 @@ function renderPanel(c){
   '</div>'+
   '<div class="collapsible'+(sunCollapsed?' collapsed':'')+'">'+
     renderSunPanel(times,hour,uv,isDay)+
-  '</div>';
+  '</div>';});
 
   // WEEKLY PREVIEW (renamed ENTRENAMIENTOS)
-  pBlocks.weekly='<div class="panel-section-title">'+
+  pBlocks.weekly=safePanelBlock('ENTRENAMIENTOS',function(){return '<div class="panel-section-title">'+
     '<span>ENTRENAMIENTOS</span>'+
     '<div style="display:flex;align-items:center;gap:4px">'+
       '<button class="panel-train-btn" onclick="quickAddTraining()" title="Registrar entrenamiento" aria-label="Registrar entrenamiento">+</button>'+
@@ -3466,19 +3620,20 @@ function renderPanel(c){
         })()+
       '</div>'+
     '</div>'+
-  '</div>';
+  '</div>';});
 
   // BODY STATE (dynamic, collapsed by default)
-  const bodyStateCollapsed=store.panelCollapsed.bodyState!==false;
-  pBlocks.bodyState='<div class="panel-section-title">'+
+  const bodyStateCollapsed=pCol.bodyState!==false;
+  pBlocks.bodyState=safePanelBlock('ESTADO CORPORAL AHORA',function(){return '<div class="panel-section-title">'+
     '<span>ESTADO CORPORAL AHORA</span>'+
     '<button class="collapse-btn" onclick="togglePanelSection(\'bodyState\')">'+(bodyStateCollapsed?'▼':'▲')+'</button>'+
   '</div>'+
   '<div class="collapsible'+(bodyStateCollapsed?' collapsed':'')+'">'+
     renderBodyStateCard(hour,times)+
-  '</div>';
+  '</div>';});
 
   // WIDGETS
+  pBlocks.widgets=safePanelBlock('TUS DATOS',function(){
   let widgetsHTML='<div class="panel-section-title">'+
     '<span>TUS DATOS</span>'+
     '<div style="display:flex;gap:6px;align-items:center">'+
@@ -3487,6 +3642,7 @@ function renderPanel(c){
     '</div>'+
   '</div>';
   if(widgetReorderMode){
+    if(!Array.isArray(store.widgets))store.widgets=[];
     widgetsHTML+='<div class="widget-reorder-list">'+
       store.widgets.map(function(w,idx){
         const def=WIDGET_DEFS[w];if(!def)return '';
@@ -3500,14 +3656,17 @@ function renderPanel(c){
       }).join('')+
     '</div>';
   }else{
+    const wlist=Array.isArray(store.widgets)?store.widgets:[];
     widgetsHTML+='<div class="panel-grid">'+
-      (store.widgets.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 3">Aún no hay datos.</div>')+
+      (wlist.map(function(w){return renderWidget(w);}).filter(Boolean).join('')||'<div class="empty-state" style="grid-column:span 3">Aún no hay datos.</div>')+
     '</div>';
   }
-  pBlocks.widgets=widgetsHTML;
+  return widgetsHTML;});
 
-  // Assemble sections by user-defined panelOrder
-  store.panelOrder.forEach(function(id){
+  // Assemble sections by user-defined panelOrder. Si el orden guardado estuviera dañado,
+  // caemos al orden por defecto para que el panel nunca quede vacío.
+  const order=(Array.isArray(store.panelOrder)&&store.panelOrder.length)?store.panelOrder:['sun','weekly','bodyState','widgets'];
+  order.forEach(function(id){
     if(pBlocks[id])html+=pBlocks[id];
   });
 
@@ -3590,7 +3749,9 @@ function widgetInTopDecile(id,data){
 }
 function renderWidget(id){
   const def=WIDGET_DEFS[id];if(!def)return '';
-  const data=def.get();
+  // Un widget con datos inesperados no debe tumbar el panel entero.
+  let data=null;
+  try{data=def.get();}catch(e){console.warn('widget «'+id+'»',e);data=null;}
   if(!data){
     // Show empty placeholder instead of hiding entirely
     return '<div class="panel-card panel-card-empty" onclick="showTab(\''+def.section+'\')"><div class="panel-card-head"><span class="panel-card-icon">'+def.icon+'</span><div class="panel-card-title">'+def.name.toUpperCase()+'</div></div><div class="panel-card-value" style="color:var(--text-dim);font-size:14px">—</div><div class="panel-card-sub">Sin datos</div></div>';
@@ -3599,7 +3760,8 @@ function renderWidget(id){
   const isToday=data.date&&String(data.date).substring(0,10)===today();
   const todayCls=isToday?' panel-card-today':'';
   // Resaltado dorado si el valor está en el 10% mejor del histórico.
-  const topDecile=widgetInTopDecile(id,data);
+  let topDecile=false;
+  try{topDecile=widgetInTopDecile(id,data);}catch(e){topDecile=false;}
   const topCls=topDecile?' panel-card-top':'';
   const topBadge=topDecile?'<span class="panel-card-top-badge" title="Entre el 10% mejor de tu histórico">★ TOP</span>':'';
   // Indicador de "hoy": si NO hay chip TOP, va el chip normal "HOY" abajo a la derecha.
@@ -7977,7 +8139,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.6</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 30.7</span></div>'+
       '</div>'+
     '</div>';
   c.innerHTML=h;
@@ -8479,6 +8641,9 @@ function applyImportedData(d){
   _pendingPhotoChecks=[];   // verificaciones diferidas de fotos (caso 2 abajo)
   Object.keys(d).forEach(function(k){
     if(k==='_meta'||k==='_photos')return;
+    // Un null remoto no debe sustituir a una estructura local válida (era una de las vías
+    // por las que el panel se quedaba en negro tras sincronizar).
+    if(d[k]===null&&store[k]&&typeof store[k]==='object')return;
     if(d[k]!==undefined){
       // --- photo preservation for weeklyPlan ---
       if(k==='weeklyPlan'&&d[k]&&typeof d[k]==='object'){
@@ -8544,6 +8709,8 @@ function applyImportedData(d){
       });
     });
   }
+  // Tras aplicar datos externos (archivo o nube) reparamos cualquier estructura dañada.
+  if(typeof sanitizeStore==='function')sanitizeStore();
   return importedFormula;
 }
 
