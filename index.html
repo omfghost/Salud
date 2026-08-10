@@ -1502,6 +1502,14 @@ function sanitizeStore(){
     if(k==='weekArchive'&&store[k]===undefined)return;
     if(!store[k]||typeof store[k]!=='object'||Array.isArray(store[k])){store[k]=STORE_OBJ_DEFAULTS[k]();mark(k);}
   });
+  // 4b) Valores de settings que se usan como clave de un preset: si no existen, el
+  // acceso lanzaba TypeError y tumbaba Panel y Sol sin que «Reparar» pudiera hacer nada.
+  // Las claves válidas se leen de los propios presets, así no pueden desincronizarse.
+  [['weather',WEATHER_PRESETS,'soleado'],['skinType',SKIN_TYPES,'III'],
+   ['clothing',CLOTHING_LEVELS,'shorts']].forEach(function(e){
+    if(!e[1][store.settings[e[0]]]){store.settings[e[0]]=e[2];mark('settings');}
+  });
+
   // 5) weeklyPlan: cada día debe ser un objeto (un día null rompía la vista semanal).
   ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','extra'].forEach(function(d){
     if(!store.weeklyPlan[d]||typeof store.weeklyPlan[d]!=='object'){
@@ -2660,7 +2668,7 @@ function render(){
     fn(c);
     return;
   }catch(e){
-    console.warn('render',e);
+    logAppError('render '+currentTab+' (1º)',e);
     // Segundo intento: reparamos la estructura de datos y volvemos a montar la vista.
     try{
       sanitizeStore();
@@ -2668,7 +2676,7 @@ function render(){
       fn(c);
       return;
     }catch(e2){
-      console.warn('render (2º intento)',e2);
+      logAppError('render '+currentTab,e2);
       c.innerHTML=renderErrorCard(e2);
     }
   }
@@ -2693,6 +2701,47 @@ function renderErrorCard(e){
       '<div style="margin-top:10px;font-size:10.5px;color:var(--text-dim)">«Reparar sección» restaura el orden de bloques y los widgets a los valores por defecto. No borra ningún registro.</div>'+
     '</div>';
 }
+// Registro de errores en memoria: permite ver y copiar exactamente qué ha fallado desde
+// Ajustes → Diagnóstico, en vez de depender de la consola del navegador.
+var APP_ERRORS=[];
+function logAppError(where,e){
+  try{
+    var msg=(e&&e.message)?e.message:String(e);
+    var line=((e&&e.stack||'').split('\n')[1]||'').trim();
+    APP_ERRORS.unshift({t:new Date().toLocaleString('es-ES'),where:where,msg:msg,line:line});
+    if(APP_ERRORS.length>25)APP_ERRORS.length=25;
+    console.warn('['+where+']',e);
+  }catch(_){}
+}
+window.addEventListener('error',function(ev){
+  logAppError('JS',ev.error||{message:ev.message,stack:(ev.filename||'')+':'+(ev.lineno||'')});
+});
+window.addEventListener('unhandledrejection',function(ev){logAppError('promesa',ev.reason||{message:'rechazo sin motivo'});});
+
+function renderDiagBody(){
+  function esc(x){return String(x==null?'':x).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;');});}
+  if(!APP_ERRORS.length){
+    return '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;font-family:var(--sans)">Sin errores registrados en esta sesión. ✓</div>';
+  }
+  var rows=APP_ERRORS.slice(0,8).map(function(e){
+    return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)">'+
+      '<div style="font-size:11px;color:var(--accent);font-family:var(--sans)">'+esc(e.where)+' · '+esc(e.t)+'</div>'+
+      '<div style="font-size:11.5px;color:var(--text);word-break:break-word;font-family:var(--sans)">'+esc(e.msg)+'</div>'+
+      (e.line?'<div style="font-size:10.5px;color:var(--text-dim);word-break:break-word;font-family:var(--sans)">'+esc(e.line)+'</div>':'')+
+    '</div>';
+  }).join('');
+  return '<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:6px;font-family:var(--sans)">'+APP_ERRORS.length+' error(es) en esta sesión. Cópialos para poder diagnosticarlos.</div>'+
+    rows+
+    '<div class="btn-row" style="margin-top:10px;gap:8px">'+
+      '<button class="btn btn-secondary btn-sm" style="flex:1" onclick="copyDiag(this)">Copiar</button>'+
+      '<button class="btn btn-tertiary btn-sm" style="flex:1" onclick="APP_ERRORS=[];render();">Limpiar</button>'+
+    '</div>';
+}
+function copyDiag(btn){
+  var txt=APP_ERRORS.map(function(e){return e.t+' | '+e.where+' | '+e.msg+' | '+(e.line||'');}).join('\n');
+  txt='HEALTH v31.1\n'+navigator.userAgent+'\n\n'+txt;
+  try{navigator.clipboard.writeText(txt);btn.textContent='Copiado ✓';setTimeout(function(){btn.textContent='Copiar';},1800);}catch(e){}
+}
 // Aísla cada bloque del panel: si uno falla, se degrada a un aviso pequeño en lugar de
 // tumbar toda la pantalla.
 function safePanelBlock(label,build){
@@ -2701,7 +2750,7 @@ function safePanelBlock(label,build){
     // Primer fallo: reparamos la estructura del store y reintentamos una vez.
     try{sanitizeStore();return build();}catch(e2){}
     const e=err;
-    console.warn('bloque de panel «'+label+'»',e);
+    logAppError('bloque '+label,e);
     const msg=String(e&&e.message?e.message:e).replace(/[&<>]/g,'');
     return '<div class="panel-section-title"><span>'+label+'</span></div>'+
       '<div class="card" style="padding:12px">'+
@@ -2822,6 +2871,21 @@ function calcSunTimes(lat,lng,date){
   return t;
 }
 
+// Accesos seguros a los presets: si el valor guardado no existe (dato antiguo, corrupto
+// o llegado por sincronización), caemos al valor por defecto en vez de lanzar TypeError.
+function weatherPreset(){
+  const k=(store.settings||{}).weather;
+  return WEATHER_PRESETS[k]||WEATHER_PRESETS.soleado;
+}
+function skinPreset(){
+  const k=(store.settings||{}).skinType;
+  return SKIN_TYPES[k]||SKIN_TYPES.III;
+}
+function clothingPreset(){
+  const k=(store.settings||{}).clothing;
+  return CLOTHING_LEVELS[k]||CLOTHING_LEVELS.shorts;
+}
+
 // Factor de calibración obtenido de la detección automática: ancla la curva teórica al
 // UV real de la zona (ozono, altitud, aerosoles). Caduca a las 36 h.
 function uvCalFactor(){
@@ -2843,23 +2907,74 @@ function uvFromElev(e,exp){
 }
 function uvIndex(hour,t,w){
   let v=uvFromElev(solarElevation(hour,t),UV_EXP);
-  if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];v*=wp.uvMult;}
+  if(w)v*=weatherPreset().uvMult;
   return Math.max(0,Math.min(12,v));
 }
 function uvaIndex(hour,t,w){
   const e=solarElevation(hour,t);
   if(e<=UVA_MIN_ELEV)return 0;
   let v=uvFromElev(e,UVA_EXP);
-  if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];v*=wp.uvMult;}
+  if(w)v*=weatherPreset().uvMult;
   return Math.max(0,Math.min(12,v));
 }
 // UVB ponderado por el espectro de acción de la vitamina D. No hace falta corte artificial:
 // el exponente 3.6 ya lo lleva a ~0 con el sol bajo (a 10° de elevación vale 0.02).
 function uvbIndex(hour,t,w){
   let v=uvFromElev(solarElevation(hour,t),VITD_EXP);
-  if(w){const wp=WEATHER_PRESETS[store.settings.weather||'soleado'];v*=wp.uvbMult;}
+  if(w)v*=weatherPreset().uvbMult;
   return Math.max(0,Math.min(12,v));
 }
+// ============================================================================
+// REPARACIÓN ÚNICA: el cambio de semana del lunes se ejecutó con la versión anterior,
+// que (a) NO ascendía a semana en curso lo planificado por adelantado —se quedaba
+// huérfano en weekArchive con la clave de esta semana, invisible— y (b) dejaba en la
+// semana nueva las MISMAS referencias de foto que la semana archivada, de modo que
+// reaparecían las fotos de la semana pasada. Esto recupera lo uno y deshace lo otro.
+(function(){
+  try{
+    if(localStorage.getItem('h_weekRollFix_v31')==='1')return;
+    if(!store.weekArchive||typeof store.weekArchive!=='object'){
+      localStorage.setItem('h_weekRollFix_v31','1');return;
+    }
+    var days=WEEKDAY_IDS.concat(['extra']);
+    var curKey=weekKeyForOffset(0), prevKey=weekKeyForOffset(-1);
+    var planned=store.weekArchive[curKey];
+    var prev=store.weekArchive[prevKey]||{};
+    var changed=false, recovered=0, unlinked=0;
+    // (a) Lo que estuviera guardado con la clave de ESTA semana es contenido que se
+    // introdujo para ella: pasa a ser la semana en curso.
+    if(planned&&typeof planned==='object'){
+      days.forEach(function(d){
+        var pl=planned[d];
+        if(pl&&typeof pl==='object'&&(pl.text||pl.image)){
+          var cur=store.weeklyPlan[d]||{};
+          // No pisamos algo que ya se haya escrito hoy en la semana en curso.
+          if(!cur.text&&!cur.image){
+            store.weeklyPlan[d]={text:pl.text||'',image:pl.image||null,done:!!pl.done};
+            recovered++;changed=true;
+          }
+        }
+      });
+      delete store.weekArchive[curKey];changed=true;
+    }
+    // (b) Referencias duplicadas entre la semana en curso y la archivada: la foto
+    // pertenece a la semana pasada, así que se desvincula de la nueva (sin borrar bytes).
+    days.forEach(function(d){
+      var cur=store.weeklyPlan[d], old=prev[d];
+      if(cur&&old&&cur.image&&cur.image===old.image){
+        store.weeklyPlan[d]={text:cur.text||'',image:null,done:false};
+        unlinked++;changed=true;
+      }
+    });
+    if(changed){
+      saveWeekly();
+      save('weekArchive',store.weekArchive);
+      console.warn('reparación semana v31: '+recovered+' días recuperados, '+unlinked+' fotos desduplicadas');
+    }
+    localStorage.setItem('h_weekRollFix_v31','1');
+  }catch(e){console.warn('reparación semana v31',e);}
+})();
+
 // ============================================================================
 // MIGRACIÓN ÚNICA: recalcular la vitamina D histórica al modelo solar físico (v31).
 // El modelo anterior normalizaba el UVB a 11 en el mediodía TODOS los días del año, así
@@ -2947,8 +3062,8 @@ function vitDPerMinute(uvb){
   // For full skin (exposure=1) at high UVB that's ~600-900 IU/min. We scale by UVB,
   // skin type, exposed-skin fraction and age. Values are deliberately conservative.
   let base=uvb<=6?uvb*55:6*55+(uvb-6)*22; // IU/min at full-body exposure, fair skin
-  const skin=SKIN_TYPES[store.settings.skinType||'III'];
-  const cloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
+  const skin=skinPreset();
+  const cloth=clothingPreset();
   // Solar geometry factor: the sun lights only the side facing it; the opposite side is in
   // shade. Accounting for movement/turning and diffuse+reflected sky UV, on average only
   // ~65% of the bared skin receives effective radiation at any time (not the full surface).
@@ -3774,11 +3889,20 @@ function renderPanel(c){
   const now=new Date();
   // Guardas locales: aunque sanitizeStore() ya repara el store al arrancar y tras cada
   // sincronizacion, aqui evitamos que un campo nulo puntual tumbe todo el panel.
-  const pSet=(store.settings&&typeof store.settings==='object')?store.settings:{lat:40.4168,lng:-3.7038};
+  const pSet=(store.settings&&typeof store.settings==='object')?store.settings:{lat:DEFAULT_LAT,lng:DEFAULT_LNG};
   const pCol=(store.panelCollapsed&&typeof store.panelCollapsed==='object')?store.panelCollapsed:{};
-  const times=calcSunTimes(pSet.lat,pSet.lng);
+  // El cálculo solar va fuera de los bloques aislados, así que se protege aparte: si
+  // fallara aquí se llevaba por delante el Panel entero y «Reparar» no podía hacer nada.
+  let times,uv;
   const hour=sunLive?(now.getHours()+now.getMinutes()/60):sunSliderHour;
-  const uv=uvIndex(hour,times,true);
+  try{
+    times=calcSunTimes(pSet.lat,pSet.lng);
+    uv=uvIndex(hour,times,true);
+  }catch(e){
+    logAppError('cálculo solar',e);
+    try{times=calcSunTimes(DEFAULT_LAT,DEFAULT_LNG);}catch(e2){times={sunrise:7,sunset:21,noon:14,dawn:6.5,dusk:21.5,dayLen:14,uvbStart:11,uvbEnd:17,uvbPrimeStart:12,uvbPrimeEnd:16,uvaStart:8,uvaEnd:20,maxElev:60,goldenMorning:{start:7,end:8},goldenEvening:{start:20,end:21},blueMorning:{start:6.5,end:7},blueEvening:{start:21,end:21.5}};}
+    uv=0;
+  }
   const isDay=hour>=times.sunrise&&hour<=times.sunset;
   const realHour=now.getHours()+now.getMinutes()/60;
   let greeting='BUENAS NOCHES';
@@ -3912,8 +4036,9 @@ function renderPanel(c){
   });
 
   c.innerHTML=html;
-  // Keep the header quote present (re-render content shouldn't blank it)
-  updateHeaderQuote();
+  // Keep the header quote present (re-render content shouldn't blank it).
+  // Va en try/catch: el panel ya está pintado y un fallo aquí no debe borrarlo.
+  try{updateHeaderQuote();}catch(e){logAppError('updateHeaderQuote',e);}
 
   if(window.panelRefreshTimer)clearInterval(window.panelRefreshTimer);
   window.panelRefreshTimer=setInterval(function(){if(currentTab==='panel')render();},60000);
@@ -7540,7 +7665,7 @@ function saveSunSession(obj){
 // Get HTML for a single sol block by id (reorderable)
 // Inner content of the skin/clothing/age section (reused inside Vit D block)
 function skinClothingInner(){
-  const curCloth=CLOTHING_LEVELS[store.settings.clothing||'shorts'];
+  const curCloth=clothingPreset();
   const ageFactor=Math.round(vitDAgeFactor()*100);
   return '<div class="skinage-compact" style="margin-top:8px">'+
     // Tipo de piel + Ropa en una sola línea (sin cabeceras de icono).
@@ -7597,7 +7722,7 @@ function getSolBlock(id,times,currentHour,uv,uva,uvb,isDay){
         // Weather: always-on label, just shows detected + toggle to switch manual
         '<div class="env-loc-row">'+
           '<span class="sub-section-label" style="margin:0;flex:0 0 auto">🌤️ CLIMA</span>'+
-          (autoW?'<span style="font-size:13px;margin-left:4px">'+(WEATHER_PRESETS[store.settings.weather||'soleado'].icon)+'</span><span style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.6px;font-size:10px">'+WEATHER_PRESETS[store.settings.weather||'soleado'].name+'</span>':'<span style="font-size:9px;color:var(--text-dim)">Manual</span>')+
+          (autoW?'<span style="font-size:13px;margin-left:4px">'+(weatherPreset().icon)+'</span><span style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.6px;font-size:10px">'+weatherPreset().name+'</span>':'<span style="font-size:9px;color:var(--text-dim)">Manual</span>')+
           '<span class="auto-toggle-label" style="margin-left:auto">Auto</span>'+
           '<div class="toggle '+(autoW?'active':'')+'" onclick="toggleAutoWeather(this)"><div class="toggle-handle"></div></div>'+
         '</div>'+
@@ -8412,7 +8537,15 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.0</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.1</span></div>'+
+      '</div>'+
+    '</div>'+
+    // Diagnóstico: deja ver y copiar el error exacto cuando algo falla, sin depender de
+    // la consola del navegador.
+    '<div class="card">'+
+      '<div class="card-title" onclick="toggleEstadoBlock(\'setdiag\')"><div class="card-title-text"><span>🩺 DIAGNÓSTICO</span></div><button class="collapse-btn">'+(store.collapsed.setdiag?'▼':'▲')+'</button></div>'+
+      '<div class="collapsible'+(store.collapsed.setdiag?' collapsed':'')+'">'+
+        renderDiagBody()+
       '</div>'+
     '</div>';
   c.innerHTML=h;
