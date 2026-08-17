@@ -2280,9 +2280,9 @@ function dateForWeekdayOffset(dayId,off){
 function purgeOldWeeks(){
   if(!store.weekArchive)return;
   var changed=false;
-  var minKey=weekKeyForOffset(-4); // límite: 4 semanas atrás
+  var minKey=weekKeyForOffset(-12); // límite: 12 semanas atrás (antes 4: se perdía historial)
   Object.keys(store.weekArchive).forEach(function(key){
-    // Conservamos de -4 hasta +1; lo que esté por debajo de -4 se elimina.
+    // Conservamos de -12 hasta +1; lo que esté por debajo se elimina.
     if(key<minKey){
       var wk=store.weekArchive[key]||{};
       var imgs=[];
@@ -2327,7 +2327,7 @@ function selectWeekDay(dayId){
 function changeWeek(dir,animate){
   if(dir==='reset'){if(weekViewOffset!==0){weekViewOffset=0;selectedWeekDay=todayDayId();render();}return;}
   var next=weekViewOffset+dir;
-  if(next<-4||next>1)return;
+  if(next<-12||next>1)return;
   weekViewOffset=next;
   // Al cambiar de semana, seleccionamos un día sensato: hoy si es la semana actual.
   if(next===0)selectedWeekDay=todayDayId();
@@ -2720,8 +2720,19 @@ window.addEventListener('unhandledrejection',function(ev){logAppError('promesa',
 
 function renderDiagBody(){
   function esc(x){return String(x==null?'':x).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':(c==='<'?'&lt;':'&gt;');});}
+  // Herramienta de semanas: siempre visible, con vista previa antes de tocar nada.
+  var prev=[];
+  try{prev=realignWeeksByDate(false)||[];}catch(e){}
+  var wk='<div style="font-size:11.5px;color:var(--text-dim);line-height:1.6;font-family:var(--sans);margin-bottom:8px">'+
+    '<b style="color:var(--text)">Semanas</b><br>'+
+    (prev.length
+      ? 'Hay '+prev.length+' semana(s) fuera de sitio según la fecha real de sus fotos:<br>'+
+        prev.map(function(r){return '· '+esc(r.from)+' → '+esc(r.to);}).join('<br>')
+      : 'Todas las semanas están en su sitio. ✓')+
+    '</div>'+
+    '<button class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:12px" onclick="realignWeeksByDate(true);render();">Recolocar semanas por su fecha real</button>';
   if(!APP_ERRORS.length){
-    return '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;font-family:var(--sans)">Sin errores registrados en esta sesión. ✓</div>';
+    return wk+'<div style="font-size:12px;color:var(--text-dim);line-height:1.6;font-family:var(--sans)">Sin errores registrados en esta sesión. ✓</div>';
   }
   var rows=APP_ERRORS.slice(0,8).map(function(e){
     return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)">'+
@@ -2730,7 +2741,7 @@ function renderDiagBody(){
       (e.line?'<div style="font-size:10.5px;color:var(--text-dim);word-break:break-word;font-family:var(--sans)">'+esc(e.line)+'</div>':'')+
     '</div>';
   }).join('');
-  return '<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:6px;font-family:var(--sans)">'+APP_ERRORS.length+' error(es) en esta sesión. Cópialos para poder diagnosticarlos.</div>'+
+  return wk+'<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:6px;font-family:var(--sans)">'+APP_ERRORS.length+' error(es) en esta sesión. Cópialos para poder diagnosticarlos.</div>'+
     rows+
     '<div class="btn-row" style="margin-top:10px;gap:8px">'+
       '<button class="btn btn-secondary btn-sm" style="flex:1" onclick="copyDiag(this)">Copiar</button>'+
@@ -2739,7 +2750,7 @@ function renderDiagBody(){
 }
 function copyDiag(btn){
   var txt=APP_ERRORS.map(function(e){return e.t+' | '+e.where+' | '+e.msg+' | '+(e.line||'');}).join('\n');
-  txt='HEALTH v31.2\n'+navigator.userAgent+'\n\n'+txt;
+  txt='HEALTH v31.3\n'+navigator.userAgent+'\n\n'+txt;
   try{navigator.clipboard.writeText(txt);btn.textContent='Copiado ✓';setTimeout(function(){btn.textContent='Copiar';},1800);}catch(e){}
 }
 // Aísla cada bloque del panel: si uno falla, se degrada a un aviso pequeño en lugar de
@@ -3367,6 +3378,137 @@ function checkWeeklyReset(){
 
 // Run reset check on load
 checkWeeklyReset();
+
+// ============================================================================
+// RECOLOCACIÓN DE SEMANAS POR FECHA REAL (v31.3)
+// Las referencias de foto son 'img:<timestamp>_<aleatorio>' y los vínculos a registros
+// (actId) también son marcas de tiempo. Eso permite fechar objetivamente el contenido de
+// cada semana y devolverlo a la semana a la que pertenece de verdad, sin depender de las
+// claves (que es justo lo que estaba mal). Regla: una foto subida un DOMINGO a partir de
+// las 13:00 es planificación de la semana siguiente —así funciona la vista semanal—; en
+// cualquier otro caso pertenece a la semana en la que se subió.
+function mondayKeyOfDate(dt){
+  var d=new Date(dt.getTime());
+  d.setHours(0,0,0,0);
+  var js=d.getDay();
+  d.setDate(d.getDate()+((js===0)?-6:1-js));
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function weekOfEvidence(dt){
+  // Domingo por la tarde = se está preparando la semana que entra.
+  if(dt.getDay()===0&&dt.getHours()>=13){
+    var n=new Date(dt.getTime());n.setDate(n.getDate()+1);
+    return mondayKeyOfDate(n);
+  }
+  return mondayKeyOfDate(dt);
+}
+function inferWeekKey(wk){
+  if(!wk||typeof wk!=='object')return null;
+  var days=WEEKDAY_IDS.concat(['extra']);
+  var votes={},best=null,bestN=0;
+  function vote(k){if(!k)return;votes[k]=(votes[k]||0)+1;if(votes[k]>bestN){bestN=votes[k];best=k;}}
+  // Las fotos son la evidencia más fiable.
+  var hadPhoto=false;
+  days.forEach(function(d){
+    var v=wk[d];if(!v||typeof v!=='object')return;
+    var m=/^img:(\d{10,})_/.exec(v.image||'');
+    if(m){hadPhoto=true;vote(weekOfEvidence(new Date(parseInt(m[1],10))));}
+  });
+  if(hadPhoto)return best;
+  // Sin fotos, recurrimos al vínculo con el registro de entrenamiento.
+  days.forEach(function(d){
+    var v=wk[d];if(!v||typeof v!=='object')return;
+    var a=parseInt(v.actId,10);
+    if(a>1e12)vote(mondayKeyOfDate(new Date(a)));
+  });
+  return best;
+}
+// Funde dos versiones de la MISMA semana sin perder nada: gana la entrada con más
+// información (marcas y vínculo al registro), completando texto o foto que le falte.
+function mergeWeekInto(dst,src){
+  WEEKDAY_IDS.concat(['extra']).forEach(function(d){
+    var a=dst[d], b=src[d];
+    var aHas=a&&(a.text||a.image), bHas=b&&(b.text||b.image);
+    if(!bHas)return;
+    if(!aHas){dst[d]=b;return;}
+    var aScore=(a.done?2:0)+(a.actId?2:0)+(a.image?1:0)+(a.text?1:0);
+    var bScore=(b.done?2:0)+(b.actId?2:0)+(b.image?1:0)+(b.text?1:0);
+    var win=(bScore>aScore)?b:a, lose=(win===a)?b:a;
+    var merged={text:win.text||lose.text||'',image:win.image||lose.image||null,done:win.done===true||lose.done===true};
+    if(win.actId||lose.actId)merged.actId=win.actId||lose.actId;
+    // Un día solo puede mostrar UNA foto, pero aquí puede haber dos legítimas: la pizarra
+    // que se cargó el domingo por adelantado y la del entrenamiento real. La que no se
+    // muestra se guarda en 'alt' en lugar de tirarla, y photoRefInUse la tiene en cuenta
+    // para que la purga nunca borre sus bytes.
+    var alt=[];
+    [].concat(win.alt||[],lose.alt||[]).forEach(function(r){if(r&&alt.indexOf(r)<0)alt.push(r);});
+    if(lose.image&&lose.image!==merged.image&&alt.indexOf(lose.image)<0)alt.push(lose.image);
+    if(win.image&&win.image!==merged.image&&alt.indexOf(win.image)<0)alt.push(win.image);
+    if(alt.length)merged.alt=alt;
+    // Si los textos difieren, se conservan ambos en vez de perder uno.
+    if(win.text&&lose.text&&win.text!==lose.text)merged.text=win.text+'\n— — —\n'+lose.text;
+    dst[d]=merged;
+  });
+}
+function isWeekEmpty(wk){
+  if(!wk||typeof wk!=='object')return true;
+  return !WEEKDAY_IDS.concat(['extra']).some(function(d){return wk[d]&&(wk[d].text||wk[d].image);});
+}
+// Devuelve un informe de los cambios. apply=false solo simula.
+function realignWeeksByDate(apply){
+  var report=[];
+  try{
+    if(!store.weekArchive||typeof store.weekArchive!=='object')store.weekArchive={};
+    var curKey=weekKeyForOffset(0);
+    // Reunimos todas las semanas con contenido, la actual incluida.
+    var blocks=[];
+    if(!isWeekEmpty(store.weeklyPlan))blocks.push({key:curKey,data:store.weeklyPlan,isCurrent:true});
+    Object.keys(store.weekArchive).forEach(function(k){
+      if(!isWeekEmpty(store.weekArchive[k]))blocks.push({key:k,data:store.weekArchive[k],isCurrent:false});
+    });
+    // Calculamos destino antes de mover nada.
+    blocks.forEach(function(b){
+      b.target=inferWeekKey(b.data)||b.key;
+      if(b.target!==b.key)report.push({from:b.key,to:b.target});
+    });
+    if(!apply)return report;
+    if(!report.length)return report;
+    // Reconstruimos el archivo desde cero con los destinos calculados.
+    var vacios={};
+    Object.keys(store.weekArchive).forEach(function(k){if(isWeekEmpty(store.weekArchive[k]))vacios[k]=store.weekArchive[k];});
+    var nuevo={};
+    blocks.forEach(function(b){
+      var t=b.target;
+      // Una semana no puede quedar marcada como hecha si aún no ha ocurrido.
+      if(!nuevo[t])nuevo[t]=JSON.parse(JSON.stringify(b.data));
+      else mergeWeekInto(nuevo[t],b.data);
+    });
+    store.weekArchive={};
+    Object.keys(vacios).forEach(function(k){store.weekArchive[k]=vacios[k];});
+    Object.keys(nuevo).forEach(function(k){store.weekArchive[k]=nuevo[k];});
+    // La semana en curso se toma de su clave; si nada le corresponde, queda limpia.
+    var mine=store.weekArchive[curKey];
+    var vacia={};
+    WEEKDAY_IDS.concat(['extra']).forEach(function(d){vacia[d]=(d==='extra')?{text:'',image:null,done:false}:{text:'',image:null};});
+    if(mine&&!isWeekEmpty(mine)){
+      WEEKDAY_IDS.concat(['extra']).forEach(function(d){vacia[d]=mine[d]||vacia[d];});
+    }
+    vacia.calendarSync=store.weeklyPlan.calendarSync===true;
+    store.weeklyPlan=vacia;
+    delete store.weekArchive[curKey];
+    saveWeekly();
+    save('weekArchive',store.weekArchive);
+    console.warn('semanas recolocadas:',report.map(function(r){return r.from+'→'+r.to;}).join(', '));
+  }catch(e){logAppError('realignWeeksByDate',e);}
+  return report;
+}
+(function(){
+  try{
+    if(localStorage.getItem('h_weekRealign_v313')==='1')return;
+    realignWeeksByDate(true);
+    localStorage.setItem('h_weekRealign_v313','1');
+  }catch(e){}
+})();
 
 // Acceso seguro a los arrays de registros: devuelven siempre un array limpio y el
 // ultimo registro valido, aunque el store traiga huecos o entradas nulas.
@@ -7145,7 +7287,10 @@ function photoRefInUse(ref,excludeDay,newImg,excludeWeekOffset){
     Object.keys(wk).forEach(function(k){
       if(k===excludeDay&&(exKey===null?key==='__current__':key===exKey))return;
       var v=wk[k];
-      if(v&&typeof v==='object'&&v.image===ref)inUse=true;
+      if(v&&typeof v==='object'){
+        if(v.image===ref)inUse=true;
+        if(Array.isArray(v.alt)&&v.alt.indexOf(ref)>=0)inUse=true;
+      }
     });
   }
   scanWeek('__current__',store.weeklyPlan);
@@ -8594,7 +8739,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.2</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.3</span></div>'+
       '</div>'+
     '</div>'+
     // Diagnóstico: deja ver y copiar el error exacto cuando algo falla, sin depender de
