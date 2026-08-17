@@ -2739,7 +2739,7 @@ function renderDiagBody(){
 }
 function copyDiag(btn){
   var txt=APP_ERRORS.map(function(e){return e.t+' | '+e.where+' | '+e.msg+' | '+(e.line||'');}).join('\n');
-  txt='HEALTH v31.1\n'+navigator.userAgent+'\n\n'+txt;
+  txt='HEALTH v31.2\n'+navigator.userAgent+'\n\n'+txt;
   try{navigator.clipboard.writeText(txt);btn.textContent='Copiado ✓';setTimeout(function(){btn.textContent='Copiar';},1800);}catch(e){}
 }
 // Aísla cada bloque del panel: si uno falla, se degrada a un aviso pequeño en lugar de
@@ -2764,24 +2764,39 @@ function copyErrorInfo(btn){
   const txt=box?box.innerText:'';
   try{navigator.clipboard.writeText(txt);btn.textContent='Copiado ✓';setTimeout(function(){btn.textContent='Copiar detalle';},1800);}catch(e){}
 }
-// Restaura preferencias de disposición (no toca registros) y vuelve a renderizar.
+// Repara la disposición SIN destruir configuración válida.
+// La versión anterior de este botón restauraba widgets y orden a los valores de fábrica
+// aunque estuvieran perfectamente bien: pulsarlo borraba la selección de widgets. Ahora
+// solo se corrige lo que de verdad está mal.
 function repairCurrentView(){
   sanitizeStore();
-  store.panelOrder=['sun','weekly','bodyState','widgets'];
-  store.panelCollapsed={};
-  store.widgets=DEFAULT_WIDGETS.slice();
-  store.estadoOrder=DEFAULT_ESTADO_ORDER.slice();
-  store.solOrder=['environment','hormones','suntimer','lightfreq'];
-  store.activityOrder=['weekly','sport','acthistory','records','wods'];
+  const VALID_BLOCKS=['sun','weekly','bodyState','widgets'];
+  // panelOrder: quitamos ids desconocidos y añadimos los que falten, conservando el orden.
+  let order=Array.isArray(store.panelOrder)?store.panelOrder.filter(function(id){return VALID_BLOCKS.indexOf(id)>=0;}):[];
+  VALID_BLOCKS.forEach(function(id){if(order.indexOf(id)<0)order.push(id);});
+  store.panelOrder=order;
+  // widgets: solo se descartan los ids que ya no existen. Si no queda ninguno (y solo
+  // entonces) recuperamos los de fábrica, para no dejar el panel sin nada.
+  let ws=Array.isArray(store.widgets)?store.widgets.filter(function(w){return !!WIDGET_DEFS[w];}):[];
+  if(!ws.length)ws=DEFAULT_WIDGETS.slice();
+  store.widgets=ws;
+  if(!Array.isArray(store.estadoOrder)||!store.estadoOrder.length)store.estadoOrder=DEFAULT_ESTADO_ORDER.slice();
+  if(!store.panelCollapsed||typeof store.panelCollapsed!=='object')store.panelCollapsed={};
   try{
     localStorage.setItem('h_panelOrder',JSON.stringify(store.panelOrder));
     localStorage.setItem('h_panelCollapsed',JSON.stringify(store.panelCollapsed));
     localStorage.setItem('h_widgets',JSON.stringify(store.widgets));
     localStorage.setItem('h_estadoOrder',JSON.stringify(store.estadoOrder));
-    localStorage.setItem('h_solOrder',JSON.stringify(store.solOrder));
-    localStorage.setItem('h_activityOrder',JSON.stringify(store.activityOrder));
   }catch(e){}
   panelReorderMode=false;widgetReorderMode=false;
+  render();
+}
+// Restaurar los widgets de fábrica es ahora una acción explícita y aparte: reparar un
+// fallo nunca debe implicar perder la configuración.
+function resetWidgetsToDefault(){
+  store.widgets=DEFAULT_WIDGETS.slice();
+  saveWidgets();
+  if(document.getElementById('widgetsList'))renderWidgetsModal();
   render();
 }
 
@@ -2924,57 +2939,6 @@ function uvbIndex(hour,t,w){
   if(w)v*=weatherPreset().uvbMult;
   return Math.max(0,Math.min(12,v));
 }
-// ============================================================================
-// REPARACIÓN ÚNICA: el cambio de semana del lunes se ejecutó con la versión anterior,
-// que (a) NO ascendía a semana en curso lo planificado por adelantado —se quedaba
-// huérfano en weekArchive con la clave de esta semana, invisible— y (b) dejaba en la
-// semana nueva las MISMAS referencias de foto que la semana archivada, de modo que
-// reaparecían las fotos de la semana pasada. Esto recupera lo uno y deshace lo otro.
-(function(){
-  try{
-    if(localStorage.getItem('h_weekRollFix_v31')==='1')return;
-    if(!store.weekArchive||typeof store.weekArchive!=='object'){
-      localStorage.setItem('h_weekRollFix_v31','1');return;
-    }
-    var days=WEEKDAY_IDS.concat(['extra']);
-    var curKey=weekKeyForOffset(0), prevKey=weekKeyForOffset(-1);
-    var planned=store.weekArchive[curKey];
-    var prev=store.weekArchive[prevKey]||{};
-    var changed=false, recovered=0, unlinked=0;
-    // (a) Lo que estuviera guardado con la clave de ESTA semana es contenido que se
-    // introdujo para ella: pasa a ser la semana en curso.
-    if(planned&&typeof planned==='object'){
-      days.forEach(function(d){
-        var pl=planned[d];
-        if(pl&&typeof pl==='object'&&(pl.text||pl.image)){
-          var cur=store.weeklyPlan[d]||{};
-          // No pisamos algo que ya se haya escrito hoy en la semana en curso.
-          if(!cur.text&&!cur.image){
-            store.weeklyPlan[d]={text:pl.text||'',image:pl.image||null,done:!!pl.done};
-            recovered++;changed=true;
-          }
-        }
-      });
-      delete store.weekArchive[curKey];changed=true;
-    }
-    // (b) Referencias duplicadas entre la semana en curso y la archivada: la foto
-    // pertenece a la semana pasada, así que se desvincula de la nueva (sin borrar bytes).
-    days.forEach(function(d){
-      var cur=store.weeklyPlan[d], old=prev[d];
-      if(cur&&old&&cur.image&&cur.image===old.image){
-        store.weeklyPlan[d]={text:cur.text||'',image:null,done:false};
-        unlinked++;changed=true;
-      }
-    });
-    if(changed){
-      saveWeekly();
-      save('weekArchive',store.weekArchive);
-      console.warn('reparación semana v31: '+recovered+' días recuperados, '+unlinked+' fotos desduplicadas');
-    }
-    localStorage.setItem('h_weekRollFix_v31','1');
-  }catch(e){console.warn('reparación semana v31',e);}
-})();
-
 // ============================================================================
 // MIGRACIÓN ÚNICA: recalcular la vitamina D histórica al modelo solar físico (v31).
 // El modelo anterior normalizaba el UVB a 11 en el mediodía TODOS los días del año, así
@@ -3246,15 +3210,15 @@ function getRandomQuote(){
 }
 
 // Get Monday's date of current week as YYYY-MM-DD
-function getCurrentWeekStart(){
-  const d=new Date();
-  const day=d.getDay();
-  // Monday-based: shift Sunday(0)->-6, others -> day-1
-  const diff=day===0?-6:1-day;
-  d.setDate(d.getDate()+diff);
-  d.setHours(0,0,0,0);
-  return d.toISOString().split('T')[0];
-}
+// CLAVE DE SEMANA — una sola fuente de verdad.
+// El bug de raíz de todos los fallos de semanas: esta función construía la clave con
+// toISOString(), que convierte a UTC. En España (UTC+1/+2) la medianoche local del lunes
+// es el DOMINGO a las 22:00 UTC, así que devolvía la fecha del domingo, un día antes que
+// weekKeyForOffset(), que sí usa la fecha local. Resultado: el archivo semanal se
+// escribía con unas claves y se leía con otras. La semana terminada se guardaba donde
+// nadie la buscaba, y lo planificado para la nueva semana no se encontraba al llegar el
+// lunes. Ahora ambas funciones devuelven exactamente lo mismo.
+function getCurrentWeekStart(){return weekKeyForOffset(0);}
 // Devuelve el número del día del mes (1-31) para un día de la semana de la semana ACTUAL.
 // weekdayId: 'monday'..'sunday'. weekOffset: 0=esta semana, -1=anterior, etc.
 function dayOfMonthFor(weekdayId,weekOffset){
@@ -3289,14 +3253,14 @@ function checkWeeklyReset(){
     WEEKDAY_IDS.concat(['extra']).forEach(function(did){
       var pl=planned&&planned[did];
       if(pl&&(pl.text||pl.image)){
+        // Lo que dejaste planificado por adelantado pasa a ser la semana en curso,
+        // siempre sin marcas: es trabajo por hacer, no por hecho.
         store.weeklyPlan[did]={text:pl.text||'',image:pl.image||null,done:false};
       }else{
-        // Sin plan previo: conservamos el texto base (el plan puede repetirse) pero la FOTO
-        // se queda solo en la semana archivada. Antes la referencia quedaba duplicada en
-        // ambas semanas: la foto de la semana pasada reaparecía en la nueva y, al
-        // sustituirla, se borraban los bytes que el archivo seguía necesitando.
-        var cur=store.weeklyPlan[did]||{text:'',image:null};
-        store.weeklyPlan[did]={text:cur.text||'',image:null,done:false};
+        // Sin plan previo la semana nueva empieza COMPLETAMENTE VACÍA. Antes se arrastraba
+        // el texto de la semana anterior y parecía que los entrenos se habían mudado de
+        // semana; lo hecho debe quedarse en su semana, que es la archivada.
+        store.weeklyPlan[did]=(did==='extra')?{text:'',image:null,done:false}:{text:'',image:null};
       }
     });
     if(planned)delete store.weekArchive[current];
@@ -3308,6 +3272,99 @@ function checkWeeklyReset(){
     localStorage.setItem('h_weekStart',current);
   }
 }
+// ============================================================================
+// NORMALIZACIÓN ÚNICA DE CLAVES DE SEMANA (v31.2)
+// Hasta ahora convivían dos formatos de clave con un día de diferencia (ver
+// getCurrentWeekStart). Esto reunifica el archivo: cada semana guardada bajo la clave
+// del DOMINGO se traslada a la clave del LUNES, que es la que usa el navegador de
+// semanas. Sin esto, al corregir la función se dispararía un cambio de semana falso.
+(function(){
+  try{
+    if(!store.weekArchive||typeof store.weekArchive!=='object')store.weekArchive={};
+    var days=WEEKDAY_IDS.concat(['extra']);
+    function isEmptyWeek(w){
+      if(!w||typeof w!=='object')return true;
+      return !days.some(function(d){return w[d]&&(w[d].text||w[d].image);});
+    }
+    function mondayKeyOf(key){
+      var dt=new Date(key+'T12:00:00');
+      if(isNaN(dt.getTime()))return null;
+      if(dt.getDay()===1)return key;              // ya es lunes: correcta
+      if(dt.getDay()!==0)return null;             // formato inesperado: no la tocamos
+      dt.setDate(dt.getDate()+1);                 // domingo -> lunes siguiente
+      return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+    }
+    var moved=0;
+    Object.keys(store.weekArchive).forEach(function(key){
+      var canon=mondayKeyOf(key);
+      if(!canon||canon===key)return;
+      var src=store.weekArchive[key], dst=store.weekArchive[canon];
+      if(isEmptyWeek(dst)){
+        store.weekArchive[canon]=src;             // destino vacío: se traslada entera
+      }else if(!isEmptyWeek(src)){
+        // Ambas con contenido: fusionamos día a día sin pisar nada que ya exista.
+        days.forEach(function(d){
+          var sv=src[d];
+          if(sv&&(sv.text||sv.image)&&!(dst[d]&&(dst[d].text||dst[d].image)))dst[d]=sv;
+        });
+      }
+      delete store.weekArchive[key];
+      moved++;
+    });
+    // h_weekStart debe quedar en el mismo formato, o el arranque creería que ha empezado
+    // una semana nueva y archivaría la actual por error.
+    var ws=localStorage.getItem('h_weekStart');
+    if(ws){
+      var cw=mondayKeyOf(ws);
+      if(cw&&cw!==ws)localStorage.setItem('h_weekStart',cw);
+    }
+    // Si el cambio de semana está pendiente (aún no ha corrido checkWeeklyReset para esta
+    // semana), NO tocamos nada más: weeklyPlan todavía contiene la semana que termina y
+    // weekArchive[claveActual] lo que se planificó por adelantado. De ambas cosas se
+    // encarga el rollover, y adelantarnos aquí mezclaría las dos semanas.
+    var curKey=weekKeyForOffset(0);
+    var pendiente=(localStorage.getItem('h_weekStart')||curKey)!==curKey;
+    if(pendiente){
+      if(moved){saveWeekly();save('weekArchive',store.weekArchive);}
+      return;
+    }
+    // La semana en curso no puede estar además en el archivo: sería la misma semana por
+    // duplicado y reaparecería al navegar.
+    if(store.weekArchive[curKey]){
+      var pend=store.weekArchive[curKey];
+      days.forEach(function(d){
+        var pv=pend[d], cv=store.weeklyPlan[d];
+        if(pv&&(pv.text||pv.image)&&!(cv&&(cv.text||cv.image))){
+          store.weeklyPlan[d]={text:pv.text||'',image:pv.image||null,done:false};
+        }
+      });
+      delete store.weekArchive[curKey];
+      moved++;
+    }
+    // Si la semana en curso es una copia exacta de la anterior (secuela del bug: los
+    // entrenos "se mudaron" de semana), la vaciamos: su sitio es la semana archivada.
+    var prev=store.weekArchive[weekKeyForOffset(-1)];
+    if(prev&&!isEmptyWeek(prev)){
+      var same=days.every(function(d){
+        var a=store.weeklyPlan[d]||{}, b=prev[d]||{};
+        return (a.text||'')===(b.text||'')&&(a.image||null)===(b.image||null);
+      });
+      if(same){
+        days.forEach(function(d){
+          store.weeklyPlan[d]=(d==='extra')?{text:'',image:null,done:false}:{text:'',image:null};
+        });
+        moved++;
+        console.warn('semana en curso era copia de la anterior: vaciada');
+      }
+    }
+    if(moved){
+      saveWeekly();
+      save('weekArchive',store.weekArchive);
+      console.warn('claves de semana normalizadas ('+moved+' ajustes)');
+    }
+  }catch(e){console.warn('normalización de semanas',e);}
+})();
+
 // Run reset check on load
 checkWeeklyReset();
 
@@ -8537,7 +8594,7 @@ function renderAjustes(c){
     '<div class="card">'+
       '<div class="card-title" onclick="toggleEstadoBlock(\'setabout\')"><div class="card-title-text"><span>ℹ️ SOBRE HEALTH</span></div><button class="collapse-btn">'+(store.collapsed.setabout?'▼':'▲')+'</button></div>'+
       '<div class="collapsible'+(store.collapsed.setabout?' collapsed':'')+'">'+
-        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.1</span></div>'+
+        '<div style="font-size:12px;color:#999;line-height:1.65;font-family:var(--sans)">Aplicación integral de salud personal. Los datos se guardan localmente y, si activas la sincronización en la nube, también online en tu propio Firebase. Funciona offline.<br><br><span style="font-family:var(--serif);font-style:italic;color:var(--accent);font-size:14px">Versión 31.2</span></div>'+
       '</div>'+
     '</div>'+
     // Diagnóstico: deja ver y copiar el error exacto cuando algo falla, sin depender de
